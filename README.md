@@ -35,7 +35,7 @@
 ## 安装
 
 ```bash
-git clone https://github.com/your-repo/qq-farm-bot.git
+git clone https://github.com/linguo2625469/qq-farm-bot.git
 cd qq-farm-bot
 npm install
 ```
