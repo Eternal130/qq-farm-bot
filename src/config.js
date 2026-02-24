@@ -11,6 +11,7 @@ const CONFIG = {
     farmCheckInterval: 1000,    // 自己农场巡查完成后等待间隔 (可通过 --interval 修改, 最低1秒)
     friendCheckInterval: 10000,   // 好友巡查完成后等待间隔 (可通过 --friend-interval 修改, 最低1秒)
     forceLowestLevelCrop: false,  // 开启后固定种最低等级作物（通常是白萝卜），跳过经验效率分析
+    enableSteal: true,            // 偷菜功能开关 (可通过 --no-steal 关闭)
     device_info: {
         client_version: "1.6.0.14_20251224",
         sys_software: 'iOS 26.2.1',

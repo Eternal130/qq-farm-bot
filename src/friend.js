@@ -444,8 +444,8 @@ async function visitFriend(friend, totalActions, myGid) {
         }
     }
 
-    // 偷菜: 始终执行
-    if (status.stealable.length > 0) {
+    // 偷菜: 根据配置决定是否执行
+    if (CONFIG.enableSteal && status.stealable.length > 0) {
         let ok = 0;
         const stolenPlants = [];
         for (let i = 0; i < status.stealable.length; i++) {
@@ -546,9 +546,13 @@ async function checkFriends() {
                 console.log(`[调试] 好友列表预览 [${name}]: steal=${stealNum} dry=${dryNum} weed=${weedNum} insect=${insectNum}`);
             }
 
-            if (hasSteal) {
-                // 有可偷的，始终加入
+            if (hasSteal && CONFIG.enableSteal) {
+                // 有可偷的且启用偷菜，始终加入
                 priorityFriends.push({ gid, name, level: toNum(f.level), hasSteal: true, hasHelp });
+                visitedGids.add(gid);
+            } else if (hasSteal && hasHelp && canHelpWithExp) {
+                // 有可偷但禁用偷菜，同时有帮助项时加入（会执行帮助但不偷菜）
+                priorityFriends.push({ gid, name, level: toNum(f.level), hasSteal: true, hasHelp: true });
                 visitedGids.add(gid);
             } else if (hasHelp && canHelpWithExp) {
                 // 只有帮助项且还能获得经验时才加入

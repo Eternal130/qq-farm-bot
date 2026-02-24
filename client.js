@@ -47,12 +47,13 @@ QQ经典农场 挂机脚本
   --friend-interval   好友巡查完成后等待秒数, 默认1秒, 最低1秒
   --verify            验证proto定义
   --decode            解码PB数据 (运行 --decode 无参数查看详细帮助)
+  --no-steal          禁用偷菜功能 (默认启用)
 
 功能:
   - 自动收获成熟作物 → 购买种子 → 种植 → 施肥
   - 自动除草、除虫、浇水
   - 自动铲除枯死作物
-  - 自动巡查好友农场: 帮忙浇水/除草/除虫 + 偷菜
+  - 自动巡查好友农场: 帮忙浇水/除草/除虫 (+ 偷菜，可用 --no-steal 禁用)
   - 自动领取任务奖励 (支持分享翻倍)
   - 每分钟自动出售仓库果实
   - 启动时读取 share.txt 处理邀请码 (仅微信)
@@ -92,6 +93,9 @@ function parseArgs(args) {
         if (args[i] === '--friend-interval' && args[i + 1]) {
             const sec = parseInt(args[++i]);
             CONFIG.friendCheckInterval = Math.max(sec, 1) * 1000;  // 最低1秒
+        }
+        if (args[i] === '--no-steal') {
+            CONFIG.enableSteal = false;
         }
     }
     return options;

@@ -20,7 +20,7 @@
 ### 好友农场
 - **好友巡查** — 自动巡查好友农场
 - **帮忙操作** — 帮好友浇水/除草/除虫
-- **自动偷菜** — 偷取好友成熟作物
+- **自动偷菜** — 偷取好友成熟作物（可用 `--no-steal` 禁用）
 
 ### 系统功能
 - **自动领取任务** — 自动领取完成的任务奖励，支持分享翻倍/三倍奖励
@@ -71,14 +71,54 @@ node client.js --code <你的登录code> --wx
 node client.js --code <code> --interval 5 --friend-interval 2
 ```
 
+### 后台运行
+
+使用 `nohup` 在后台运行：
+
+```bash
+# 后台运行，日志输出到 nohup.out
+nohup node client.js --code <你的code> &
+
+# 指定日志文件
+nohup node client.js --code <你的code> > farm.log 2>&1 &
+
+# 禁用偷菜 + 后台运行
+nohup node client.js --code <你的code> --no-steal > farm.log 2>&1 &
+```
+
+常用管理命令：
+
+```bash
+# 查看进程
+ps aux | grep client.js
+
+# 查看实时日志
+tail -f farm.log
+
+# 停止运行
+pkill -f "node client.js"
+```
+
+扫码登录后台运行：
+
+```bash
+# 先在前台扫码获取 code
+node client.js --qr
+
+# 扫码成功后，使用获取的 code 后台运行
+nohup node client.js --code <获取的code> > farm.log 2>&1 &
+```
+
 ### 参数说明
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `--code` | 小程序登录凭证（**必需**） | — |
+| `--qr` | 使用QQ扫码获取登录code（仅QQ平台） | — |
 | `--wx` | 使用微信登录 | QQ 小程序 |
 | `--interval` | 自己农场巡查间隔（秒） | 2 |
 | `--friend-interval` | 好友巡查间隔（秒） | 1 |
+| `--no-steal` | 禁用偷菜功能 | 启用 |
 | `--verify` | 验证 proto 定义是否正确 | — |
 | `--decode` | 进入 PB 数据解码模式 | — |
 
