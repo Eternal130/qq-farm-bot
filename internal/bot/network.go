@@ -17,6 +17,16 @@ import (
 	"qq-farm-bot/proto/userpb"
 )
 
+// ServerError represents a business error returned by the game server.
+type ServerError struct {
+	Service string
+	Method  string
+	Code    int64
+	Message string
+}
+
+func (e *ServerError) Error() string { return e.Message }
+
 const (
 	// writeWait is the deadline for write operations.
 	writeWait = 10 * time.Second
@@ -222,7 +232,7 @@ func (n *Network) SendRequest(service, method string, body []byte) ([]byte, erro
 		return nil, result.err
 	}
 	if result.meta != nil && result.meta.ErrorCode != 0 {
-		return nil, fmt.Errorf("%s.%s error: code=%d %s", service, method, result.meta.ErrorCode, result.meta.ErrorMessage)
+		return nil, &ServerError{Service: service, Method: method, Code: result.meta.ErrorCode, Message: result.meta.ErrorMessage}
 	}
 	return result.body, nil
 }
