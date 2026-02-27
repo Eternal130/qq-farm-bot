@@ -1,3 +1,157 @@
+/* ============================================
+   QQ Farm Bot - Organic Farm Theme Design System
+   Inspired by Steve Jobs: Simplicity, Clarity, Delight
+   ============================================ */
+
+/* === CSS Custom Properties (Design Tokens) === */
+:root {
+  /* Farm Theme Colors */
+  --farm-primary: #15803D;
+  --farm-primary-light: #22C55E;
+  --farm-primary-lighter: #86EFAC;
+  --farm-primary-lightest: #DCFCE7;
+  --farm-primary-dark: #166534;
+  --farm-primary-darker: #14532D;
+  
+  --farm-accent: #CA8A04;
+  --farm-accent-light: #EAB308;
+  --farm-accent-lighter: #FDE047;
+  --farm-accent-lightest: #FEF9C3;
+  
+  --farm-bg: #F0FDF4;
+  --farm-bg-warm: #FEFCE8;
+  --farm-card-bg: #FFFFFF;
+  --farm-text: #14532D;
+  --farm-text-secondary: #475569;
+  --farm-text-muted: #64748B;
+  
+  --farm-border: #E5E7EB;
+  --farm-border-light: #F3F4F6;
+  
+  /* Semantic Colors */
+  --farm-danger: #DC2626;
+  --farm-danger-light: #FEE2E2;
+  --farm-warning: #F59E0B;
+  --farm-warning-light: #FEF3C7;
+  --farm-success: #22C55E;
+  --farm-success-light: #DCFCE7;
+  
+  /* Shadows */
+  --farm-shadow-sm: 0 1px 2px rgba(21, 128, 61, 0.04);
+  --farm-shadow: 0 4px 24px rgba(21, 128, 61, 0.08);
+  --farm-shadow-lg: 0 8px 40px rgba(21, 128, 61, 0.12);
+  --farm-shadow-card: 0 2px 12px rgba(21, 128, 61, 0.06);
+  --farm-shadow-card-hover: 0 8px 32px rgba(21, 128, 61, 0.12);
+  
+  /* Border Radius */
+  --farm-radius-sm: 8px;
+  --farm-radius: 12px;
+  --farm-radius-lg: 16px;
+  --farm-radius-xl: 20px;
+  --farm-radius-full: 9999px;
+  
+  /* Transitions */
+  --farm-transition-fast: 150ms ease;
+  --farm-transition: 200ms ease;
+  --farm-transition-slow: 300ms ease;
+  
+  /* Spacing */
+  --farm-space-1: 4px;
+  --farm-space-2: 8px;
+  --farm-space-3: 12px;
+  --farm-space-4: 16px;
+  --farm-space-5: 20px;
+  --farm-space-6: 24px;
+  --farm-space-8: 32px;
+  
+  /* === Element Plus Theme Overrides === */
+  
+  /* Primary Color */
+  --el-color-primary: #15803D;
+  --el-color-primary-light-3: #22C55E;
+  --el-color-primary-light-5: #4ADE80;
+  --el-color-primary-light-7: #86EFAC;
+  --el-color-primary-light-8: #BBF7D0;
+  --el-color-primary-light-9: #DCFCE7;
+  --el-color-primary-dark-2: #166534;
+  
+  /* Success */
+  --el-color-success: #22C55E;
+  --el-color-success-light-3: #4ADE80;
+  --el-color-success-light-5: #86EFAC;
+  --el-color-success-light-7: #BBF7D0;
+  --el-color-success-light-8: #DCFCE7;
+  --el-color-success-light-9: #F0FDF4;
+  --el-color-success-dark-2: #16A34A;
+  
+  /* Warning */
+  --el-color-warning: #CA8A04;
+  --el-color-warning-light-3: #EAB308;
+  --el-color-warning-light-5: #FACC15;
+  --el-color-warning-light-7: #FDE047;
+  --el-color-warning-light-8: #FEF08A;
+  --el-color-warning-light-9: #FEF9C3;
+  --el-color-warning-dark-2: #A16207;
+  
+  /* Danger */
+  --el-color-danger: #DC2626;
+  --el-color-danger-light-3: #EF4444;
+  --el-color-danger-light-5: #F87171;
+  --el-color-danger-light-7: #FECACA;
+  --el-color-danger-light-8: #FEE2E2;
+  --el-color-danger-light-9: #FEF2F2;
+  --el-color-danger-dark-2: #B91C1C;
+  
+  /* Info */
+  --el-color-info: #64748B;
+  --el-color-info-light-3: #94A3B8;
+  --el-color-info-light-5: #CBD5E1;
+  --el-color-info-light-7: #E2E8F0;
+  --el-color-info-light-8: #F1F5F9;
+  --el-color-info-light-9: #F8FAFC;
+  --el-color-info-dark-2: #475569;
+  
+  /* Text */
+  --el-text-color-primary: #14532D;
+  --el-text-color-regular: #475569;
+  --el-text-color-secondary: #64748B;
+  --el-text-color-placeholder: #94A3B8;
+  
+  /* Background */
+  --el-bg-color: #FFFFFF;
+  --el-bg-color-page: #F0FDF4;
+  --el-bg-color-overlay: #FFFFFF;
+  
+  /* Border */
+  --el-border-color: #E5E7EB;
+  --el-border-color-light: #F3F4F6;
+  --el-border-color-lighter: #F9FAFB;
+  --el-border-color-extra-light: #F0FDF4;
+  
+  /* Fill */
+  --el-fill-color: #F0FDF4;
+  --el-fill-color-light: #F9FAFB;
+  --el-fill-color-lighter: #FFFFFF;
+  --el-fill-color-blank: #FFFFFF;
+  
+  /* Border Radius */
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 20px;
+  --el-border-radius-circle: 50%;
+  
+  /* Box Shadow */
+  --el-box-shadow: 0 4px 24px rgba(21, 128, 61, 0.08);
+  --el-box-shadow-light: 0 2px 12px rgba(21, 128, 61, 0.06);
+  --el-box-shadow-lighter: 0 1px 4px rgba(21, 128, 61, 0.04);
+  --el-box-shadow-dark: 0 8px 40px rgba(21, 128, 61, 0.16);
+  
+  /* Font */
+  --el-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  --el-font-size-base: 14px;
+}
+
+/* === Base Styles === */
 * {
   margin: 0;
   padding: 0;
@@ -10,70 +164,133 @@ html, body, #app {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--el-font-family);
+  font-size: var(--el-font-size-base);
+  color: var(--el-text-color-primary);
+  background-color: var(--el-bg-color-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* === Custom Scrollbar (Green Theme) === */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+  background: #F0FDF4;
+  border-radius: var(--farm-radius-full);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+  background: #BBF7D0;
+  border-radius: var(--farm-radius-full);
+  border: 2px solid #F0FDF4;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #86EFAC;
 }
 
-/* Log level colors */
-.log-info {
-  color: #606266;
+::-webkit-scrollbar-corner {
+  background: #F0FDF4;
 }
 
-.log-warn {
-  color: #e6a23c;
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #BBF7D0 #F0FDF4;
 }
 
-.log-error {
-  color: #f56c6c;
-}
-
-.log-debug {
-  color: #909399;
-}
-
-/* Card hover effect */
-.el-card {
-  transition: all 0.3s ease;
-}
-
-.el-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Status tag styles */
+/* === Status Tag Styles === */
 .status-running {
-  background-color: #f0f9eb;
-  border-color: #e1f3d8;
-  color: #67c23a;
+  background-color: #DCFCE7;
+  border-color: #BBF7D0;
+  color: #16A34A;
 }
 
 .status-stopped {
-  background-color: #f4f4f5;
-  border-color: #e9e9eb;
-  color: #909399;
+  background-color: #F1F5F9;
+  border-color: #E2E8F0;
+  color: #64748B;
 }
 
 .status-error {
-  background-color: #fef0f0;
-  border-color: #fde2e2;
-  color: #f56c6c;
+  background-color: #FEE2E2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+/* === Element Plus Component Enhancements === */
+
+/* Buttons */
+.el-button--primary {
+  --el-button-bg-color: var(--farm-primary);
+  --el-button-border-color: var(--farm-primary);
+  --el-button-hover-bg-color: var(--farm-primary-light);
+  --el-button-hover-border-color: var(--farm-primary-light);
+  --el-button-active-bg-color: var(--farm-primary-dark);
+  --el-button-active-border-color: var(--farm-primary-dark);
+}
+
+.el-button--primary.is-link,
+.el-button--primary.is-text {
+  --el-button-text-color: var(--farm-primary);
+}
+
+/* Input Focus */
+.el-input__wrapper:focus-within {
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2) !important;
+}
+
+/* Card Styles */
+.el-card {
+  border-radius: var(--farm-radius);
+  border: 1px solid var(--farm-border-light);
+  box-shadow: var(--farm-shadow-card);
+  transition: box-shadow var(--farm-transition), transform var(--farm-transition);
+}
+
+/* Link Colors */
+.el-link--primary {
+  --el-link-text-color: var(--farm-primary);
+  --el-link-hover-text-color: var(--farm-primary-light);
+}
+
+/* Message */
+.el-message--success {
+  --el-message-bg-color: #DCFCE7;
+  --el-message-border-color: #BBF7D0;
+}
+
+/* Tag */
+.el-tag--success {
+  --el-tag-bg-color: #DCFCE7;
+  --el-tag-border-color: #BBF7D0;
+  --el-tag-text-color: #16A34A;
+}
+
+.el-tag--warning {
+  --el-tag-bg-color: #FEF9C3;
+  --el-tag-border-color: #FDE047;
+  --el-tag-text-color: #A16207;
+}
+
+.el-tag--danger {
+  --el-tag-bg-color: #FEE2E2;
+  --el-tag-border-color: #FECACA;
+  --el-tag-text-color: #DC2626;
+}
+
+/* Focus Ring */
+:focus-visible {
+  outline: 2px solid var(--farm-primary-light);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(21, 128, 61, 0.2);
+  color: var(--farm-text);
 }

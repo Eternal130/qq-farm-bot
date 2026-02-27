@@ -58,6 +58,19 @@ func (f *FarmWorker) checkFarm() {
 	}
 
 	lands := landsReply.Lands
+
+	// Auto unlock & upgrade lands before analyzing
+	unlockedNew, upgradedNew := f.autoUnlockAndUpgrade(lands)
+	if unlockedNew > 0 || upgradedNew > 0 {
+		// Re-fetch lands after unlock/upgrade to get updated state
+		landsReply, err = f.net.AllLands()
+		if err != nil {
+			f.logger.Warnf("巡田", "重新获取土地失败: %v", err)
+			return
+		}
+		lands = landsReply.Lands
+	}
+
 	status := f.analyzeLands(lands)
 	unlockedCount := 0
 	for _, land := range lands {
@@ -95,6 +108,17 @@ func (f *FarmWorker) checkFarm() {
 		len(status.needWater) > 0 || len(status.dead) > 0 || len(status.empty) > 0
 
 	var actions []string
+
+	// Record unlock/upgrade actions
+	if unlockedNew > 0 {
+		actions = append(actions, fmt.Sprintf("解锁%d", unlockedNew))
+	}
+	if upgradedNew > 0 {
+		actions = append(actions, fmt.Sprintf("升级%d", upgradedNew))
+	}
+	if unlockedNew > 0 || upgradedNew > 0 {
+		hasWork = true
+	}
 
 	// Batch operations: weed, bug, water
 	if len(status.needWeed) > 0 {
@@ -527,4 +551,43 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 		}
 	}
 	return best.goods, nil
+}
+
+// autoUnlockAndUpgrade checks all lands and attempts to unlock/upgrade eligible ones.
+// Returns counts of successfully unlocked and upgraded lands.
+func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, upgraded int) {
+	_, level, _, gold, _ := f.net.state.Get()
+
+	for _, land := range lands {
+		// Try unlock
+		if !land.Unlocked && land.CouldUnlock {
+			cond := land.UnlockCondition
+			if cond != nil && level >= cond.NeedLevel && gold >= cond.NeedGold {
+				if _, err := f.net.UnlockLand(land.Id); err != nil {
+					f.logger.Warnf("\u89e3\u9501", "\u571f\u5730#%d \u5931\u8d25: %v", land.Id, err)
+				} else {
+					f.logger.Infof("\u89e3\u9501", "\u571f\u5730#%d \u6210\u529f (\u82b1\u8d39%d\u91d1\u5e01)", land.Id, cond.NeedGold)
+					unlocked++
+					gold -= cond.NeedGold // track remaining gold
+				}
+				time.Sleep(200 * time.Millisecond)
+			}
+		}
+
+		// Try upgrade
+		if land.Unlocked && land.CouldUpgrade {
+			cond := land.UpgradeCondition
+			if cond != nil && level >= cond.NeedLevel && gold >= cond.NeedGold {
+				if _, err := f.net.UpgradeLand(land.Id); err != nil {
+					f.logger.Warnf("\u5347\u7ea7", "\u571f\u5730#%d Lv%d\u2192Lv%d \u5931\u8d25: %v", land.Id, land.Level, land.Level+1, err)
+				} else {
+					f.logger.Infof("\u5347\u7ea7", "\u571f\u5730#%d Lv%d\u2192Lv%d (\u82b1\u8d39%d\u91d1\u5e01)", land.Id, land.Level, land.Level+1, cond.NeedGold)
+					upgraded++
+					gold -= cond.NeedGold
+				}
+				time.Sleep(200 * time.Millisecond)
+			}
+		}
+	}
+	return
 }

@@ -8,10 +8,8 @@ import {
   ElSwitch,
   ElButton,
   ElEmpty,
-  ElIcon,
-  ElTag
 } from 'element-plus'
-import { Refresh, Connection } from '@element-plus/icons-vue'
+import { Refresh } from '@element-plus/icons-vue'
 
 const accounts = ref<Account[]>([])
 const selectedAccountId = ref<number | null>(null)
@@ -190,12 +188,12 @@ onUnmounted(() => {
       <template #header>
         <div class="card-header">
           <div class="header-left">
-            <span>实时日志</span>
+            <span class="header-title">实时日志</span>
             
             <ElSelect 
               v-model="selectedAccountId" 
               placeholder="选择账号"
-              style="width: 200px"
+              class="account-select"
               clearable
             >
               <ElOption
@@ -204,14 +202,16 @@ onUnmounted(() => {
                 :label="account.name"
                 :value="account.id"
               >
-                <span>{{ account.name }}</span>
-                <ElTag 
-                  size="small" 
-                  :type="account.status === 'running' ? 'success' : 'info'"
-                  style="margin-left: 8px"
-                >
-                  {{ account.status === 'running' ? '运行中' : '已停止' }}
-                </ElTag>
+                <div class="account-option">
+                  <span class="account-option-name">{{ account.name }}</span>
+                  <span 
+                    class="account-option-status"
+                    :class="account.status === 'running' ? 'status-running' : 'status-stopped'"
+                  >
+                    <span class="status-indicator"></span>
+                    {{ account.status === 'running' ? '运行中' : '已停止' }}
+                  </span>
+                </div>
               </ElOption>
             </ElSelect>
           </div>
@@ -223,31 +223,30 @@ onUnmounted(() => {
             </div>
             
             <div class="connection-status" v-if="realtimeMode">
-              <ElIcon :color="connected ? '#67c23a' : '#909399'">
-                <Connection />
-              </ElIcon>
-              <span :class="connected ? 'connected' : 'disconnected'">
-                {{ connected ? '已连接' : '未连接' }}
-              </span>
+              <span class="connection-dot" :class="connected ? 'connected' : 'disconnected'"></span>
+              <span class="connection-text">{{ connected ? '已连接' : '未连接' }}</span>
             </div>
             
             <ElButton 
               :icon="Refresh" 
               circle 
               size="small"
+              class="refresh-btn"
               @click="handleRefresh"
             />
             
             <ElButton 
               size="small"
+              class="scroll-btn"
+              :class="{ 'is-active': autoScroll }"
               @click="autoScroll = !autoScroll"
-              :type="autoScroll ? 'primary' : 'default'"
             >
               自动滚动
             </ElButton>
             
             <ElButton 
               size="small"
+              class="clear-btn"
               @click="clearLogs"
             >
               清空
@@ -256,10 +255,10 @@ onUnmounted(() => {
         </div>
       </template>
 
-      <ElEmpty v-if="!selectedAccountId" description="请先选择一个账号" />
+      <ElEmpty v-if="!selectedAccountId" description="请先选择一个账号" class="empty-state" />
       
       <div v-else class="log-container" ref="logContainer">
-        <ElEmpty v-if="logs.length === 0 && !loading" description="暂无日志" />
+        <ElEmpty v-if="logs.length === 0 && !loading" description="暂无日志" class="empty-state" />
         
         <div v-else class="log-list">
           <div 
@@ -283,8 +282,16 @@ onUnmounted(() => {
   padding: 0;
 }
 
+/* Card Styles */
 .logs-card {
-  border-radius: 8px;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+}
+
+.logs-card :deep(.el-card__header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .logs-card :deep(.el-card__body) {
@@ -307,115 +314,288 @@ onUnmounted(() => {
   gap: 16px;
 }
 
+.header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #14532D;
+}
+
+/* Account Select */
+.account-select {
+  width: 200px;
+}
+
+.account-select :deep(.el-input__wrapper) {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #D1D5DB;
+}
+
+.account-select :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #9CA3AF;
+}
+
+.account-select :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2), 0 0 0 1px #15803D !important;
+}
+
+.account-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.account-option-name {
+  font-weight: 500;
+  color: #14532D;
+}
+
+.account-option-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-running .status-indicator {
+  background: #22C55E;
+}
+
+.status-stopped .status-indicator {
+  background: #9CA3AF;
+}
+
+.status-running {
+  color: #22C55E;
+}
+
+.status-stopped {
+  color: #9CA3AF;
+}
+
+/* Header Right */
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
+/* Mode Switch */
 .mode-switch {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 0 12px;
+  height: 32px;
+  background: #F9FAFB;
+  border-radius: 8px;
 }
 
 .switch-label {
-  font-size: 14px;
-  color: #606266;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
 }
 
+/* Connection Status */
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  padding: 0 12px;
+  height: 32px;
+  background: #F9FAFB;
+  border-radius: 8px;
+}
+
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.connection-dot.connected {
+  background: #22C55E;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.connection-dot.disconnected {
+  background: #9CA3AF;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.1); }
+}
+
+.connection-text {
   font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
 }
 
-.connected {
-  color: #67c23a;
+/* Buttons */
+.refresh-btn {
+  border-radius: 8px;
+  border-color: #E5E7EB;
+  color: #6B7280;
 }
 
-.disconnected {
-  color: #909399;
+.refresh-btn:hover {
+  border-color: #15803D;
+  color: #15803D;
+  background: rgba(21, 128, 61, 0.05);
 }
 
+.scroll-btn {
+  border-radius: 8px;
+  border-color: #E5E7EB;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.scroll-btn:hover {
+  border-color: #15803D;
+  color: #15803D;
+  background: rgba(21, 128, 61, 0.05);
+}
+
+.scroll-btn.is-active {
+  background: #15803D;
+  border-color: #15803D;
+  color: #FFFFFF;
+}
+
+.scroll-btn.is-active:hover {
+  background: #166534;
+  border-color: #166534;
+}
+
+.clear-btn {
+  border-radius: 8px;
+  border-color: #E5E7EB;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.clear-btn:hover {
+  border-color: #DC2626;
+  color: #DC2626;
+  background: rgba(220, 38, 38, 0.05);
+}
+
+/* Empty State */
+.empty-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Log Container - Terminal Style */
 .log-container {
   height: 100%;
   overflow-y: auto;
-  padding: 16px;
-  background-color: #1e1e1e;
+  background: #0C1222;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
+  padding: 16px 20px;
 }
 
-.log-list {
-  height: 100%;
-}
-
-.log-entry {
-  padding: 2px 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.log-time {
-  color: #6a9955;
-  margin-right: 8px;
-}
-
-.log-tag {
-  color: #569cd6;
-  margin-right: 8px;
-}
-
-.log-message {
-  color: #d4d4d4;
-}
-
-/* Log level colors in dark theme */
-.log-info .log-message {
-  color: #d4d4d4;
-}
-
-.log-warn .log-message {
-  color: #dcdcaa;
-}
-
-.log-error .log-message {
-  color: #f14c4c;
-}
-
-.log-debug .log-message {
-  color: #808080;
-}
-
-/* Custom scrollbar for dark log container */
+/* Custom Scrollbar */
 .log-container::-webkit-scrollbar {
   width: 8px;
 }
 
 .log-container::-webkit-scrollbar-track {
-  background: #2d2d2d;
+  background: #0C1222;
 }
 
 .log-container::-webkit-scrollbar-thumb {
-  background: #555;
+  background: #1E3A5F;
   border-radius: 4px;
 }
 
 .log-container::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: #2D4A6F;
 }
 
+/* Log List */
+.log-list {
+  min-height: 100%;
+}
+
+.log-entry {
+  padding: 3px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Time - Soft Green */
+.log-time {
+  color: #4ADE80;
+  margin-right: 12px;
+  font-weight: 500;
+}
+
+/* Tag - Soft Blue */
+.log-tag {
+  color: #60A5FA;
+  margin-right: 12px;
+  font-weight: 500;
+}
+
+/* Log Levels */
+.log-info .log-message {
+  color: #94A3B8;
+}
+
+.log-warn .log-message {
+  color: #FBBF24;
+}
+
+.log-error .log-message {
+  color: #F87171;
+}
+
+.log-debug .log-message {
+  color: #64748B;
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
+  .logs-card :deep(.el-card__header) {
+    padding: 12px 16px;
+  }
+  
   .card-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
   
   .header-right {
     flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .account-select {
+    width: 100%;
+  }
+  
+  .mode-switch,
+  .connection-status {
+    padding: 0 10px;
+    height: 28px;
   }
 }
 </style>

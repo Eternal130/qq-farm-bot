@@ -12,8 +12,7 @@ import {
   ElDropdown,
   ElDropdownMenu,
   ElDropdownItem,
-  ElIcon,
-  ElButton
+  ElIcon
 } from 'element-plus'
 import { 
   Odometer, 
@@ -52,12 +51,14 @@ const handleCommand = (command: string) => {
   <ElContainer class="layout-container">
     <!-- Sidebar -->
     <ElAside 
-      :width="isCollapse ? '64px' : '220px'" 
+      :width="isCollapse ? '72px' : '240px'" 
       class="sidebar"
     >
       <div class="logo">
-        <span v-if="!isCollapse">🌾 农场管理</span>
-        <span v-else>🌾</span>
+        <div class="logo-content">
+          <span class="logo-text" v-if="!isCollapse">🌾 农场管理</span>
+          <span class="logo-icon-only" v-else>🌾</span>
+        </div>
       </div>
       
       <ElMenu
@@ -87,35 +88,38 @@ const handleCommand = (command: string) => {
           <template #title>作物收益</template>
         </ElMenuItem>
       </ElMenu>
+      
+      <!-- Collapse Toggle Button (Mobile-friendly) -->
+      <div class="sidebar-footer">
+        <button class="collapse-toggle" @click="toggleSidebar">
+          <ElIcon :size="18">
+            <Fold v-if="!isCollapse" />
+            <Expand v-else />
+          </ElIcon>
+        </button>
+      </div>
     </ElAside>
 
     <ElContainer>
       <!-- Header -->
       <ElHeader class="header">
         <div class="header-left">
-          <ElButton 
-            text 
-            @click="toggleSidebar"
-            class="collapse-btn"
-          >
-            <ElIcon :size="20">
-              <Fold v-if="!isCollapse" />
-              <Expand v-else />
-            </ElIcon>
-          </ElButton>
+          <h1 class="page-title">{{ $route.meta.title || '农场管理' }}</h1>
         </div>
         
         <div class="header-right">
-          <ElDropdown @command="handleCommand">
-            <span class="user-info">
-              <ElIcon><User /></ElIcon>
+          <ElDropdown @command="handleCommand" trigger="click">
+            <div class="user-info">
+              <div class="user-avatar">
+                <ElIcon :size="18"><User /></ElIcon>
+              </div>
               <span class="username">{{ authStore.user?.username || '用户' }}</span>
-            </span>
+            </div>
             <template #dropdown>
               <ElDropdownMenu>
                 <ElDropdownItem command="logout">
                   <ElIcon><SwitchButton /></ElIcon>
-                  退出登录
+                  <span>退出登录</span>
                 </ElDropdownItem>
               </ElDropdownMenu>
             </template>
@@ -137,60 +141,131 @@ const handleCommand = (command: string) => {
   width: 100%;
 }
 
+/* === Sidebar Styles === */
 .sidebar {
-  background-color: #304156;
-  transition: width 0.3s ease;
+  background: #FFFFFF;
+  border-right: 1px solid #E5E7EB;
+  transition: width var(--farm-transition-slow);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 8px rgba(21, 128, 61, 0.04);
 }
 
 .logo {
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  background-color: #263445;
-  white-space: nowrap;
-  overflow: hidden;
+  padding: 0 16px;
+  border-bottom: 1px solid #F3F4F6;
+  flex-shrink: 0;
 }
 
+.logo-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-text {
+  font-size: 17px;
+  font-weight: 600;
+  color: #15803D;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.logo-icon-only {
+  font-size: 24px;
+}
+
+/* === Menu Styles === */
 .sidebar-menu {
-  border-right: none;
-  background-color: #304156;
-  --el-menu-bg-color: #304156;
-  --el-menu-text-color: #bfcbd9;
-  --el-menu-active-color: #409eff;
-  --el-menu-hover-bg-color: #263445;
+  border-right: none !important;
+  background-color: transparent !important;
+  flex: 1;
+  padding: 8px;
+  --el-menu-bg-color: transparent;
+  --el-menu-text-color: #475569;
+  --el-menu-active-color: #15803D;
+  --el-menu-hover-bg-color: #F0FDF4;
 }
 
 .sidebar-menu:not(.el-menu--collapse) {
-  width: 220px;
+  width: 224px;
 }
 
 :deep(.el-menu-item) {
-  height: 50px;
-  line-height: 50px;
+  height: 48px;
+  line-height: 48px;
+  margin: 4px 0;
+  border-radius: 10px;
+  color: #475569;
+  transition: all var(--farm-transition);
+}
+
+:deep(.el-menu-item .el-icon) {
+  color: #64748B;
+  transition: color var(--farm-transition);
 }
 
 :deep(.el-menu-item:hover) {
-  background-color: #263445 !important;
+  background-color: #F0FDF4 !important;
+  color: #15803D;
+}
+
+:deep(.el-menu-item:hover .el-icon) {
+  color: #15803D;
 }
 
 :deep(.el-menu-item.is-active) {
-  background-color: #409eff !important;
-  color: #fff !important;
+  background-color: #DCFCE7 !important;
+  color: #15803D !important;
+  font-weight: 500;
 }
 
+:deep(.el-menu-item.is-active .el-icon) {
+  color: #15803D;
+}
+
+/* === Sidebar Footer === */
+.sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+
+.collapse-toggle {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #64748B;
+  transition: all var(--farm-transition);
+}
+
+.collapse-toggle:hover {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #15803D;
+}
+
+/* === Header Styles === */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
-  padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 0 24px;
+  height: 64px;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.04);
 }
 
 .header-left {
@@ -198,8 +273,11 @@ const handleCommand = (command: string) => {
   align-items: center;
 }
 
-.collapse-btn {
-  padding: 8px;
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #14532D;
+  margin: 0;
 }
 
 .header-right {
@@ -210,29 +288,56 @@ const handleCommand = (command: string) => {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  color: #606266;
   padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  border-radius: 12px;
+  transition: all var(--farm-transition);
 }
 
 .user-info:hover {
-  background-color: #f5f7fa;
+  background: #F0FDF4;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  border-radius: 10px;
+  color: #15803D;
 }
 
 .username {
   font-size: 14px;
+  font-weight: 500;
+  color: #475569;
 }
 
+/* === Main Content === */
 .main-content {
-  background-color: #f0f2f5;
-  padding: 20px;
+  background-color: #F0FDF4;
+  padding: 24px;
   overflow-y: auto;
+  min-height: 0;
 }
 
-/* Responsive */
+/* === Dropdown Menu === */
+:deep(.el-dropdown-menu__item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+
+:deep(.el-dropdown-menu__item:hover) {
+  background-color: #F0FDF4;
+  color: #15803D;
+}
+
+/* === Responsive === */
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -240,6 +345,19 @@ const handleCommand = (command: string) => {
     top: 0;
     height: 100vh;
     z-index: 1000;
+    box-shadow: 4px 0 16px rgba(21, 128, 61, 0.12);
+  }
+  
+  .main-content {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 16px;
+  }
+  
+  .username {
+    display: none;
   }
 }
 </style>

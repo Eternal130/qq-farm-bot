@@ -12,3 +12,4 @@ server/server
 server/data/farm.db
 server/data/farm.db-shm
 server/data/farm.db-wal
+.opencode/

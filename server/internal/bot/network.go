@@ -433,3 +433,27 @@ func (n *Network) AllLands() (*plantpb.AllLandsReply, error) {
 	reply := &plantpb.AllLandsReply{}
 	return reply, proto.Unmarshal(replyBody, reply)
 }
+
+// UnlockLand sends a land unlock request.
+func (n *Network) UnlockLand(landID int64) (*plantpb.UnlockLandReply, error) {
+	req := &plantpb.UnlockLandRequest{LandId: landID}
+	body, _ := proto.Marshal(req)
+	replyBody, err := n.SendRequest("gamepb.plantpb.PlantService", "UnlockLand", body)
+	if err != nil {
+		return nil, err
+	}
+	reply := &plantpb.UnlockLandReply{}
+	return reply, proto.Unmarshal(replyBody, reply)
+}
+
+// UpgradeLand sends a land upgrade request.
+func (n *Network) UpgradeLand(landID int64) (*plantpb.UpgradeLandReply, error) {
+	req := &plantpb.UpgradeLandRequest{LandId: landID}
+	body, _ := proto.Marshal(req)
+	replyBody, err := n.SendRequest("gamepb.plantpb.PlantService", "UpgradeLand", body)
+	if err != nil {
+		return nil, err
+	}
+	reply := &plantpb.UpgradeLandReply{}
+	return reply, proto.Unmarshal(replyBody, reply)
+}

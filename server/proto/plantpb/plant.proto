@@ -192,3 +192,13 @@ message LandsNotify {
     repeated LandInfo lands = 1;
     int64 host_gid = 2;
 }
+
+message UnlockLandRequest { int64 land_id = 1; }
+message UnlockLandReply {
+    repeated LandInfo land = 1;
+}
+
+message UpgradeLandRequest { int64 land_id = 1; }
+message UpgradeLandReply {
+    repeated LandInfo land = 1;
+}

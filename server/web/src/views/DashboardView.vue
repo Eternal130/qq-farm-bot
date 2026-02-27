@@ -5,9 +5,7 @@ import {
   ElRow, 
   ElCol, 
   ElCard, 
-  ElStatistic,
   ElButton,
-  ElTag,
   ElIcon,
   ElEmpty,
   ElMessage
@@ -104,11 +102,7 @@ const toggleBot = async (bot: BotCard) => {
     }
   }
 }
-const getStatusType = (status: string): 'success' | 'info' | 'danger' => {
-  if (status === 'running') return 'success'
-  if (status === 'error') return 'danger'
-  return 'info'
-}
+
 
 const getStatusText = (status: string): string => {
   if (status === 'running') return '运行中'
@@ -159,30 +153,39 @@ onUnmounted(() => {
     <!-- Stats Row -->
     <ElRow :gutter="20" class="stats-row">
       <ElCol :xs="24" :sm="8" :md="8">
-        <ElCard class="stat-card" shadow="hover">
-          <div class="stat-content">
-            <ElIcon class="stat-icon" :size="32" color="#409eff"><User /></ElIcon>
-            <ElStatistic title="账号总数" :value="stats.totalAccounts" />
+        <div class="stat-card stat-card--accounts">
+          <div class="stat-icon-wrapper stat-icon--green">
+            <ElIcon :size="24"><User /></ElIcon>
           </div>
-        </ElCard>
+          <div class="stat-info">
+            <span class="stat-title">账号总数</span>
+            <span class="stat-value">{{ stats.totalAccounts }}</span>
+          </div>
+        </div>
       </ElCol>
       
       <ElCol :xs="24" :sm="8" :md="8">
-        <ElCard class="stat-card" shadow="hover">
-          <div class="stat-content">
-            <ElIcon class="stat-icon" :size="32" color="#67c23a"><VideoPlay /></ElIcon>
-            <ElStatistic title="运行中" :value="stats.runningBots" />
+        <div class="stat-card stat-card--running">
+          <div class="stat-icon-wrapper stat-icon--emerald">
+            <ElIcon :size="24"><VideoPlay /></ElIcon>
           </div>
-        </ElCard>
+          <div class="stat-info">
+            <span class="stat-title">运行中</span>
+            <span class="stat-value">{{ stats.runningBots }}</span>
+          </div>
+        </div>
       </ElCol>
       
       <ElCol :xs="24" :sm="8" :md="8">
-        <ElCard class="stat-card" shadow="hover">
-          <div class="stat-content">
-            <ElIcon class="stat-icon" :size="32" color="#e6a23c"><Coin /></ElIcon>
-            <ElStatistic title="金币总额" :value="stats.totalGold" :formatter="(val) => val.toLocaleString()" />
+        <div class="stat-card stat-card--gold">
+          <div class="stat-icon-wrapper stat-icon--gold">
+            <ElIcon :size="24"><Coin /></ElIcon>
           </div>
-        </ElCard>
+          <div class="stat-info">
+            <span class="stat-title">金币总额</span>
+            <span class="stat-value">{{ stats.totalGold.toLocaleString() }}</span>
+          </div>
+        </div>
       </ElCol>
     </ElRow>
 
@@ -190,7 +193,10 @@ onUnmounted(() => {
     <ElCard class="bots-card" shadow="never">
       <template #header>
         <div class="card-header">
-          <span><ElIcon><TrendCharts /></ElIcon> 账号状态</span>
+          <div class="header-title">
+            <ElIcon class="header-icon"><TrendCharts /></ElIcon>
+            <span>账号状态</span>
+          </div>
         </div>
       </template>
       
@@ -206,44 +212,47 @@ onUnmounted(() => {
           :lg="6"
           class="bot-col"
         >
-          <ElCard class="bot-card" :body-style="{ padding: '16px' }" shadow="hover">
+          <div class="bot-card">
             <div class="bot-header">
               <div class="bot-name">
-                <span class="platform-tag">{{ bot.platform.toUpperCase() }}</span>
-                {{ bot.name }}
+                <span class="platform-tag" :class="bot.platform === 'qq' ? 'platform-qq' : 'platform-wx'">
+                  {{ bot.platform.toUpperCase() }}
+                </span>
+                <span class="bot-name-text">{{ bot.name }}</span>
               </div>
-              <ElTag :type="getStatusType(bot.status)" size="small">
-                {{ getStatusText(bot.status) }}
-              </ElTag>
+              <div class="bot-status" :class="bot.status === 'running' ? 'status-running' : 'status-stopped'">
+                <span class="status-dot"></span>
+                <span class="status-text">{{ getStatusText(bot.status) }}</span>
+              </div>
             </div>
             
             <div class="bot-stats">
               <div class="stat-item">
-                <span class="label">等级</span>
-                <span class="value">Lv.{{ bot.level }}</span>
+                <span class="stat-label">等级</span>
+                <span class="stat-value">Lv.{{ bot.level }}</span>
               </div>
               <div class="stat-item">
-                <span class="label">金币</span>
-                <span class="value gold">{{ bot.gold.toLocaleString() }}</span>
+                <span class="stat-label">金币</span>
+                <span class="stat-value stat-value--gold">{{ bot.gold.toLocaleString() }}</span>
               </div>
               <div class="stat-item">
-                <span class="label">经验</span>
-                <span class="value">{{ bot.exp.toLocaleString() }}</span>
+                <span class="stat-label">经验</span>
+                <span class="stat-value">{{ bot.exp.toLocaleString() }}</span>
               </div>
             </div>
             
-            <div class="bot-stats bot-stats-extra">
+            <div class="bot-stats bot-stats--secondary">
               <div class="stat-item">
-                <span class="label">偷菜</span>
-                <span class="value steal">{{ bot.total_steal }}</span>
+                <span class="stat-label">偷菜</span>
+                <span class="stat-value">{{ bot.total_steal }}</span>
               </div>
               <div class="stat-item">
-                <span class="label">帮助</span>
-                <span class="value help">{{ bot.total_help }}</span>
+                <span class="stat-label">帮助</span>
+                <span class="stat-value stat-value--help">{{ bot.total_help }}</span>
               </div>
               <div class="stat-item">
-                <span class="label">好友</span>
-                <span class="value">{{ bot.friends_count }}</span>
+                <span class="stat-label">好友</span>
+                <span class="stat-value">{{ bot.friends_count }}</span>
               </div>
             </div>
             
@@ -265,6 +274,7 @@ onUnmounted(() => {
             <div class="land-grid" v-if="bot.lands && bot.lands.filter(l => l.unlocked).length > 0">
               <div 
                 class="land-cell" 
+                :class="'phase-cell-' + getPhaseType(land.phase)"
                 v-for="land in bot.lands.filter(l => l.unlocked)" 
                 :key="land.id"
               >
@@ -273,30 +283,25 @@ onUnmounted(() => {
                   <span class="land-level">Lv.{{ land.level }}</span>
                 </div>
                 <div class="land-crop">{{ land.crop_name || '空地' }}</div>
-                <ElTag 
-                  v-if="land.phase" 
-                  :type="getPhaseType(land.phase)" 
-                  size="small"
-                  class="phase-tag"
-                >
-                  {{ land.phase }}
-                </ElTag>
-                <ElTag v-else type="info" size="small" class="phase-tag">空地</ElTag>
+                <div class="land-phase" :class="'phase-' + getPhaseType(land.phase)">
+                  {{ land.phase || '空地' }}
+                </div>
               </div>
             </div>
             
             <ElButton
               :type="bot.status === 'running' ? 'danger' : 'success'"
-              size="small"
+              size="default"
               class="control-btn"
               @click="toggleBot(bot)"
             >
-              <ElIcon>
+              <ElIcon class="control-icon">
                 <VideoPause v-if="bot.status === 'running'" />
                 <VideoPlay v-else />
               </ElIcon>
+              <span>{{ bot.status === 'running' ? '停止运行' : '启动运行' }}</span>
             </ElButton>
-          </ElCard>
+          </div>
         </ElCol>
       </ElRow>
     </ElCard>
@@ -309,51 +314,141 @@ onUnmounted(() => {
 }
 
 .stats-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
+/* Stat Cards */
 .stat-card {
-  border-radius: 8px;
-}
-
-.stat-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.stat-content {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
   gap: 16px;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
 }
 
-.stat-icon {
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+
+.stat-card--accounts::before {
+  background: #15803D;
+}
+
+.stat-card--running::before {
+  background: #10B981;
+}
+
+.stat-card--gold::before {
+  background: #CA8A04;
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
+.stat-icon--green {
+  background: rgba(21, 128, 61, 0.1);
+  color: #15803D;
+}
+
+.stat-icon--emerald {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.stat-icon--gold {
+  background: rgba(202, 138, 4, 0.1);
+  color: #CA8A04;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-title {
+  font-size: 13px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #14532D;
+  line-height: 1.2;
+}
+
+/* Bots Card */
 .bots-card {
-  border-radius: 8px;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+}
+
+.bots-card :deep(.el-card__header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.bots-card :deep(.el-card__body) {
+  padding: 24px;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 500;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #14532D;
+}
+
+.header-icon {
+  color: #15803D;
+  font-size: 20px;
 }
 
 .bot-col {
   margin-bottom: 16px;
 }
 
+/* Bot Card */
 .bot-card {
-  border-radius: 8px;
-  border: 1px solid #e4e7ed;
-  transition: all 0.3s ease;
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 2px 8px rgba(21, 128, 61, 0.04);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  border: 1px solid rgba(21, 128, 61, 0.08);
+  height: 100%;
 }
 
 .bot-card:hover {
-  border-color: #409eff;
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.12), 0 8px 24px rgba(21, 128, 61, 0.08);
 }
 
 .bot-header {
@@ -362,136 +457,212 @@ onUnmounted(() => {
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #F3F4F6;
 }
 
 .bot-name {
-  font-weight: 500;
-  color: #303133;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.platform-tag {
-  font-size: 10px;
-  padding: 2px 6px;
-  background-color: #f0f2f5;
-  border-radius: 4px;
-  color: #909399;
+.bot-name-text {
+  font-weight: 600;
+  color: #14532D;
+  font-size: 15px;
 }
 
-.bot-stats {
+.platform-tag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.platform-qq {
+  background: rgba(21, 128, 61, 0.1);
+  color: #15803D;
+}
+
+.platform-wx {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563EB;
+}
+
+.bot-status {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-running .status-dot {
+  background: #22C55E;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-stopped .status-dot {
+  background: #9CA3AF;
+}
+
+.status-running .status-text {
+  color: #22C55E;
+}
+
+.status-stopped .status-text {
+  color: #9CA3AF;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1); }
+}
+
+/* Bot Stats */
+.bot-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .stat-item {
   text-align: center;
+  padding: 8px 4px;
+  background: #F9FAFB;
+  border-radius: 8px;
 }
 
-.stat-item .label {
+.stat-label {
   display: block;
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 4px;
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-bottom: 2px;
+  font-weight: 500;
 }
 
-.stat-item .value {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
+.stat-item .stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #14532D;
 }
 
-.stat-item .value.gold {
-  color: #e6a23c;
+.stat-value--gold {
+  color: #CA8A04 !important;
 }
 
-
-.stat-item .value.steal {
-  color: #909399;
+.stat-value--help {
+  color: #22C55E !important;
 }
 
-.stat-item .value.help {
-  color: #67c23a;
-}
-
-.bot-stats-extra {
-  margin-bottom: 12px;
-}
-
-.bot-stats-extra .stat-item .value {
+.bot-stats--secondary .stat-item .stat-value {
   font-size: 14px;
 }
 
+.bot-stats--secondary {
+  margin-bottom: 12px;
+}
+
+/* Level Up Info */
 .level-up-info {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  padding: 8px 12px;
-  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
-  border-radius: 6px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #FEF9C3 0%, #FEF08A 100%);
+  border-radius: 10px;
 }
 
 .level-up-label {
   font-size: 12px;
-  color: #f56c6c;
-  font-weight: 500;
+  color: #A16207;
+  font-weight: 600;
+  background: rgba(202, 138, 4, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .level-up-value {
   font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: #854D0E;
 }
 
+/* Land Overview */
 .land-overview {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  padding: 8px 12px;
-  background: linear-gradient(135deg, #f0f9eb 0%, #e1f3d8 100%);
-  border-radius: 6px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+  border-radius: 10px;
 }
 
 .land-label {
   font-size: 12px;
-  color: #67c23a;
-  font-weight: 500;
+  color: #166534;
+  font-weight: 600;
+  background: rgba(21, 128, 61, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .land-value {
   font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: #14532D;
 }
 
+/* Land Grid */
 .land-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
-  max-height: 180px;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 200px;
   overflow-y: auto;
-  padding: 2px;
+  padding: 4px;
+}
+
+.land-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.land-grid::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+.land-grid::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
 }
 
 .land-cell {
-  background: #fafafa;
-  border: 1px solid #ebeef5;
-  border-radius: 6px;
-  padding: 6px;
+  background: #FAFAFA;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 8px;
   font-size: 11px;
   text-align: center;
   transition: all 0.2s ease;
 }
 
 .land-cell:hover {
-  border-color: #409eff;
-  background: #f0f7ff;
+  border-color: rgba(21, 128, 61, 0.3);
+  background: #F0FDF4;
 }
 
 .land-cell-header {
@@ -502,18 +673,19 @@ onUnmounted(() => {
 }
 
 .land-id {
-  color: #909399;
+  color: #9CA3AF;
   font-weight: 500;
+  font-size: 10px;
 }
 
 .land-level {
-  color: #409eff;
-  font-weight: 600;
+  color: #15803D;
+  font-weight: 700;
   font-size: 10px;
 }
 
 .land-crop {
-  color: #303133;
+  color: #14532D;
   font-weight: 500;
   margin-bottom: 4px;
   white-space: nowrap;
@@ -521,14 +693,96 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
-.phase-tag {
-  font-size: 10px !important;
-  padding: 0 4px !important;
-  height: 18px !important;
-  line-height: 16px !important;
+.land-phase {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
+.phase-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+}
+
+.phase-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #D97706;
+}
+
+.phase-danger {
+  background: rgba(220, 38, 38, 0.15);
+  color: #DC2626;
+}
+
+.phase-primary {
+  background: rgba(21, 128, 61, 0.15);
+  color: #15803D;
+}
+
+.phase-info {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6B7280;
+}
+
+/* Control Button */
 .control-btn {
   width: 100%;
+  border-radius: 8px;
+  font-weight: 600;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.control-icon {
+  font-size: 16px;
+}
+
+.control-btn.el-button--success {
+  background: #15803D;
+  border-color: #15803D;
+}
+
+.control-btn.el-button--success:hover {
+  background: #166534;
+  border-color: #166534;
+}
+
+.control-btn.el-button--danger {
+  background: #DC2626;
+  border-color: #DC2626;
+}
+
+.control-btn.el-button--danger:hover {
+  background: #B91C1C;
+  border-color: #B91C1C;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .stats-row {
+    margin-bottom: 16px;
+  }
+  
+  .stat-card {
+    padding: 16px 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .bots-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+  
+  .bot-col {
+    margin-bottom: 12px;
+  }
 }
 </style>
