@@ -1,0 +1,52 @@
+syntax = "proto3";
+package gamepb.shoppb;
+option go_package = "qq-farm-bot/proto/shoppb";
+
+import "corepb/core.proto";
+
+message ShopProfile {
+    int64 shop_id = 1;
+    string shop_name = 2;
+    int32 shop_type = 3;
+}
+
+message GoodsInfo {
+    int64 id = 1;
+    int64 bought_num = 2;
+    int64 price = 3;
+    int64 limit_count = 4;
+    bool unlocked = 5;
+    int64 item_id = 6;
+    int64 item_count = 7;
+    repeated Cond conds = 8;
+}
+
+enum CondType {
+    COND_TYPE_UNKNOWN = 0;
+    MIN_LEVEL = 1;
+    UNLOCK_CARD = 2;
+}
+
+message Cond {
+    int32 type = 1;
+    int64 param = 2;
+}
+
+message ShopProfilesRequest {}
+message ShopProfilesReply { repeated ShopProfile shop_profiles = 1; }
+
+message ShopInfoRequest { int64 shop_id = 1; }
+message ShopInfoReply { repeated GoodsInfo goods_list = 1; }
+
+message BuyGoodsRequest {
+    int64 goods_id = 1;
+    int64 num = 2;
+    int64 price = 3;
+}
+message BuyGoodsReply {
+    GoodsInfo goods = 1;
+    repeated corepb.Item get_items = 2;
+    repeated corepb.Item cost_items = 3;
+}
+
+message GoodsUnlockNotify { repeated GoodsInfo goods_list = 1; }

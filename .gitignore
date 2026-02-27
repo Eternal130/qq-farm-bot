@@ -5,3 +5,10 @@ package-lock.json
 game.js
 /game
 logs/
+farm.log
+.gitignore
+server/qq-farm-bot
+server/server
+server/data/farm.db
+server/data/farm.db-shm
+server/data/farm.db-wal

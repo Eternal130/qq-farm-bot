@@ -1,0 +1,9 @@
+{
+  "listen": "0.0.0.0:18080",
+  "jwt_secret": "qq-farm-bot-secret-change-me",
+  "db_path": "/opt/qq-farm-bot/server/data/farm.db",
+  "admin_user": "admin",
+  "admin_pass": "admin123",
+  "game_server_url": "wss://gate-obt.nqf.qq.com/prod/ws",
+  "client_version": "1.6.0.14_20251224"
+}

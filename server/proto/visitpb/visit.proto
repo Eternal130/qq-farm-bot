@@ -1,0 +1,26 @@
+syntax = "proto3";
+package gamepb.visitpb;
+option go_package = "qq-farm-bot/proto/visitpb";
+
+import "plantpb/plant.proto";
+import "userpb/user.proto";
+
+enum EnterReason {
+    ENTER_REASON_UNKNOWN = 0;
+    ENTER_REASON_BUBBLE = 1;
+    ENTER_REASON_FRIEND = 2;
+    ENTER_REASON_INTERACT = 3;
+}
+
+message EnterRequest {
+    int64 host_gid = 1;
+    int32 reason = 2;
+}
+
+message EnterReply {
+    gamepb.userpb.BasicInfo basic = 1;
+    repeated gamepb.plantpb.LandInfo lands = 2;
+}
+
+message LeaveRequest { int64 host_gid = 1; }
+message LeaveReply {}
