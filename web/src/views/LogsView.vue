@@ -22,7 +22,7 @@ const connected = ref(false)
 const autoScroll = ref(true)
 
 let websocket: WebSocket | null = null
-let logContainer: HTMLElement | null = null
+const logContainerRef = ref<HTMLElement | null>(null)
 
 const fetchAccounts = async () => {
   try {
@@ -31,8 +31,8 @@ const fetchAccounts = async () => {
     if (accounts.value.length > 0 && !selectedAccountId.value) {
       selectedAccountId.value = accounts.value[0].id
     }
-  } catch (error) {
-    console.error('Failed to fetch accounts:', error)
+  } catch {
+    // silently fail - accounts list will be empty
   }
 }
 
@@ -47,8 +47,8 @@ const fetchHistoricalLogs = async () => {
       await nextTick()
       scrollToBottom()
     }
-  } catch (error) {
-    console.error('Failed to fetch logs:', error)
+  } catch {
+    // silently fail - will show empty log area
   } finally {
     loading.value = false
   }
@@ -64,7 +64,6 @@ const connectWebSocket = () => {
   
   websocket.onopen = () => {
     connected.value = true
-    console.log('WebSocket connected')
   }
   
   websocket.onmessage = (event) => {
@@ -80,19 +79,17 @@ const connectWebSocket = () => {
       if (autoScroll.value) {
         nextTick(() => scrollToBottom())
       }
-    } catch (error) {
-      console.error('Failed to parse log:', error)
+    } catch {
+      // malformed message, skip
     }
   }
   
-  websocket.onerror = (error) => {
-    console.error('WebSocket error:', error)
+  websocket.onerror = () => {
     connected.value = false
   }
   
   websocket.onclose = () => {
     connected.value = false
-    console.log('WebSocket disconnected')
   }
 }
 
@@ -105,8 +102,8 @@ const disconnectWebSocket = () => {
 }
 
 const scrollToBottom = () => {
-  if (logContainer) {
-    logContainer.scrollTop = logContainer.scrollHeight
+  if (logContainerRef.value) {
+    logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight
   }
 }
 
@@ -174,11 +171,7 @@ onMounted(() => {
       connectWebSocket()
     }
   })
-  
-  // Get log container reference
-  logContainer = document.querySelector('.log-container')
 })
-
 onUnmounted(() => {
   disconnectWebSocket()
 })
@@ -261,13 +254,13 @@ onUnmounted(() => {
 
       <ElEmpty v-if="!selectedAccountId" description="请先选择一个账号" class="empty-state" />
       
-      <div v-else class="log-container" ref="logContainer">
+      <div v-else class="log-container" ref="logContainerRef">
         <ElEmpty v-if="logs.length === 0 && !loading" description="暂无日志" class="empty-state" />
         
         <div v-else class="log-list">
           <div 
-            v-for="(log, index) in logs" 
-            :key="index" 
+            v-for="log in logs" 
+            :key="log.id" 
             class="log-entry"
             :class="getLevelClass(log.level)"
           >

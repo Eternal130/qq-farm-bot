@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { accountApi, type Account, type CreateAccountRequest, type QRCodeResponse } from '@/api'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { accountApi, getErrorMessage, type Account, type CreateAccountRequest, type QRCodeResponse } from '@/api'
 import { 
   ElTable, 
   ElTableColumn, 
@@ -103,9 +103,8 @@ const handleSubmit = async () => {
     }
     dialogVisible.value = false
     fetchAccounts()
-  } catch (error: any) {
-    const message = error.response?.data?.error || '操作失败'
-    ElMessage.error(message)
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '操作失败'))
   }
 }
 
@@ -119,10 +118,9 @@ const handleDelete = async (row: Account) => {
     await accountApi.delete(row.id)
     ElMessage.success('删除成功')
     fetchAccounts()
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error !== 'cancel') {
-      const message = error.response?.data?.error || '删除失败'
-      ElMessage.error(message)
+      ElMessage.error(getErrorMessage(error, '删除失败'))
     }
   }
 }
@@ -143,9 +141,8 @@ const toggleBot = async (row: Account) => {
       ElMessage.success(`已启动 ${row.name}`)
     }
     fetchAccounts()
-  } catch (error: any) {
-    const message = error.response?.data?.error || '操作失败'
-    ElMessage.error(message)
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '操作失败'))
   }
 }
 
@@ -156,9 +153,8 @@ const startQRLogin = async (row: Account) => {
     currentQRAccountId.value = row.id
     qrDialogVisible.value = true
     startQRPolling(row.id, response.data.login_code)
-  } catch (error: any) {
-    const message = error.response?.data?.error || '获取二维码失败'
-    ElMessage.error(message)
+  } catch (error: unknown) {
+    ElMessage.error(getErrorMessage(error, '获取二维码失败'))
   }
 }
 
@@ -193,8 +189,8 @@ const startQRPolling = (accountId: number, loginCode: string) => {
         ElMessage.error(data.message || '扫码登录失败')
         closeQRDialog()
       }
-    } catch (error) {
-      console.error('QR polling error:', error)
+    } catch {
+      // polling error - will retry on next interval
     }
   }, 2000)
 }
@@ -225,6 +221,10 @@ const getStatusText = (status: string): string => {
 
 onMounted(() => {
   fetchAccounts()
+})
+
+onUnmounted(() => {
+  closeQRDialog()
 })
 </script>
 

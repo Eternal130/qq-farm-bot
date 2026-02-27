@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { authApi } from '@/api'
+import { authApi, getErrorMessage } from '@/api'
 import { 
   ElCard, 
   ElForm, 
@@ -67,9 +67,8 @@ const handleRegister = async () => {
       }
       
       router.push('/dashboard')
-    } catch (error: any) {
-      const message = error.response?.data?.error || '注册失败，请稍后重试'
-      ElMessage.error(message)
+    } catch (error: unknown) {
+      ElMessage.error(getErrorMessage(error, '注册失败，请稍后重试'))
     } finally {
       loading.value = false
     }
@@ -161,7 +160,7 @@ const goToLogin = () => {
         </div>
       </ElCard>
       
-      <p class="copyright">© 2024 QQ农场管理系统 · 让农场管理更简单</p>
+      <p class="copyright">© {{ new Date().getFullYear() }} QQ农场管理系统 · 让农场管理更简单</p>
     </div>
   </div>
 </template>

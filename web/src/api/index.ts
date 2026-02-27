@@ -23,18 +23,31 @@ instance.interceptors.request.use(
   }
 )
 
-// Response interceptor - handle errors
+// Response interceptor - handle 401 unauthorized
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Lazy import to avoid circular dependency (auth store imports types from this module)
+      Promise.all([
+        import('@/stores/auth'),
+        import('@/router')
+      ]).then(([{ useAuthStore }, { default: router }]) => {
+        useAuthStore().clearAuth()
+        router.push('/login')
+      })
     }
     return Promise.reject(error)
   }
 )
+
+// Helper: extract error message from axios errors
+export function getErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error) && typeof error.response?.data?.error === 'string') {
+    return error.response.data.error
+  }
+  return fallback
+}
 
 // Types
 export interface User {

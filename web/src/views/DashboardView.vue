@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { dashboardApi, accountApi, type LandStatus } from '@/api'
+import { dashboardApi, accountApi, getErrorMessage, type LandStatus } from '@/api'
 import { 
   ElRow, 
   ElCol, 
@@ -79,8 +79,8 @@ const fetchDashboard = async () => {
       exp_to_next_level: acc.exp_to_next_level || 0,
       hours_to_next_level: acc.hours_to_next_level || 0
     }))
-  } catch (error) {
-    console.error('Failed to fetch dashboard:', error)
+  } catch {
+    // silently fail - dashboard shows empty state
   }
 }
 
@@ -95,8 +95,8 @@ const toggleBot = async (bot: BotCard) => {
     }
     // Refresh data
     await fetchDashboard()
-  } catch (error: any) {
-    const message = error.response?.data?.error || '操作失败'
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, '操作失败')
     if (message.includes('no login code')) {
       ElMessage.warning('该账号尚未登录，请前往账号管理页面扫码登录')
     } else {
