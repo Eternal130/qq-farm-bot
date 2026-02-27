@@ -76,6 +76,10 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FriendInterval int    `json:"friend_interval"`
 			EnableSteal    bool   `json:"enable_steal"`
 			ForceLowest    bool   `json:"force_lowest"`
+			AutoUseFertilizer    bool `json:"auto_use_fertilizer"`
+			AutoBuyFertilizer    bool `json:"auto_buy_fertilizer"`
+			FertilizerTargetCount int  `json:"fertilizer_target_count"`
+			FertilizerBuyDailyLimit int `json:"fertilizer_buy_daily_limit"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -101,6 +105,10 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FriendInterval: req.FriendInterval,
 			EnableSteal:    req.EnableSteal,
 			ForceLowest:    req.ForceLowest,
+			AutoUseFertilizer:      req.AutoUseFertilizer,
+			AutoBuyFertilizer:      req.AutoBuyFertilizer,
+			FertilizerTargetCount:  req.FertilizerTargetCount,
+			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
 		}
 		if err := s.CreateAccount(account); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -135,6 +143,10 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FriendInterval *int    `json:"friend_interval"`
 			EnableSteal    *bool   `json:"enable_steal"`
 			ForceLowest    *bool   `json:"force_lowest"`
+			AutoUseFertilizer      *bool `json:"auto_use_fertilizer"`
+			AutoBuyFertilizer      *bool `json:"auto_buy_fertilizer"`
+			FertilizerTargetCount  *int  `json:"fertilizer_target_count"`
+			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -164,6 +176,18 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.ForceLowest != nil {
 			account.ForceLowest = *req.ForceLowest
+		}
+		if req.AutoUseFertilizer != nil {
+			account.AutoUseFertilizer = *req.AutoUseFertilizer
+		}
+		if req.AutoBuyFertilizer != nil {
+			account.AutoBuyFertilizer = *req.AutoBuyFertilizer
+		}
+		if req.FertilizerTargetCount != nil {
+			account.FertilizerTargetCount = *req.FertilizerTargetCount
+		}
+		if req.FertilizerBuyDailyLimit != nil {
+			account.FertilizerBuyDailyLimit = *req.FertilizerBuyDailyLimit
 		}
 
 		if err := s.UpdateAccount(account); err != nil {

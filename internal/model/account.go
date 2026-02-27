@@ -17,6 +17,12 @@ type Account struct {
 	EnableSteal    bool `json:"enable_steal"`
 	ForceLowest    bool `json:"force_lowest"` // force lowest level crop
 
+	// Fertilizer config
+	AutoUseFertilizer    bool `json:"auto_use_fertilizer"`     // enable pack opening + surplus item usage
+	AutoBuyFertilizer    bool `json:"auto_buy_fertilizer"`     // enable coupon purchase
+	FertilizerTargetCount int  `json:"fertilizer_target_count"` // keep this many items, use surplus
+	FertilizerBuyDailyLimit int `json:"fertilizer_buy_daily_limit"` // max daily buys (0=unlimited)
+
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

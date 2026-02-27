@@ -522,21 +522,25 @@ onUnmounted(() => {
 .action-btn.el-button--success {
   background: #15803D;
   border-color: #15803D;
+  color: #fff;
 }
 
 .action-btn.el-button--success:hover {
   background: #166534;
   border-color: #166534;
+  color: #fff;
 }
 
-.action-btn.el-button--danger {
+.action-btn.el-button--danger:not(.is-text) {
   background: #DC2626;
   border-color: #DC2626;
+  color: #fff;
 }
 
-.action-btn.el-button--danger:hover {
+.action-btn.el-button--danger:not(.is-text):hover {
   background: #B91C1C;
   border-color: #B91C1C;
+  color: #fff;
 }
 
 .action-btn--qr {
@@ -553,6 +557,8 @@ onUnmounted(() => {
 
 .action-btn.el-button--primary.is-text {
   color: #15803D;
+  background: transparent;
+  border-color: transparent;
 }
 
 .action-btn.el-button--primary.is-text:hover {
@@ -562,6 +568,8 @@ onUnmounted(() => {
 
 .action-btn.el-button--danger.is-text {
   color: #DC2626;
+  background: transparent;
+  border-color: transparent;
 }
 
 .action-btn.el-button--danger.is-text:hover {

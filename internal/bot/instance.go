@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"sync"
@@ -20,14 +21,27 @@ type BotConfig struct {
 	FriendInterval int // seconds
 	EnableSteal    bool
 	ForceLowest    bool
+	AutoUseFertilizer      bool
+	AutoBuyFertilizer      bool
+	FertilizerTargetCount  int
+	FertilizerBuyDailyLimit int
 }
 
 const (
-	// reconnectBackoffInit is the initial wait time before reconnecting.
-	reconnectBackoffInit = 2 * time.Second
-	// reconnectBackoffMax is the maximum wait time between reconnection attempts.
-	reconnectBackoffMax = 60 * time.Second
+	reconnectBackoffInit    = 2 * time.Second
+	reconnectBackoffMax     = 60 * time.Second
+	maxLoginTimeoutAttempts = 3
 )
+
+// connectError wraps a connection/login failure with the disconnect reason
+// so the watchdog can apply differentiated retry strategies.
+type connectError struct {
+	reason DisconnectReason
+	err    error
+}
+
+func (e *connectError) Error() string { return e.err.Error() }
+func (e *connectError) Unwrap() error { return e.err }
 
 // Instance represents a running bot for a single game account.
 type Instance struct {
@@ -54,6 +68,10 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		FriendInterval: account.FriendInterval,
 		EnableSteal:    account.EnableSteal,
 		ForceLowest:    account.ForceLowest,
+		AutoUseFertilizer:      account.AutoUseFertilizer,
+		AutoBuyFertilizer:      account.AutoBuyFertilizer,
+		FertilizerTargetCount:  account.FertilizerTargetCount,
+		FertilizerBuyDailyLimit: account.FertilizerBuyDailyLimit,
 	}
 	if cfg.FarmInterval < 1 {
 		cfg.FarmInterval = 10
@@ -103,13 +121,13 @@ func (inst *Instance) connectAndRun() error {
 		return fmt.Errorf("connect: %w", err)
 	}
 
-	// Login
 	if err := net.Login(inst.config.ClientVersion); err != nil {
+		reason := net.GetDisconnectReason()
 		net.Close()
 		inst.mu.Lock()
 		inst.err = err.Error()
 		inst.mu.Unlock()
-		return fmt.Errorf("login: %w", err)
+		return &connectError{reason: reason, err: fmt.Errorf("login: %w", err)}
 	}
 
 	inst.mu.Lock()
@@ -135,15 +153,17 @@ func (inst *Instance) connectAndRun() error {
 	warehouse := NewWarehouseWorker(net, inst.logger)
 	go warehouse.RunLoop()
 
+	fertilizer := NewFertilizerWorker(net, inst.logger, inst.config)
+	go fertilizer.RunLoop()
+
 	return nil
 }
 
-// watchdog monitors for disconnection and automatically reconnects with exponential backoff.
 func (inst *Instance) watchdog() {
 	backoff := reconnectBackoffInit
+	loginTimeoutCount := 0
 
 	for {
-		// Get current network to watch
 		inst.mu.RLock()
 		net := inst.net
 		inst.mu.RUnlock()
@@ -152,42 +172,74 @@ func (inst *Instance) watchdog() {
 			return
 		}
 
-		// Wait for disconnect or explicit stop
 		select {
 		case <-net.Done():
-			// Connection lost
 		case <-inst.stopCh:
-			// User stopped the bot
 			return
 		}
 
+		reason := net.GetDisconnectReason()
 		inst.mu.Lock()
 		inst.running = false
 		inst.mu.Unlock()
 
-		inst.logger.Warnf("系统", "连接断开，%v 后尝试重连...", backoff)
-
-		// Wait before reconnecting (or stop if requested)
-		select {
-		case <-time.After(backoff):
-		case <-inst.stopCh:
-			inst.logger.Info("系统", "Bot 已停止")
+		if !reason.Retryable() {
+			inst.logger.Warnf("系统", "连接断开 (reason=%s)，不再重连", reason)
+			inst.mu.Lock()
+			inst.err = fmt.Sprintf("断开: %s", reason)
+			inst.mu.Unlock()
 			return
 		}
 
-		// Attempt reconnect
-		if err := inst.connectAndRun(); err != nil {
+		if reason == DisconnectLoginTimeout {
+			loginTimeoutCount++
+			if loginTimeoutCount >= maxLoginTimeoutAttempts {
+				inst.logger.Warnf("系统", "登录超时累计 %d 次，停止重连", loginTimeoutCount)
+				inst.mu.Lock()
+				inst.err = fmt.Sprintf("登录超时达上限 (%d/%d)", loginTimeoutCount, maxLoginTimeoutAttempts)
+				inst.mu.Unlock()
+				return
+			}
+		}
+
+		inst.logger.Warnf("系统", "连接断开 (reason=%s)，%v 后尝试重连...", reason, backoff)
+
+		// Reconnect loop: retry with exponential backoff until success or stop.
+		for {
+			select {
+			case <-time.After(backoff):
+			case <-inst.stopCh:
+				inst.logger.Info("系统", "Bot 已停止")
+				return
+			}
+
+			err := inst.connectAndRun()
+			if err == nil {
+				inst.logger.Infof("重连", "成功")
+				backoff = reconnectBackoffInit
+				loginTimeoutCount = 0
+				break
+			}
+
+			// Check if reconnection failed due to login timeout.
+			var ce *connectError
+			if errors.As(err, &ce) && ce.reason == DisconnectLoginTimeout {
+				loginTimeoutCount++
+				if loginTimeoutCount >= maxLoginTimeoutAttempts {
+					inst.logger.Warnf("系统", "登录超时累计 %d 次，停止重连", loginTimeoutCount)
+					inst.mu.Lock()
+					inst.err = fmt.Sprintf("登录超时达上限 (%d/%d)", loginTimeoutCount, maxLoginTimeoutAttempts)
+					inst.mu.Unlock()
+					return
+				}
+			}
+
 			inst.logger.Warnf("重连", "失败: %v", err)
-			// Exponential backoff
 			backoff *= 2
 			if backoff > reconnectBackoffMax {
 				backoff = reconnectBackoffMax
 			}
-			continue
 		}
-
-		inst.logger.Infof("重连", "成功")
-		backoff = reconnectBackoffInit // reset on success
 	}
 }
 
