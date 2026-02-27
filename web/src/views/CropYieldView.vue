@@ -6,6 +6,7 @@ import {
   ElTable,
   ElTableColumn,
   ElInput,
+  ElTag
 } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
@@ -80,16 +81,16 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
         </ElTableColumn>
         <ElTableColumn prop="growTime" label="生长时间" min-width="100" sortable>
           <template #default="{ row }">
-            <span class="time-tag" :class="'time-' + getGrowTimeType(row.growTime)">
+            <ElTag :type="getGrowTimeType(row.growTime)" size="small" class="time-tag">
               {{ row.growTime }}
-            </span>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="growTimeFert" label="施肥后" min-width="110" sortable>
           <template #default="{ row }">
-            <span class="time-tag time-outline" :class="'time-' + getGrowTimeType(row.growTimeFert)">
+            <ElTag :type="getGrowTimeType(row.growTimeFert)" size="small" effect="plain" class="time-tag">
               {{ row.growTimeFert }}
-            </span>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="harvestExp" label="收获经验" min-width="100" sortable align="right">
@@ -315,41 +316,8 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 
 /* Time Tags */
 .time-tag {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
   border-radius: 6px;
-}
-
-.time-success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16A34A;
-}
-
-.time-warning {
-  background: rgba(245, 158, 11, 0.12);
-  color: #D97706;
-}
-
-.time-danger {
-  background: rgba(220, 38, 38, 0.1);
-  color: #DC2626;
-}
-
-.time-outline.time-success {
-  background: transparent;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.time-outline.time-warning {
-  background: transparent;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.time-outline.time-danger {
-  background: transparent;
-  border: 1px solid rgba(220, 38, 38, 0.25);
+  font-weight: 600;
 }
 
 /* Value Colors */

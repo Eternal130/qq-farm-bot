@@ -1,15 +1,20 @@
-
 .DS_Store
 node_modules
 package-lock.json
-game.js
-/game
+
+# Build artifacts
+qq-farm-bot
+/cmd/server/dist/
+/web/dist/
+
+# Database
+data/farm.db
+data/farm.db-shm
+data/farm.db-wal
+
+# Logs
 logs/
 farm.log
-.gitignore
-server/qq-farm-bot
-server/server
-server/data/farm.db
-server/data/farm.db-shm
-server/data/farm.db-wal
+
+# IDE / tools
 .opencode/

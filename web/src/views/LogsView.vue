@@ -8,8 +8,10 @@ import {
   ElSwitch,
   ElButton,
   ElEmpty,
+  ElIcon,
+  ElTag
 } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
+import { Refresh, Connection } from '@element-plus/icons-vue'
 
 const accounts = ref<Account[]>([])
 const selectedAccountId = ref<number | null>(null)
@@ -202,16 +204,14 @@ onUnmounted(() => {
                 :label="account.name"
                 :value="account.id"
               >
-                <div class="account-option">
-                  <span class="account-option-name">{{ account.name }}</span>
-                  <span 
-                    class="account-option-status"
-                    :class="account.status === 'running' ? 'status-running' : 'status-stopped'"
-                  >
-                    <span class="status-indicator"></span>
-                    {{ account.status === 'running' ? '运行中' : '已停止' }}
-                  </span>
-                </div>
+                <span>{{ account.name }}</span>
+                <ElTag 
+                  size="small" 
+                  :type="account.status === 'running' ? 'success' : 'info'"
+                  class="account-status-tag"
+                >
+                  {{ account.status === 'running' ? '运行中' : '已停止' }}
+                </ElTag>
               </ElOption>
             </ElSelect>
           </div>
@@ -223,8 +223,12 @@ onUnmounted(() => {
             </div>
             
             <div class="connection-status" v-if="realtimeMode">
-              <span class="connection-dot" :class="connected ? 'connected' : 'disconnected'"></span>
-              <span class="connection-text">{{ connected ? '已连接' : '未连接' }}</span>
+              <ElIcon :color="connected ? '#22C55E' : '#9CA3AF'" class="connection-icon">
+                <Connection />
+              </ElIcon>
+              <span class="connection-text" :class="connected ? 'connected' : 'disconnected'">
+                {{ connected ? '已连接' : '未连接' }}
+              </span>
             </div>
             
             <ElButton 
@@ -338,45 +342,8 @@ onUnmounted(() => {
   box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2), 0 0 0 1px #15803D !important;
 }
 
-.account-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.account-option-name {
-  font-weight: 500;
-  color: #14532D;
-}
-
-.account-option-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-}
-
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.status-running .status-indicator {
-  background: #22C55E;
-}
-
-.status-stopped .status-indicator {
-  background: #9CA3AF;
-}
-
-.status-running {
-  color: #22C55E;
-}
-
-.status-stopped {
-  color: #9CA3AF;
+.account-status-tag {
+  margin-left: 8px;
 }
 
 /* Header Right */
@@ -407,38 +374,28 @@ onUnmounted(() => {
 .connection-status {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 0 12px;
   height: 32px;
   background: #F9FAFB;
   border-radius: 8px;
 }
 
-.connection-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.connection-dot.connected {
-  background: #22C55E;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.connection-dot.disconnected {
-  background: #9CA3AF;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
-  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.1); }
+.connection-icon {
+  font-size: 16px;
 }
 
 .connection-text {
   font-size: 13px;
   font-weight: 500;
-  color: #6B7280;
+}
+
+.connection-text.connected {
+  color: #22C55E;
+}
+
+.connection-text.disconnected {
+  color: #9CA3AF;
 }
 
 /* Buttons */

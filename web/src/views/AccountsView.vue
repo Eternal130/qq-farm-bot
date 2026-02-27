@@ -5,6 +5,7 @@ import {
   ElTable, 
   ElTableColumn, 
   ElButton, 
+  ElTag, 
   ElDialog,
   ElForm,
   ElFormItem,
@@ -15,7 +16,9 @@ import {
   ElInputNumber,
   ElMessage,
   ElMessageBox,
-  ElImage
+  ElSpace,
+  ElImage,
+  ElCard
 } from 'element-plus'
 import { Plus, Edit, Delete, VideoPlay, VideoPause, Grid } from '@element-plus/icons-vue'
 
@@ -208,6 +211,11 @@ const closeQRDialog = () => {
   qrPolling.value = false
 }
 
+const getStatusType = (status: string): 'success' | 'info' | 'danger' => {
+  if (status === 'running') return 'success'
+  if (status === 'error') return 'danger'
+  return 'info'
+}
 
 const getStatusText = (status: string): string => {
   if (status === 'running') return '运行中'
@@ -241,17 +249,16 @@ onMounted(() => {
         </ElTableColumn>
         <ElTableColumn prop="platform" label="平台" width="90" align="center">
           <template #default="{ row }">
-            <span class="platform-badge" :class="row.platform === 'qq' ? 'platform-qq' : 'platform-wx'">
+            <ElTag size="small" :type="row.platform === 'qq' ? 'success' : 'primary'" class="platform-tag">
               {{ row.platform.toUpperCase() }}
-            </span>
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <div class="status-tag" :class="'status-' + row.status">
-              <span class="status-dot"></span>
-              <span class="status-text">{{ getStatusText(row.status) }}</span>
-            </div>
+            <ElTag :type="getStatusType(row.status)" size="small" class="status-tag">
+              {{ getStatusText(row.status) }}
+            </ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="level" label="等级" width="80" align="center">
@@ -264,20 +271,21 @@ onMounted(() => {
             <span class="gold-value">{{ (row.gold || 0).toLocaleString() }}</span>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="操作" width="260" fixed="right" align="center">
+        <ElTableColumn label="操作" width="280" fixed="right" align="center">
           <template #default="{ row }">
-            <div class="action-buttons">
+            <ElSpace wrap>
               <ElButton
                 :type="row.status === 'running' ? 'danger' : 'success'"
                 size="small"
                 :icon="row.status === 'running' ? VideoPause : VideoPlay"
                 @click="toggleBot(row)"
-                class="action-btn action-btn--toggle"
+                class="action-btn"
               >
                 {{ row.status === 'running' ? '停止' : '启动' }}
               </ElButton>
               <ElButton
                 v-if="row.platform === 'qq'"
+                type="warning"
                 size="small"
                 :icon="Grid"
                 @click="startQRLogin(row)"
@@ -286,24 +294,26 @@ onMounted(() => {
                 扫码
               </ElButton>
               <ElButton
+                type="primary"
                 size="small"
                 text
                 :icon="Edit"
                 @click="openEditDialog(row)"
-                class="action-btn action-btn--edit"
+                class="action-btn"
               >
                 编辑
               </ElButton>
               <ElButton
+                type="danger"
                 size="small"
                 text
                 :icon="Delete"
                 @click="handleDelete(row)"
-                class="action-btn action-btn--delete"
+                class="action-btn"
               >
                 删除
               </ElButton>
-            </div>
+            </ElSpace>
           </template>
         </ElTableColumn>
       </ElTable>
@@ -486,67 +496,11 @@ onMounted(() => {
   color: #14532D;
 }
 
-/* Platform Badge */
-.platform-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 100px;
-  letter-spacing: 0.3px;
-}
-
-.platform-qq {
-  background: rgba(21, 128, 61, 0.12);
-  color: #15803D;
-}
-
-.platform-wx {
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563EB;
-}
-
-/* Status Tag */
+/* Platform & Status Tags */
+.platform-tag,
 .status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  border-radius: 6px;
   font-weight: 500;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-running .status-dot {
-  background: #22C55E;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-}
-
-.status-running .status-text {
-  color: #22C55E;
-}
-
-.status-error .status-dot {
-  background: #DC2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
-}
-
-.status-error .status-text {
-  color: #DC2626;
-}
-
-.status-stopped .status-dot,
-.status-info .status-dot {
-  background: #9CA3AF;
-}
-
-.status-stopped .status-text,
-.status-info .status-text {
-  color: #6B7280;
 }
 
 .level-value {
@@ -560,44 +514,35 @@ onMounted(() => {
 }
 
 /* Action Buttons */
-.action-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
 .action-btn {
   border-radius: 6px;
-  font-size: 12px;
-  padding: 5px 10px;
-  height: 28px;
+  font-weight: 500;
 }
 
-.action-btn--toggle.el-button--success {
+.action-btn.el-button--success {
   background: #15803D;
   border-color: #15803D;
 }
 
-.action-btn--toggle.el-button--success:hover {
+.action-btn.el-button--success:hover {
   background: #166534;
   border-color: #166534;
 }
 
-.action-btn--toggle.el-button--danger {
+.action-btn.el-button--danger {
   background: #DC2626;
   border-color: #DC2626;
 }
 
-.action-btn--toggle.el-button--danger:hover {
+.action-btn.el-button--danger:hover {
   background: #B91C1C;
   border-color: #B91C1C;
 }
 
 .action-btn--qr {
-  background: transparent;
-  border: 1px solid #CA8A04;
+  border-color: #CA8A04;
   color: #CA8A04;
+  background: transparent;
 }
 
 .action-btn--qr:hover {
@@ -606,20 +551,20 @@ onMounted(() => {
   color: #A16207;
 }
 
-.action-btn--edit {
+.action-btn.el-button--primary.is-text {
   color: #15803D;
 }
 
-.action-btn--edit:hover {
+.action-btn.el-button--primary.is-text:hover {
   background: rgba(21, 128, 61, 0.08);
   color: #166534;
 }
 
-.action-btn--delete {
+.action-btn.el-button--danger.is-text {
   color: #DC2626;
 }
 
-.action-btn--delete:hover {
+.action-btn.el-button--danger.is-text:hover {
   background: rgba(220, 38, 38, 0.08);
   color: #B91C1C;
 }
@@ -798,10 +743,6 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
-  
-  .action-buttons {
-    flex-wrap: wrap;
   }
   
   .account-dialog :deep(.el-dialog) {

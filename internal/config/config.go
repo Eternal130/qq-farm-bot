@@ -54,7 +54,7 @@ func Load(path string) (*Config, error) {
 
 func (c *Config) ResolvePaths(baseDir string) {
 	c.DataDir = filepath.Join(baseDir, "data")
-	c.GameConfigDir = filepath.Join(baseDir, "..", "gameConfig")
+	c.GameConfigDir = filepath.Join(baseDir, "gameConfig")
 	if !filepath.IsAbs(c.DBPath) {
 		c.DBPath = filepath.Join(baseDir, c.DBPath)
 	}

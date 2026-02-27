@@ -5,7 +5,9 @@ import {
   ElRow, 
   ElCol, 
   ElCard, 
+  ElStatistic,
   ElButton,
+  ElTag,
   ElIcon,
   ElEmpty,
   ElMessage
@@ -103,6 +105,11 @@ const toggleBot = async (bot: BotCard) => {
   }
 }
 
+const getStatusType = (status: string): 'success' | 'info' | 'danger' => {
+  if (status === 'running') return 'success'
+  if (status === 'error') return 'danger'
+  return 'info'
+}
 
 const getStatusText = (status: string): string => {
   if (status === 'running') return '运行中'
@@ -153,39 +160,36 @@ onUnmounted(() => {
     <!-- Stats Row -->
     <ElRow :gutter="20" class="stats-row">
       <ElCol :xs="24" :sm="8" :md="8">
-        <div class="stat-card stat-card--accounts">
-          <div class="stat-icon-wrapper stat-icon--green">
-            <ElIcon :size="24"><User /></ElIcon>
+        <ElCard class="stat-card stat-card--accounts" shadow="never">
+          <div class="stat-content">
+            <div class="stat-icon-wrapper stat-icon--green">
+              <ElIcon :size="24"><User /></ElIcon>
+            </div>
+            <ElStatistic title="账号总数" :value="stats.totalAccounts" />
           </div>
-          <div class="stat-info">
-            <span class="stat-title">账号总数</span>
-            <span class="stat-value">{{ stats.totalAccounts }}</span>
-          </div>
-        </div>
+        </ElCard>
       </ElCol>
       
       <ElCol :xs="24" :sm="8" :md="8">
-        <div class="stat-card stat-card--running">
-          <div class="stat-icon-wrapper stat-icon--emerald">
-            <ElIcon :size="24"><VideoPlay /></ElIcon>
+        <ElCard class="stat-card stat-card--running" shadow="never">
+          <div class="stat-content">
+            <div class="stat-icon-wrapper stat-icon--emerald">
+              <ElIcon :size="24"><VideoPlay /></ElIcon>
+            </div>
+            <ElStatistic title="运行中" :value="stats.runningBots" />
           </div>
-          <div class="stat-info">
-            <span class="stat-title">运行中</span>
-            <span class="stat-value">{{ stats.runningBots }}</span>
-          </div>
-        </div>
+        </ElCard>
       </ElCol>
       
       <ElCol :xs="24" :sm="8" :md="8">
-        <div class="stat-card stat-card--gold">
-          <div class="stat-icon-wrapper stat-icon--gold">
-            <ElIcon :size="24"><Coin /></ElIcon>
+        <ElCard class="stat-card stat-card--gold" shadow="never">
+          <div class="stat-content">
+            <div class="stat-icon-wrapper stat-icon--gold">
+              <ElIcon :size="24"><Coin /></ElIcon>
+            </div>
+            <ElStatistic title="金币总额" :value="stats.totalGold" :formatter="(val) => val.toLocaleString()" />
           </div>
-          <div class="stat-info">
-            <span class="stat-title">金币总额</span>
-            <span class="stat-value">{{ stats.totalGold.toLocaleString() }}</span>
-          </div>
-        </div>
+        </ElCard>
       </ElCol>
     </ElRow>
 
@@ -212,7 +216,7 @@ onUnmounted(() => {
           :lg="6"
           class="bot-col"
         >
-          <div class="bot-card">
+          <ElCard class="bot-card" :body-style="{ padding: '16px' }" shadow="hover">
             <div class="bot-header">
               <div class="bot-name">
                 <span class="platform-tag" :class="bot.platform === 'qq' ? 'platform-qq' : 'platform-wx'">
@@ -220,39 +224,38 @@ onUnmounted(() => {
                 </span>
                 <span class="bot-name-text">{{ bot.name }}</span>
               </div>
-              <div class="bot-status" :class="bot.status === 'running' ? 'status-running' : 'status-stopped'">
-                <span class="status-dot"></span>
-                <span class="status-text">{{ getStatusText(bot.status) }}</span>
-              </div>
+              <ElTag :type="getStatusType(bot.status)" size="small" class="status-tag">
+                {{ getStatusText(bot.status) }}
+              </ElTag>
             </div>
             
             <div class="bot-stats">
               <div class="stat-item">
-                <span class="stat-label">等级</span>
-                <span class="stat-value">Lv.{{ bot.level }}</span>
+                <span class="label">等级</span>
+                <span class="value">Lv.{{ bot.level }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">金币</span>
-                <span class="stat-value stat-value--gold">{{ bot.gold.toLocaleString() }}</span>
+                <span class="label">金币</span>
+                <span class="value gold">{{ bot.gold.toLocaleString() }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">经验</span>
-                <span class="stat-value">{{ bot.exp.toLocaleString() }}</span>
+                <span class="label">经验</span>
+                <span class="value">{{ bot.exp.toLocaleString() }}</span>
               </div>
             </div>
             
             <div class="bot-stats bot-stats--secondary">
               <div class="stat-item">
-                <span class="stat-label">偷菜</span>
-                <span class="stat-value">{{ bot.total_steal }}</span>
+                <span class="label">偷菜</span>
+                <span class="value">{{ bot.total_steal }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">帮助</span>
-                <span class="stat-value stat-value--help">{{ bot.total_help }}</span>
+                <span class="label">帮助</span>
+                <span class="value help">{{ bot.total_help }}</span>
               </div>
               <div class="stat-item">
-                <span class="stat-label">好友</span>
-                <span class="stat-value">{{ bot.friends_count }}</span>
+                <span class="label">好友</span>
+                <span class="value">{{ bot.friends_count }}</span>
               </div>
             </div>
             
@@ -274,7 +277,6 @@ onUnmounted(() => {
             <div class="land-grid" v-if="bot.lands && bot.lands.filter(l => l.unlocked).length > 0">
               <div 
                 class="land-cell" 
-                :class="'phase-cell-' + getPhaseType(land.phase)"
                 v-for="land in bot.lands.filter(l => l.unlocked)" 
                 :key="land.id"
               >
@@ -283,25 +285,31 @@ onUnmounted(() => {
                   <span class="land-level">Lv.{{ land.level }}</span>
                 </div>
                 <div class="land-crop">{{ land.crop_name || '空地' }}</div>
-                <div class="land-phase" :class="'phase-' + getPhaseType(land.phase)">
-                  {{ land.phase || '空地' }}
-                </div>
+                <ElTag 
+                  v-if="land.phase" 
+                  :type="getPhaseType(land.phase)" 
+                  size="small"
+                  class="phase-tag"
+                >
+                  {{ land.phase }}
+                </ElTag>
+                <ElTag v-else type="info" size="small" class="phase-tag">空地</ElTag>
               </div>
             </div>
             
             <ElButton
               :type="bot.status === 'running' ? 'danger' : 'success'"
-              size="default"
+              size="small"
               class="control-btn"
               @click="toggleBot(bot)"
             >
-              <ElIcon class="control-icon">
+              <ElIcon>
                 <VideoPause v-if="bot.status === 'running'" />
                 <VideoPlay v-else />
               </ElIcon>
-              <span>{{ bot.status === 'running' ? '停止运行' : '启动运行' }}</span>
+              {{ bot.status === 'running' ? '停止运行' : '启动运行' }}
             </ElButton>
-          </div>
+          </ElCard>
         </ElCol>
       </ElRow>
     </ElCard>
@@ -319,16 +327,12 @@ onUnmounted(() => {
 
 /* Stat Cards */
 .stat-card {
-  background: #FFFFFF;
   border-radius: 16px;
-  padding: 20px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+  border: none;
+  margin-bottom: 16px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
 }
 
 .stat-card::before {
@@ -351,6 +355,16 @@ onUnmounted(() => {
 
 .stat-card--gold::before {
   background: #CA8A04;
+}
+
+.stat-card :deep(.el-card__body) {
+  padding: 20px 24px;
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .stat-icon-wrapper {
@@ -378,23 +392,17 @@ onUnmounted(() => {
   color: #CA8A04;
 }
 
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-title {
+.stat-card :deep(.el-statistic__head) {
   font-size: 13px;
   color: #6B7280;
   font-weight: 500;
+  margin-bottom: 4px;
 }
 
-.stat-value {
+.stat-card :deep(.el-statistic__content) {
   font-size: 28px;
   font-weight: 700;
   color: #14532D;
-  line-height: 1.2;
 }
 
 /* Bots Card */
@@ -438,13 +446,9 @@ onUnmounted(() => {
 
 /* Bot Card */
 .bot-card {
-  background: #FFFFFF;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 2px 8px rgba(21, 128, 61, 0.04);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
   border: 1px solid rgba(21, 128, 61, 0.08);
-  height: 100%;
+  transition: box-shadow 0.25s ease;
 }
 
 .bot-card:hover {
@@ -491,86 +495,45 @@ onUnmounted(() => {
   color: #2563EB;
 }
 
-.bot-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-running .status-dot {
-  background: #22C55E;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.status-stopped .status-dot {
-  background: #9CA3AF;
-}
-
-.status-running .status-text {
-  color: #22C55E;
-}
-
-.status-stopped .status-text {
-  color: #9CA3AF;
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
-  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1); }
+.status-tag {
+  border-radius: 6px;
 }
 
 /* Bot Stats */
 .bot-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  display: flex;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
 
 .stat-item {
   text-align: center;
-  padding: 8px 4px;
-  background: #F9FAFB;
-  border-radius: 8px;
 }
 
-.stat-label {
+.stat-item .label {
   display: block;
   font-size: 11px;
   color: #9CA3AF;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   font-weight: 500;
 }
 
-.stat-item .stat-value {
+.stat-item .value {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   color: #14532D;
 }
 
-.stat-value--gold {
-  color: #CA8A04 !important;
+.stat-item .value.gold {
+  color: #CA8A04;
 }
 
-.stat-value--help {
-  color: #22C55E !important;
+.stat-item .value.help {
+  color: #22C55E;
 }
 
-.bot-stats--secondary .stat-item .stat-value {
+.bot-stats--secondary .stat-item .value {
   font-size: 14px;
-}
-
-.bot-stats--secondary {
-  margin-bottom: 12px;
 }
 
 /* Level Up Info */
@@ -629,11 +592,11 @@ onUnmounted(() => {
 .land-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-  max-height: 200px;
+  gap: 6px;
+  margin-bottom: 12px;
+  max-height: 180px;
   overflow-y: auto;
-  padding: 4px;
+  padding: 2px;
 }
 
 .land-grid::-webkit-scrollbar {
@@ -654,7 +617,7 @@ onUnmounted(() => {
   background: #FAFAFA;
   border: 1px solid #E5E7EB;
   border-radius: 10px;
-  padding: 8px;
+  padding: 6px;
   font-size: 11px;
   text-align: center;
   transition: all 0.2s ease;
@@ -680,7 +643,7 @@ onUnmounted(() => {
 
 .land-level {
   color: #15803D;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 10px;
 }
 
@@ -693,37 +656,12 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 
-.land-phase {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.phase-success {
-  background: rgba(34, 197, 94, 0.15);
-  color: #16A34A;
-}
-
-.phase-warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: #D97706;
-}
-
-.phase-danger {
-  background: rgba(220, 38, 38, 0.15);
-  color: #DC2626;
-}
-
-.phase-primary {
-  background: rgba(21, 128, 61, 0.15);
-  color: #15803D;
-}
-
-.phase-info {
-  background: rgba(107, 114, 128, 0.15);
-  color: #6B7280;
+.phase-tag {
+  font-size: 10px !important;
+  padding: 0 4px !important;
+  height: 18px !important;
+  line-height: 16px !important;
+  border-radius: 4px !important;
 }
 
 /* Control Button */
@@ -731,16 +669,8 @@ onUnmounted(() => {
   width: 100%;
   border-radius: 8px;
   font-weight: 600;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  height: 36px;
   transition: all 0.2s ease;
-}
-
-.control-icon {
-  font-size: 16px;
 }
 
 .control-btn.el-button--success {
@@ -769,11 +699,11 @@ onUnmounted(() => {
     margin-bottom: 16px;
   }
   
-  .stat-card {
+  .stat-card :deep(.el-card__body) {
     padding: 16px 20px;
   }
   
-  .stat-value {
+  .stat-card :deep(.el-statistic__content) {
     font-size: 24px;
   }
   
