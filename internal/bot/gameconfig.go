@@ -16,6 +16,7 @@ type PlantConfig struct {
 	SeedID     int    `json:"seed_id"`
 	Exp        int    `json:"exp"`
 	GrowPhases string `json:"grow_phases"`
+	Seasons    int    `json:"seasons"`
 	Fruit      struct {
 		ID    int `json:"id"`
 		Count int `json:"count"`
@@ -49,16 +50,33 @@ type SeedShopEntry struct {
 	FruitCount    int    `json:"fruitCount"`
 }
 
+// PlantPhaseData holds parsed phase info for fertilizer optimization.
+type PlantPhaseData struct {
+	PhaseDurations       []int // all non-zero growth phase durations
+	MaxPhaseDuration     int   // longest phase in season 1
+	MaxPhaseIndex        int   // 0-based index of longest phase
+	TotalGrowTime        int   // sum of all phase durations
+	AllPhasesEqual       bool  // true if all phases have the same duration
+	Season2Phases        []int // last 3 non-zero phases (for multi-season crops)
+	Season2GrowTime      int   // sum of season 2 phases
+	Season2MaxPhase      int   // longest phase in season 2
+	Season2MaxPhaseIndex int   // index of longest phase within Season2Phases
+	Season2AllEqual      bool  // true if all season 2 phases are equal
+}
+
 // SeedYieldRow contains calculated yield info for a seed
 type SeedYieldRow struct {
 	SeedID               int
 	Name                 string
 	RequiredLevel        int
 	Price                int
-	ExpHarvest           int
-	GrowTimeSec          int
-	NormalFertReduceSec  int
-	GrowTimeNormalFert   int
+	ExpHarvest           int // base exp per season
+	Seasons              int
+	GrowTimeSec          int // season 1 total grow time
+	Season2GrowTimeSec   int // season 2 total grow time (0 if single season)
+	NormalFertReduceSec  int // time saved by fertilizer in season 1 (max phase)
+	Season2FertReduceSec int // time saved by fertilizer in season 2
+	GrowTimeNormalFert   int // effective grow time with fert (both seasons combined)
 	FarmExpPerHourNormal float64
 }
 
@@ -72,7 +90,7 @@ type GameConfig struct {
 	levelExpMap    map[int]int64 // level -> cumulative exp
 	seedShopData   *SeedShopExport
 	seedYieldCache []SeedYieldRow
-	firstPhaseTime map[int]int // seed_id -> first phase time (for fertilizer reduction)
+	plantPhaseData map[int]*PlantPhaseData // seed_id -> phase data
 }
 
 var globalGameConfig *GameConfig
@@ -85,7 +103,7 @@ func LoadGameConfig(configDir string) *GameConfig {
 			seedToPlant:    make(map[int]*PlantConfig),
 			fruitToPlant:   make(map[int]*PlantConfig),
 			levelExpMap:    make(map[int]int64),
-			firstPhaseTime: make(map[int]int),
+			plantPhaseData: make(map[int]*PlantPhaseData),
 		}
 		globalGameConfig.load(configDir)
 	})
@@ -138,8 +156,8 @@ func (gc *GameConfig) load(configDir string) {
 		}
 	}
 
-	// Build first phase time map for fertilizer reduction calculation
-	gc.buildFirstPhaseTimeMap()
+	// Build phase data for fertilizer optimization
+	gc.buildPlantPhaseData()
 
 	// Calculate yield for all seeds
 	gc.calculateSeedYield(18) // default 18 lands
@@ -250,31 +268,121 @@ const (
 	normalFertPlantSpeed    = normalFertPlantsPer2Sec / 2 // 6 块/秒
 )
 
-// buildFirstPhaseTimeMap extracts the first phase duration for each plant
-// This is used to calculate fertilizer reduction (normal fert removes one phase)
-func (gc *GameConfig) buildFirstPhaseTimeMap() {
-	for _, p := range gc.plants {
-		if p.GrowPhases == "" {
+// parseGrowPhases extracts all non-zero phase durations from a grow_phases string.
+// Format: "name:seconds;name:seconds;...;mature:0;"
+func parseGrowPhases(growPhases string) []int {
+	var durations []int
+	for _, phase := range strings.Split(growPhases, ";") {
+		phase = strings.TrimSpace(phase)
+		if phase == "" {
 			continue
 		}
-		// Parse grow_phases like "种子:1;发芽:1;成熟:0;"
-		for _, phase := range strings.Split(p.GrowPhases, ";") {
-			phase = strings.TrimSpace(phase)
-			if phase == "" {
-				continue
-			}
-			parts := strings.Split(phase, ":")
-			if len(parts) == 2 {
-				if v, err := strconv.Atoi(parts[1]); err == nil && v > 0 {
-					gc.firstPhaseTime[p.SeedID] = v
-					break // Only need first non-zero phase
-				}
+		parts := strings.Split(phase, ":")
+		if len(parts) == 2 {
+			if v, err := strconv.Atoi(parts[1]); err == nil && v > 0 {
+				durations = append(durations, v)
 			}
 		}
 	}
+	return durations
 }
 
-// calculateSeedYield calculates experience yield for all seeds
+// parseAllPhaseDurations extracts ALL phase durations including zero (mature).
+// Used for season 2 calculation: the game takes the last 3 phases from the full list.
+func parseAllPhaseDurations(growPhases string) []int {
+	var durations []int
+	for _, phase := range strings.Split(growPhases, ";") {
+		phase = strings.TrimSpace(phase)
+		if phase == "" {
+			continue
+		}
+		parts := strings.Split(phase, ":")
+		if len(parts) == 2 {
+			if v, err := strconv.Atoi(parts[1]); err == nil {
+				durations = append(durations, v)
+			}
+		}
+	}
+	return durations
+}
+
+// buildPlantPhaseData parses phase durations for each plant and computes
+// max-phase info for optimal fertilization.
+func (gc *GameConfig) buildPlantPhaseData() {
+	for _, p := range gc.plants {
+		if p.GrowPhases == "" || p.SeedID <= 0 {
+			continue
+		}
+
+		durations := parseGrowPhases(p.GrowPhases)
+		if len(durations) == 0 {
+			continue
+		}
+
+		pd := &PlantPhaseData{
+			PhaseDurations: durations,
+		}
+
+		// Find max phase and total grow time for season 1
+		for i, d := range durations {
+			pd.TotalGrowTime += d
+			if d > pd.MaxPhaseDuration {
+				pd.MaxPhaseDuration = d
+				pd.MaxPhaseIndex = i
+			}
+		}
+
+		// Check if all phases are equal (no benefit from delayed fertilization)
+		pd.AllPhasesEqual = true
+		for _, d := range durations {
+			if d != durations[0] {
+				pd.AllPhasesEqual = false
+				break
+			}
+		}
+
+		// For multi-season crops: season 2 uses the last 3 phases from the FULL
+		// phase list (including 成熟:0), then filters to non-zero growth durations.
+		seasons := p.Seasons
+		if seasons < 1 {
+			seasons = 1
+		}
+		if seasons >= 2 {
+			allPhases := parseAllPhaseDurations(p.GrowPhases)
+			if len(allPhases) >= 3 {
+				last3 := allPhases[len(allPhases)-3:]
+				var s2Phases []int
+				for _, d := range last3 {
+					if d > 0 {
+						s2Phases = append(s2Phases, d)
+					}
+				}
+				if len(s2Phases) > 0 {
+					pd.Season2Phases = s2Phases
+					for i, d := range s2Phases {
+						pd.Season2GrowTime += d
+						if d > pd.Season2MaxPhase {
+							pd.Season2MaxPhase = d
+							pd.Season2MaxPhaseIndex = i
+						}
+					}
+					pd.Season2AllEqual = true
+					for _, d := range s2Phases {
+						if d != s2Phases[0] {
+							pd.Season2AllEqual = false
+							break
+						}
+					}
+				}
+			}
+		}
+
+		gc.plantPhaseData[p.SeedID] = pd
+	}
+}
+
+// calculateSeedYield calculates experience yield for all seeds, accounting for
+// multi-season crops and optimal fertilizer usage (skip longest phase).
 func (gc *GameConfig) calculateSeedYield(lands int) {
 	if gc.seedShopData == nil || len(gc.seedShopData.Rows) == 0 {
 		return
@@ -288,14 +396,47 @@ func (gc *GameConfig) calculateSeedYield(lands int) {
 			continue
 		}
 
-		reduceSec := gc.firstPhaseTime[s.SeedID]
-		growTimeNormalFert := s.GrowTimeSec - reduceSec
-		if growTimeNormalFert < 1 {
-			growTimeNormalFert = 1
+		pd := gc.plantPhaseData[s.SeedID]
+		plant := gc.seedToPlant[s.SeedID]
+
+		seasons := 1
+		if plant != nil && plant.Seasons >= 2 {
+			seasons = plant.Seasons
 		}
 
-		cycleSecNormalFert := float64(growTimeNormalFert) + plantSecondsNormalFert
-		farmExpPerHourNormal := float64(lands*s.Exp) / cycleSecNormalFert * 3600
+		var s1FertReduce, s2FertReduce, s2GrowTime int
+
+		if pd != nil {
+			// Season 1: skip longest phase
+			s1FertReduce = pd.MaxPhaseDuration
+
+			// Season 2: skip longest of last 3 phases
+			if seasons >= 2 {
+				s2GrowTime = pd.Season2GrowTime
+				s2FertReduce = pd.Season2MaxPhase
+			}
+		}
+
+		// Season 1 grow time with fertilizer
+		s1GrowFert := s.GrowTimeSec - s1FertReduce
+		if s1GrowFert < 1 {
+			s1GrowFert = 1
+		}
+
+		// Total effective grow time (both seasons with fert)
+		totalGrowFert := s1GrowFert
+		totalExp := s.Exp
+		if seasons >= 2 && s2GrowTime > 0 {
+			s2GrowFert := s2GrowTime - s2FertReduce
+			if s2GrowFert < 1 {
+				s2GrowFert = 1
+			}
+			totalGrowFert += s2GrowFert
+			totalExp += s.Exp // second season gives same exp
+		}
+
+		cycleSecNormalFert := float64(totalGrowFert) + plantSecondsNormalFert
+		farmExpPerHourNormal := float64(lands*totalExp) / cycleSecNormalFert * 3600
 
 		rows = append(rows, SeedYieldRow{
 			SeedID:               s.SeedID,
@@ -303,9 +444,12 @@ func (gc *GameConfig) calculateSeedYield(lands int) {
 			RequiredLevel:        s.RequiredLevel,
 			Price:                s.Price,
 			ExpHarvest:           s.Exp,
+			Seasons:              seasons,
 			GrowTimeSec:          s.GrowTimeSec,
-			NormalFertReduceSec:  reduceSec,
-			GrowTimeNormalFert:   growTimeNormalFert,
+			Season2GrowTimeSec:   s2GrowTime,
+			NormalFertReduceSec:  s1FertReduce,
+			Season2FertReduceSec: s2FertReduce,
+			GrowTimeNormalFert:   totalGrowFert,
 			FarmExpPerHourNormal: farmExpPerHourNormal,
 		})
 	}
@@ -345,6 +489,42 @@ func (gc *GameConfig) GetPlantingRecommendation(level, lands int, topN int) []Se
 	return result
 }
 
+// GetPlantPhaseData returns phase timing data for a plant (looked up by plant ID).
+func (gc *GameConfig) GetPlantPhaseData(plantID int) *PlantPhaseData {
+	if gc == nil {
+		return nil
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	p, ok := gc.plantMap[plantID]
+	if !ok {
+		return nil
+	}
+	return gc.plantPhaseData[p.SeedID]
+}
+
+ // GetPlantPhaseDataBySeedID returns phase timing data for a plant (looked up by seed ID).
+func (gc *GameConfig) GetPlantPhaseDataBySeedID(seedID int) *PlantPhaseData {
+	if gc == nil {
+		return nil
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	return gc.plantPhaseData[seedID]
+}
+
+// GetPlantSeasons returns the number of seasons for a plant (1 = normal, 2 = multi-season).
+func (gc *GameConfig) GetPlantSeasons(plantID int) int {
+	if gc == nil {
+		return 1
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	if p, ok := gc.plantMap[plantID]; ok && p.Seasons >= 2 {
+		return p.Seasons
+	}
+	return 1
+}
 
 // GetNextLevelExp returns the cumulative exp required for the next level.
 // Returns (nextLevelExp, hasNextLevel). If already max level, returns (0, false).

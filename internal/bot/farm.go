@@ -17,15 +17,23 @@ const normalFertilizerID = 1011
 
 // FarmWorker handles all farm automation logic.
 type FarmWorker struct {
-	net    *Network
-	logger *Logger
-	cfg    *BotConfig
-	gc     *GameConfig
-	lands  *LandCache
+	net        *Network
+	logger     *Logger
+	cfg        *BotConfig
+	gc         *GameConfig
+	lands      *LandCache
+	fertilized map[int64]bool // tracks lands we've already fertilized this grow cycle
 }
 
 func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache) *FarmWorker {
-	return &FarmWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig(), lands: lands}
+	return &FarmWorker{
+		net:        net,
+		logger:     logger,
+		cfg:        cfg,
+		gc:         GetGameConfig(),
+		lands:      lands,
+		fertilized: make(map[int64]bool),
+	}
 }
 
 // RunLoop runs the farm check loop until context is cancelled.
@@ -72,6 +80,9 @@ func (f *FarmWorker) checkFarm() {
 	}
 
 	status := f.analyzeLands(lands)
+
+	// Optimal fertilization: fertilize growing plants when in their longest phase
+	f.checkAndFertilize(lands)
 	unlockedCount := 0
 	for _, land := range lands {
 		if land.Unlocked {
@@ -143,6 +154,10 @@ func (f *FarmWorker) checkFarm() {
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
 			harvestedLands = status.harvestable
+			// Clear fertilized state for harvested lands (replant or season 2 transition)
+			for _, id := range harvestedLands {
+				delete(f.fertilized, id)
+			}
 		}
 	}
 
@@ -211,6 +226,8 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 			if matureTime > 0 && plantTime > 0 && matureTime > plantTime {
 				hi := LandHarvestInfo{
 					LandID:        land.Id,
+					CropID:        land.Plant.Id,
+					Season:        land.Plant.GetSeason(),
 					CropExp:       f.gc.GetPlantExp(int(land.Plant.Id)),
 					CycleTimeSec:  matureTime - plantTime,
 					MatureTimeSec: matureTime,
@@ -290,6 +307,96 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 		}
 	}
 	return s
+}
+
+// checkAndFertilize examines growing plants and fertilizes them when they're in their longest phase.
+// Normal fertilizer skips the current phase, so applying it during the longest phase saves the most time.
+func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
+	nowSec := time.Now().Unix()
+	fertilizeCount := 0
+
+	for _, land := range lands {
+		if !land.Unlocked || land.Plant == nil || len(land.Plant.Phases) == 0 {
+			continue
+		}
+
+		plant := land.Plant
+		landID := land.Id
+
+		// Skip if already fertilized this cycle
+		if f.fertilized[landID] {
+			continue
+		}
+
+		// Get current phase
+		currentPhase := getCurrentPhase(plant.Phases, nowSec)
+		if currentPhase == nil {
+			continue
+		}
+
+		// Skip mature and dead plants
+		phase := plantpb.PlantPhase(currentPhase.Phase)
+		if phase == plantpb.PlantPhase_MATURE || phase == plantpb.PlantPhase_DEAD || phase == plantpb.PlantPhase_PHASE_UNKNOWN {
+			continue
+		}
+
+		// Get phase data for this plant
+		pd := f.gc.GetPlantPhaseData(int(plant.Id))
+		if pd == nil {
+			continue
+		}
+
+		// Determine season
+		season := plant.GetSeason()
+		if season < 1 {
+			season = 1
+		}
+
+		// Growth phase index (0-based): Phase enum 1=SEED→idx 0, 2=GERMINATION→idx 1, etc.
+		phaseIdx := int(currentPhase.Phase) - 1
+
+		var targetMaxIdx int
+		var allEqual bool
+		var totalPhases int
+
+		if season >= 2 && pd.Season2Phases != nil {
+			targetMaxIdx = pd.Season2MaxPhaseIndex
+			allEqual = pd.Season2AllEqual
+			totalPhases = len(pd.Season2Phases)
+		} else {
+			targetMaxIdx = pd.MaxPhaseIndex
+			allEqual = pd.AllPhasesEqual
+			totalPhases = len(pd.PhaseDurations)
+		}
+
+		// Validate phase index is within range
+		if phaseIdx < 0 || phaseIdx >= totalPhases {
+			continue
+		}
+
+		// Fertilize if in the longest phase (or any phase if all equal)
+		if allEqual || phaseIdx == targetMaxIdx {
+			if f.fertilizeSingle(landID) {
+				f.fertilized[landID] = true
+				fertilizeCount++
+			}
+		}
+	}
+
+	if fertilizeCount > 0 {
+		f.logger.Infof("施肥", "最优阶段施肥 %d 块地", fertilizeCount)
+	}
+}
+
+// fertilizeSingle fertilizes a single land with normal fertilizer.
+func (f *FarmWorker) fertilizeSingle(landID int64) bool {
+	req := &plantpb.FertilizeRequest{LandIds: []int64{landID}, FertilizerId: normalFertilizerID}
+	body, _ := proto.Marshal(req)
+	if _, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Fertilize", body); err != nil {
+		return false
+	}
+	time.Sleep(50 * time.Millisecond)
+	return true
 }
 
 func getCurrentPhase(phases []*plantpb.PlantPhaseInfo, nowSec int64) *plantpb.PlantPhaseInfo {
@@ -386,6 +493,11 @@ func (f *FarmWorker) fertilize(landIDs []int64) int {
 
 func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int) {
 	toLant := append([]int64{}, emptyLands...)
+	// Clear fertilized state for dead lands being removed
+	for _, id := range deadLands {
+		delete(f.fertilized, id)
+	}
+
 
 	// Remove dead plants
 	if len(deadLands) > 0 {
@@ -451,11 +563,12 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 	}
 	f.logger.Infof("种植", "已种植 %d 块", planted)
 
-	// Fertilize
+	// Clear fertilized state for newly planted lands — checkAndFertilize will handle optimal timing.
+	// For crops with all-equal phases, there's no benefit to waiting, but checkAndFertilize
+	// handles that case too (fertilizes immediately when allEqual is true).
 	if planted > 0 {
-		fertilized := f.fertilize(toLant[:planted])
-		if fertilized > 0 {
-			f.logger.Infof("施肥", "已为 %d/%d 块地施肥", fertilized, planted)
+		for _, id := range toLant[:planted] {
+			delete(f.fertilized, id)
 		}
 	}
 }

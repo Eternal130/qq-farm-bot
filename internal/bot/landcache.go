@@ -9,6 +9,8 @@ import (
 // LandHarvestInfo holds harvest timing data for level-up estimation.
 type LandHarvestInfo struct {
 	LandID        int64
+	CropID        int64 // plant ID for GameConfig lookups
+	Season        int64 // current season (1 or 2)
 	MatureTimeSec int64 // unix timestamp when crop matures
 	CropExp       int   // base exp from GameConfig
 	CycleTimeSec  int64 // actual growth duration on this land (seconds)

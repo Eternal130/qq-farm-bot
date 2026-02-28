@@ -316,6 +316,8 @@ func (inst *Instance) Status() *model.BotStatus {
 
 // estimateLevelUp calculates expected exp rate and hours to next level based on
 // current crop data: harvest times, crop exp, and growth cycle times.
+// Multi-season crops produce multiple harvests per planting cycle, which is factored
+// into both the exp rate and the discrete harvest event timeline.
 func (inst *Instance) estimateLevelUp(expToNextLevel int64) (expRatePerHour float64, hoursToNextLevel float64) {
 	if inst.lands == nil || expToNextLevel <= 0 {
 		return 0, 0
@@ -326,6 +328,7 @@ func (inst *Instance) estimateLevelUp(expToNextLevel int64) (expRatePerHour floa
 		return 0, 0
 	}
 
+	gc := GetGameConfig()
 	nowSec := time.Now().Unix()
 
 	// Calculate total exp per minute rate from all planted lands
@@ -341,17 +344,65 @@ func (inst *Instance) estimateLevelUp(expToNextLevel int64) (expRatePerHour floa
 	for _, h := range harvestInfos {
 		// Apply land exp bonus: server value is pct*100, e.g. 1000 = 10%
 		adjustedExp := float64(h.CropExp) * (10000 + float64(h.ExpBonusPct)) / 10000.0
+		if adjustedExp <= 0 {
+			continue
+		}
 
-		if h.CycleTimeSec > 0 && adjustedExp > 0 {
-			expPerMin := adjustedExp / (float64(h.CycleTimeSec) / 60.0)
+		// Determine season count and season 2 grow time for this crop
+		seasons := 1
+		var season2GrowSec int64
+		if gc != nil && h.CropID > 0 {
+			seasons = gc.GetPlantSeasons(int(h.CropID))
+			if seasons >= 2 {
+				if pd := gc.GetPlantPhaseData(int(h.CropID)); pd != nil && pd.Season2GrowTime > 0 {
+					// Apply time reduction buff to season 2 grow time
+					s2Base := int64(pd.Season2GrowTime)
+					if h.TimeReducePct > 0 {
+						s2Base = s2Base * (10000 - h.TimeReducePct) / 10000
+					}
+					// Subtract fert reduction for season 2 (max phase skipped)
+					s2Fert := int64(pd.Season2MaxPhase)
+					if h.TimeReducePct > 0 {
+						s2Fert = s2Fert * (10000 - h.TimeReducePct) / 10000
+					}
+					season2GrowSec = s2Base - s2Fert
+					if season2GrowSec < 1 {
+						season2GrowSec = 1
+					}
+				}
+			}
+		}
+
+		// Steady-state rate: total exp across all seasons / full cycle time
+		if h.CycleTimeSec > 0 {
+			totalCycleExp := adjustedExp * float64(seasons)
+			totalCycleSec := float64(h.CycleTimeSec)
+			if seasons >= 2 && season2GrowSec > 0 {
+				totalCycleSec += float64(season2GrowSec)
+			}
+			expPerMin := totalCycleExp / (totalCycleSec / 60.0)
 			totalExpPerMin += expPerMin
 		}
 
-		if h.IsMature && adjustedExp > 0 {
+		// Discrete harvest events for this land
+		currentSeason := h.Season
+		if currentSeason < 1 {
+			currentSeason = 1
+		}
+
+		if h.IsMature {
 			// Already mature — will be harvested very soon
 			events = append(events, harvestEvent{timeSec: nowSec, exp: int64(adjustedExp)})
-		} else if h.IsGrowing && h.MatureTimeSec > nowSec && adjustedExp > 0 {
+			// If season 1 mature on a multi-season crop, season 2 harvest follows
+			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
+				events = append(events, harvestEvent{timeSec: nowSec + season2GrowSec, exp: int64(adjustedExp)})
+			}
+		} else if h.IsGrowing && h.MatureTimeSec > nowSec {
 			events = append(events, harvestEvent{timeSec: h.MatureTimeSec, exp: int64(adjustedExp)})
+			// If growing in season 1 on a multi-season crop, season 2 harvest follows
+			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
+				events = append(events, harvestEvent{timeSec: h.MatureTimeSec + season2GrowSec, exp: int64(adjustedExp)})
+			}
 		}
 	}
 

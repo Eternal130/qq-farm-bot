@@ -55,7 +55,7 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
       </template>
 
       <div class="table-tip">
-        基于 18 块地、普通肥料计算。点击表头可排序。
+        基于 18 块地、普通肥料、最优阶段施肥计算。多季作物显示全季合计。点击表头可排序。
       </div>
 
       <ElTable
@@ -77,6 +77,12 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
         <ElTableColumn prop="name" label="名称" min-width="110" fixed>
           <template #default="{ row }">
             <span class="crop-name">{{ row.name }}</span>
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="seasons" label="季" width="60" sortable align="center">
+          <template #default="{ row }">
+            <ElTag v-if="row.seasons >= 2" type="warning" size="small" effect="plain" class="season-tag">{{ row.seasons }}季</ElTag>
+            <span v-else class="value-normal">1</span>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="growTime" label="生长时间" min-width="100" sortable>
@@ -316,6 +322,11 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 
 /* Time Tags */
 .time-tag {
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.season-tag {
   border-radius: 6px;
   font-weight: 600;
 }
