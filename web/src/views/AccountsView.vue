@@ -17,10 +17,13 @@ import {
   ElMessage,
   ElMessageBox,
   ElSpace,
-  ElImage,
+  ElRadioGroup,
+  ElRadioButton,
   ElCard
 } from 'element-plus'
 import { Plus, Edit, Delete, VideoPlay, VideoPause, Grid } from '@element-plus/icons-vue'
+import QRCode from '@/components/QRCode.vue'
+import type { QRStylePreset } from '@/components/QRCode.vue'
 
 const loading = ref(false)
 const accounts = ref<Account[]>([])
@@ -59,6 +62,7 @@ const qrPolling = ref(false)
 const currentQRAccountId = ref<number | null>(null)
 let qrPollInterval: number | null = null
 const autoStartAfterQR = ref(false)
+const qrStylePreset = ref<QRStylePreset>('rounded')
 
 const dialogTitle = computed(() => isEdit.value ? '编辑账号' : '添加账号')
 
@@ -564,20 +568,32 @@ onUnmounted(() => {
     <ElDialog 
       v-model="qrDialogVisible" 
       title="扫码登录"
-      width="400px"
+      width="440px"
       @close="closeQRDialog"
       class="qr-dialog"
     >
       <div class="qr-container">
         <p class="qr-tip">请使用手机QQ扫描下方二维码登录</p>
         <div class="qr-image-wrapper">
-          <ElImage 
+          <QRCode 
             v-if="qrCodeData"
-            :src="`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData.qr_code_url)}`"
-            fit="contain"
-            class="qr-image"
+            :data="qrCodeData.qr_code_url"
+            :width="200"
+            :height="200"
+            :preset="qrStylePreset"
           />
         </div>
+        
+        <!-- QR Style Selector -->
+        <div class="qr-style-selector">
+          <ElRadioGroup v-model="qrStylePreset" size="small">
+            <ElRadioButton value="rounded">圆角</ElRadioButton>
+            <ElRadioButton value="dots">点状</ElRadioButton>
+            <ElRadioButton value="elegant">优雅</ElRadioButton>
+            <ElRadioButton value="colorful">炫彩</ElRadioButton>
+          </ElRadioGroup>
+        </div>
+        
         <p class="qr-status" v-if="qrPolling">
           <span class="waiting-dot"></span>
           等待扫码中...
@@ -903,6 +919,39 @@ onUnmounted(() => {
   height: 220px;
   display: block;
 }
+.qr-image {
+  width: 220px;
+  height: 220px;
+  display: block;
+}
+
+.qr-style-selector {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.qr-style-selector :deep(.el-radio-group) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.qr-style-selector :deep(.el-radio-button__inner) {
+  border-radius: 6px !important;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.qr-style-selector :deep(.el-radio-button:first-child .el-radio-button__inner) {
+  border-radius: 6px !important;
+}
+
+.qr-style-selector :deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-radius: 6px !important;
+}
+
 
 .qr-status {
   margin-top: 24px;
