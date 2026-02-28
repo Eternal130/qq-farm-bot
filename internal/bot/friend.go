@@ -37,7 +37,6 @@ func (fw *FriendWorker) RunLoop() {
 		return
 	}
 
-	// Check friend applications once at start
 	fw.checkAndAcceptApplications()
 
 	for {
@@ -56,7 +55,6 @@ func (fw *FriendWorker) checkFriends() {
 		return
 	}
 
-	// Get all friends
 	req := &friendpb.GetAllRequest{}
 	body, _ := proto.Marshal(req)
 	replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "GetAll", body)
@@ -73,7 +71,6 @@ func (fw *FriendWorker) checkFriends() {
 	}
 	fw.stats.FriendsCount = len(friends)
 
-	// Filter friends to visit
 	type friendTarget struct {
 		gid  int64
 		name string
@@ -95,7 +92,10 @@ func (fw *FriendWorker) checkFriends() {
 		hasSteal := f.Plant != nil && f.Plant.StealPlantNum > 0
 		hasHelp := f.Plant != nil && (f.Plant.DryNum > 0 || f.Plant.WeedNum > 0 || f.Plant.InsectNum > 0)
 
-		if (hasSteal && fw.cfg.EnableSteal) || hasHelp {
+		canSteal := hasSteal && fw.cfg.EnableSteal
+		canHelp := hasHelp && fw.cfg.EnableHelpFriend
+
+		if canSteal || canHelp {
 			targets = append(targets, friendTarget{gid: f.Gid, name: name})
 		}
 	}
@@ -146,7 +146,6 @@ type friendActions struct {
 func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) friendActions {
 	var actions friendActions
 
-	// Enter friend farm
 	enterReq := &visitpb.EnterRequest{HostGid: friendGid, Reason: 2}
 	enterBody, _ := proto.Marshal(enterReq)
 	enterReplyBody, err := fw.net.SendRequest("gamepb.visitpb.VisitService", "Enter", enterBody)
@@ -170,42 +169,50 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 	status := fw.analyzeFriendLands(lands, myGid)
 	var parts []string
 
-	// Help operations
-	if len(status.needWeed) > 0 {
-		for _, landID := range status.needWeed {
-			req := &plantpb.WeedOutRequest{LandIds: []int64{landID}, HostGid: friendGid}
-			body, _ := proto.Marshal(req)
-			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WeedOut", body); err == nil {
-				actions.weed++
+	// Help operations (respect config toggle)
+	if fw.cfg.EnableHelpFriend {
+		if len(status.needWeed) > 0 {
+			for _, landID := range status.needWeed {
+				req := &plantpb.WeedOutRequest{LandIds: []int64{landID}, HostGid: friendGid}
+				body, _ := proto.Marshal(req)
+				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WeedOut", body); err == nil {
+					actions.weed++
+				}
+				time.Sleep(100 * time.Millisecond)
 			}
-			time.Sleep(100 * time.Millisecond)
 		}
-	}
-	if len(status.needBug) > 0 {
-		for _, landID := range status.needBug {
-			req := &plantpb.InsecticideRequest{LandIds: []int64{landID}, HostGid: friendGid}
-			body, _ := proto.Marshal(req)
-			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Insecticide", body); err == nil {
-				actions.bug++
+		if len(status.needBug) > 0 {
+			for _, landID := range status.needBug {
+				req := &plantpb.InsecticideRequest{LandIds: []int64{landID}, HostGid: friendGid}
+				body, _ := proto.Marshal(req)
+				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Insecticide", body); err == nil {
+					actions.bug++
+				}
+				time.Sleep(100 * time.Millisecond)
 			}
-			time.Sleep(100 * time.Millisecond)
 		}
-	}
-	if len(status.needWater) > 0 {
-		for _, landID := range status.needWater {
-			req := &plantpb.WaterLandRequest{LandIds: []int64{landID}, HostGid: friendGid}
-			body, _ := proto.Marshal(req)
-			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WaterLand", body); err == nil {
-				actions.water++
+		if len(status.needWater) > 0 {
+			for _, landID := range status.needWater {
+				req := &plantpb.WaterLandRequest{LandIds: []int64{landID}, HostGid: friendGid}
+				body, _ := proto.Marshal(req)
+				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WaterLand", body); err == nil {
+					actions.water++
+				}
+				time.Sleep(100 * time.Millisecond)
 			}
-			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
-	// Steal
+	// Steal (respect config + crop filter)
 	if fw.cfg.EnableSteal && len(status.stealable) > 0 {
-		for _, landID := range status.stealable {
-			req := &plantpb.HarvestRequest{LandIds: []int64{landID}, HostGid: friendGid, IsAll: true}
+		stealFilter := ParseCropIDs(fw.cfg.StealCropIDs)
+		hasStealFilter := len(stealFilter) > 0
+
+		for _, sl := range status.stealable {
+			if hasStealFilter && !stealFilter[int(sl.cropID)] {
+				continue
+			}
+			req := &plantpb.HarvestRequest{LandIds: []int64{sl.landID}, HostGid: friendGid, IsAll: true}
 			body, _ := proto.Marshal(req)
 			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Harvest", body); err == nil {
 				actions.steal++
@@ -233,8 +240,13 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 	return actions
 }
 
+type stealableLand struct {
+	landID int64
+	cropID int64
+}
+
 type friendLandStatus struct {
-	stealable []int64
+	stealable []stealableLand
 	needWater []int64
 	needWeed  []int64
 	needBug   []int64
@@ -257,7 +269,7 @@ func (fw *FriendWorker) analyzeFriendLands(lands []*plantpb.LandInfo, myGid int6
 		switch plantpb.PlantPhase(phase.Phase) {
 		case plantpb.PlantPhase_MATURE:
 			if plant.Stealable {
-				s.stealable = append(s.stealable, land.Id)
+				s.stealable = append(s.stealable, stealableLand{landID: land.Id, cropID: plant.Id})
 			}
 		case plantpb.PlantPhase_DEAD:
 			continue

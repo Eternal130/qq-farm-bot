@@ -14,23 +14,26 @@ import (
 type TaskWorker struct {
 	net    *Network
 	logger *Logger
+	cfg    *BotConfig
 }
 
-func NewTaskWorker(net *Network, logger *Logger) *TaskWorker {
-	return &TaskWorker{net: net, logger: logger}
+func NewTaskWorker(net *Network, logger *Logger, cfg *BotConfig) *TaskWorker {
+	return &TaskWorker{net: net, logger: logger, cfg: cfg}
 }
 
 func (tw *TaskWorker) RunLoop() {
+	if !tw.cfg.EnableClaimTask {
+		return
+	}
+
 	select {
 	case <-time.After(4 * time.Second):
 	case <-tw.net.ctx.Done():
 		return
 	}
 
-	// Check once at start
 	tw.checkAndClaim()
 
-	// Then check every 5 minutes
 	for {
 		select {
 		case <-time.After(5 * time.Minute):

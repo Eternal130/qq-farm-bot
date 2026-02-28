@@ -74,9 +74,10 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
             </span>
           </template>
         </ElTableColumn>
-        <ElTableColumn prop="name" label="名称" min-width="110" fixed>
+        <ElTableColumn prop="name" label="名称" min-width="140" fixed>
           <template #default="{ row }">
             <span class="crop-name">{{ row.name }}</span>
+            <ElTag type="info" size="small" class="level-tag">Lv.{{ row.requiredLevel }}</ElTag>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="seasons" label="季" width="60" sortable align="center">
@@ -318,6 +319,14 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 .crop-name {
   font-weight: 600;
   color: #14532D;
+}
+
+.level-tag {
+  margin-left: 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: middle;
 }
 
 /* Time Tags */

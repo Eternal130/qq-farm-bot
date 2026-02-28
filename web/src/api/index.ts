@@ -28,7 +28,6 @@ instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Lazy import to avoid circular dependency (auth store imports types from this module)
       Promise.all([
         import('@/stores/auth'),
         import('@/router')
@@ -41,7 +40,6 @@ instance.interceptors.response.use(
   }
 )
 
-// Helper: extract error message from axios errors
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error) && typeof error.response?.data?.error === 'string') {
     return error.response.data.error
@@ -71,6 +69,27 @@ export interface Account {
   friend_interval: number
   enable_steal: boolean
   force_lowest: boolean
+  // Farm automation toggles
+  enable_harvest: boolean
+  enable_plant: boolean
+  enable_sell: boolean
+  enable_weed: boolean
+  enable_bug: boolean
+  enable_water: boolean
+  enable_remove_dead: boolean
+  enable_upgrade_land: boolean
+  enable_help_friend: boolean
+  enable_claim_task: boolean
+  // Crop selection
+  plant_crop_id: number
+  sell_crop_ids: string
+  steal_crop_ids: string
+  // Fertilizer
+  auto_use_fertilizer: boolean
+  auto_buy_fertilizer: boolean
+  fertilizer_target_count: number
+  fertilizer_buy_daily_limit: number
+  // Runtime status
   status: 'running' | 'stopped' | 'error'
   level: number
   gold: number
@@ -88,6 +107,31 @@ export interface CreateAccountRequest {
   friend_interval: number
   enable_steal: boolean
   force_lowest: boolean
+  // Farm automation toggles
+  enable_harvest: boolean
+  enable_plant: boolean
+  enable_sell: boolean
+  enable_weed: boolean
+  enable_bug: boolean
+  enable_water: boolean
+  enable_remove_dead: boolean
+  enable_upgrade_land: boolean
+  enable_help_friend: boolean
+  enable_claim_task: boolean
+  // Crop selection
+  plant_crop_id: number
+  sell_crop_ids: string
+  steal_crop_ids: string
+}
+
+export interface CropInfo {
+  id: number
+  name: string
+  seed_id: number
+  fruit_id: number
+  exp: number
+  seasons: number
+  required_level: number
 }
 
 export interface BotStatus {
@@ -130,7 +174,6 @@ export interface DashboardStats {
     total_lands: number
     unlocked_lands: number
     lands: LandStatus[]
-    // Level up estimation
     exp_rate_per_hour: number
     next_level_exp: number
     exp_to_next_level: number
@@ -202,6 +245,11 @@ export const accountApi = {
     instance.get(`/accounts/${id}/logs`, { params: { limit } })
 }
 
+export const cropApi = {
+  getAll: (): Promise<AxiosResponse<CropInfo[]>> =>
+    instance.get('/crops')
+}
+
 export const dashboardApi = {
   getStats: (): Promise<AxiosResponse<DashboardStats>> => 
     instance.get('/dashboard')
@@ -212,7 +260,6 @@ export const logsApi = {
     instance.get(`/accounts/${accountId}/logs`, { params: { limit } })
 }
 
-// WebSocket connection for real-time logs
 export function createLogWebSocket(accountId: number): WebSocket {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   const host = window.location.host

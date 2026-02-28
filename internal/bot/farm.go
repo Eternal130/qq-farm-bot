@@ -68,15 +68,17 @@ func (f *FarmWorker) checkFarm() {
 	lands := landsReply.Lands
 
 	// Auto unlock & upgrade lands before analyzing
-	unlockedNew, upgradedNew := f.autoUnlockAndUpgrade(lands)
-	if unlockedNew > 0 || upgradedNew > 0 {
-		// Re-fetch lands after unlock/upgrade to get updated state
-		landsReply, err = f.net.AllLands()
-		if err != nil {
-			f.logger.Warnf("巡田", "重新获取土地失败: %v", err)
-			return
+	unlockedNew, upgradedNew := 0, 0
+	if f.cfg.EnableUpgradeLand {
+		unlockedNew, upgradedNew = f.autoUnlockAndUpgrade(lands)
+		if unlockedNew > 0 || upgradedNew > 0 {
+			landsReply, err = f.net.AllLands()
+			if err != nil {
+				f.logger.Warnf("巡田", "重新获取土地失败: %v", err)
+				return
+			}
+			lands = landsReply.Lands
 		}
-		lands = landsReply.Lands
 	}
 
 	status := f.analyzeLands(lands)
@@ -120,7 +122,6 @@ func (f *FarmWorker) checkFarm() {
 
 	var actions []string
 
-	// Record unlock/upgrade actions
 	if unlockedNew > 0 {
 		actions = append(actions, fmt.Sprintf("解锁%d", unlockedNew))
 	}
@@ -131,40 +132,45 @@ func (f *FarmWorker) checkFarm() {
 		hasWork = true
 	}
 
-	// Batch operations: weed, bug, water
-	if len(status.needWeed) > 0 {
+	// Batch operations: weed, bug, water (respect config toggles)
+	if f.cfg.EnableWeed && len(status.needWeed) > 0 {
 		if err := f.weedOut(status.needWeed); err == nil {
 			actions = append(actions, fmt.Sprintf("除草%d", len(status.needWeed)))
 		}
 	}
-	if len(status.needBug) > 0 {
+	if f.cfg.EnableBug && len(status.needBug) > 0 {
 		if err := f.insecticide(status.needBug); err == nil {
 			actions = append(actions, fmt.Sprintf("除虫%d", len(status.needBug)))
 		}
 	}
-	if len(status.needWater) > 0 {
+	if f.cfg.EnableWater && len(status.needWater) > 0 {
 		if err := f.waterLand(status.needWater); err == nil {
 			actions = append(actions, fmt.Sprintf("浇水%d", len(status.needWater)))
 		}
 	}
 
-	// Harvest
+	// Harvest (respect config toggle)
 	var harvestedLands []int64
-	if len(status.harvestable) > 0 {
+	if f.cfg.EnableHarvest && len(status.harvestable) > 0 {
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
 			harvestedLands = status.harvestable
-			// Clear fertilized state for harvested lands (replant or season 2 transition)
 			for _, id := range harvestedLands {
 				delete(f.fertilized, id)
 			}
 		}
 	}
 
-	// Remove dead + plant + fertilize
-	allDead := append(status.dead, harvestedLands...)
+	// Remove dead + plant + fertilize (respect config toggles)
+	allDead := []int64{}
 	allEmpty := status.empty
-	if len(allDead) > 0 || len(allEmpty) > 0 {
+	if f.cfg.EnableRemoveDead {
+		allDead = append(allDead, status.dead...)
+		allDead = append(allDead, harvestedLands...)
+	} else {
+		allDead = append(allDead, harvestedLands...)
+	}
+	if f.cfg.EnablePlant && (len(allDead) > 0 || len(allEmpty) > 0) {
 		f.autoPlant(allDead, allEmpty, unlockedCount)
 		actions = append(actions, fmt.Sprintf("种植%d", len(allDead)+len(allEmpty)))
 	}
@@ -220,7 +226,6 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 				}
 			}
 
-			// Build harvest info for level-up estimation
 			matureTime := getMatureTimeSec(land.Plant.Phases)
 			plantTime := getPlantStartTimeSec(land.Plant.Phases)
 			if matureTime > 0 && plantTime > 0 && matureTime > plantTime {
@@ -323,36 +328,30 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 		plant := land.Plant
 		landID := land.Id
 
-		// Skip if already fertilized this cycle
 		if f.fertilized[landID] {
 			continue
 		}
 
-		// Get current phase
 		currentPhase := getCurrentPhase(plant.Phases, nowSec)
 		if currentPhase == nil {
 			continue
 		}
 
-		// Skip mature and dead plants
 		phase := plantpb.PlantPhase(currentPhase.Phase)
 		if phase == plantpb.PlantPhase_MATURE || phase == plantpb.PlantPhase_DEAD || phase == plantpb.PlantPhase_PHASE_UNKNOWN {
 			continue
 		}
 
-		// Get phase data for this plant
 		pd := f.gc.GetPlantPhaseData(int(plant.Id))
 		if pd == nil {
 			continue
 		}
 
-		// Determine season
 		season := plant.GetSeason()
 		if season < 1 {
 			season = 1
 		}
 
-		// Growth phase index (0-based): Phase enum 1=SEED→idx 0, 2=GERMINATION→idx 1, etc.
 		phaseIdx := int(currentPhase.Phase) - 1
 
 		var targetMaxIdx int
@@ -369,12 +368,10 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 			totalPhases = len(pd.PhaseDurations)
 		}
 
-		// Validate phase index is within range
 		if phaseIdx < 0 || phaseIdx >= totalPhases {
 			continue
 		}
 
-		// Fertilize if in the longest phase (or any phase if all equal)
 		if allEqual || phaseIdx == targetMaxIdx {
 			if f.fertilizeSingle(landID) {
 				f.fertilized[landID] = true
@@ -388,7 +385,6 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 	}
 }
 
-// fertilizeSingle fertilizes a single land with normal fertilizer.
 func (f *FarmWorker) fertilizeSingle(landID int64) bool {
 	req := &plantpb.FertilizeRequest{LandIds: []int64{landID}, FertilizerId: normalFertilizerID}
 	body, _ := proto.Marshal(req)
@@ -493,11 +489,9 @@ func (f *FarmWorker) fertilize(landIDs []int64) int {
 
 func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int) {
 	toLant := append([]int64{}, emptyLands...)
-	// Clear fertilized state for dead lands being removed
 	for _, id := range deadLands {
 		delete(f.fertilized, id)
 	}
-
 
 	// Remove dead plants
 	if len(deadLands) > 0 {
@@ -511,7 +505,7 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 		return
 	}
 
-	// Find best seed from shop
+	// Find best seed from shop (respects PlantCropID config)
 	bestSeed, err := f.findBestSeed(unlockedCount)
 	if err != nil || bestSeed == nil {
 		return
@@ -563,9 +557,6 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 	}
 	f.logger.Infof("种植", "已种植 %d 块", planted)
 
-	// Clear fertilized state for newly planted lands — checkAndFertilize will handle optimal timing.
-	// For crops with all-equal phases, there's no benefit to waiting, but checkAndFertilize
-	// handles that case too (fertilizes immediately when allEqual is true).
 	if planted > 0 {
 		for _, id := range toLant[:planted] {
 			delete(f.fertilized, id)
@@ -622,8 +613,20 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 		return nil, fmt.Errorf("没有可购买的种子")
 	}
 
+	// If a specific crop is configured, try to find its seed
+	if f.cfg.PlantCropID > 0 {
+		targetSeedID := f.gc.GetSeedIDForCrop(f.cfg.PlantCropID)
+		if targetSeedID > 0 {
+			for _, c := range available {
+				if int(c.goods.ItemId) == targetSeedID {
+					return c.goods, nil
+				}
+			}
+			f.logger.Warnf("商店", "指定作物(ID:%d)的种子不可购买，使用自动选择", f.cfg.PlantCropID)
+		}
+	}
+
 	if f.cfg.ForceLowest {
-		// Sort by level asc, then price asc
 		best := available[0]
 		for _, c := range available[1:] {
 			if c.requiredLevel < best.requiredLevel || (c.requiredLevel == best.requiredLevel && c.goods.Price < best.goods.Price) {
@@ -637,7 +640,6 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 	if f.gc != nil {
 		rec := f.gc.GetPlantingRecommendation(int(level), landsCount, 50)
 		for _, r := range rec {
-			// Find matching goods in available shop items
 			for _, c := range available {
 				if c.goods.ItemId == int64(r.SeedID) {
 					return c.goods, nil
@@ -667,12 +669,10 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 }
 
 // autoUnlockAndUpgrade checks all lands and attempts to unlock/upgrade eligible ones.
-// Returns counts of successfully unlocked and upgraded lands.
 func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, upgraded int) {
 	_, level, _, gold, _ := f.net.state.Get()
 
 	for _, land := range lands {
-		// Try unlock
 		if !land.Unlocked && land.CouldUnlock {
 			cond := land.UnlockCondition
 			if cond != nil && level >= cond.NeedLevel && gold >= cond.NeedGold {
@@ -681,13 +681,12 @@ func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, 
 				} else {
 					f.logger.Infof("\u89e3\u9501", "\u571f\u5730#%d \u6210\u529f (\u82b1\u8d39%d\u91d1\u5e01)", land.Id, cond.NeedGold)
 					unlocked++
-					gold -= cond.NeedGold // track remaining gold
+					gold -= cond.NeedGold
 				}
 				time.Sleep(200 * time.Millisecond)
 			}
 		}
 
-		// Try upgrade
 		if land.Unlocked && land.CouldUpgrade {
 			cond := land.UpgradeCondition
 			if cond != nil && level >= cond.NeedLevel && gold >= cond.NeedGold {

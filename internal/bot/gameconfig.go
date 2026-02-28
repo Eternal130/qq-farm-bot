@@ -540,3 +540,106 @@ func (gc *GameConfig) GetNextLevelExp(currentLevel int) (int64, bool) {
 	}
 	return 0, false
 }
+
+type CropInfo struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	SeedID        int    `json:"seed_id"`
+	FruitID       int    `json:"fruit_id"`
+	Exp           int    `json:"exp"`
+	Seasons       int    `json:"seasons"`
+	RequiredLevel int    `json:"required_level"`
+}
+
+func (gc *GameConfig) GetCropList() []CropInfo {
+	if gc == nil {
+		return nil
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+
+	seen := make(map[int]bool)
+	var crops []CropInfo
+
+	if gc.seedShopData != nil {
+		for _, s := range gc.seedShopData.Rows {
+			if s.SeedID <= 0 || seen[s.PlantID] {
+				continue
+			}
+			seen[s.PlantID] = true
+			crops = append(crops, CropInfo{
+				ID:            s.PlantID,
+				Name:          s.Name,
+				SeedID:        s.SeedID,
+				FruitID:       s.FruitID,
+				Exp:           s.Exp,
+				Seasons:       1,
+				RequiredLevel: s.RequiredLevel,
+			})
+		}
+		for i := range crops {
+			if p, ok := gc.plantMap[crops[i].ID]; ok && p.Seasons >= 2 {
+				crops[i].Seasons = p.Seasons
+			}
+		}
+		return crops
+	}
+
+	for _, p := range gc.plants {
+		if p.SeedID <= 0 || p.SeedID < 20000 || seen[p.ID] {
+			continue
+		}
+		seen[p.ID] = true
+		seasons := p.Seasons
+		if seasons < 1 {
+			seasons = 1
+		}
+		crops = append(crops, CropInfo{
+			ID:      p.ID,
+			Name:    p.Name,
+			SeedID:  p.SeedID,
+			FruitID: p.Fruit.ID,
+			Exp:     p.Exp,
+			Seasons: seasons,
+		})
+	}
+	return crops
+}
+
+func (gc *GameConfig) GetFruitPlantID(fruitID int) int {
+	if gc == nil {
+		return 0
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	if p, ok := gc.fruitToPlant[fruitID]; ok {
+		return p.ID
+	}
+	return 0
+}
+
+func (gc *GameConfig) GetSeedIDForCrop(cropID int) int {
+	if gc == nil {
+		return 0
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	if p, ok := gc.plantMap[cropID]; ok {
+		return p.SeedID
+	}
+	return 0
+}
+
+func ParseCropIDs(s string) map[int]bool {
+	result := make(map[int]bool)
+	if s == "" {
+		return result
+	}
+	for _, part := range strings.Split(s, ",") {
+		part = strings.TrimSpace(part)
+		if id, err := strconv.Atoi(part); err == nil && id > 0 {
+			result[id] = true
+		}
+	}
+	return result
+}

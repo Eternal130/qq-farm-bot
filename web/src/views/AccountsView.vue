@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { accountApi, getErrorMessage, type Account, type CreateAccountRequest, type QRCodeResponse } from '@/api'
+import { accountApi, cropApi, getErrorMessage, type Account, type CreateAccountRequest, type QRCodeResponse, type CropInfo } from '@/api'
 import { 
   ElTable, 
   ElTableColumn, 
@@ -24,6 +24,7 @@ import { Plus, Edit, Delete, VideoPlay, VideoPause, Grid } from '@element-plus/i
 
 const loading = ref(false)
 const accounts = ref<Account[]>([])
+const crops = ref<CropInfo[]>([])
 const dialogVisible = ref(false)
 const qrDialogVisible = ref(false)
 const isEdit = ref(false)
@@ -37,7 +38,20 @@ const formData = ref<CreateAccountRequest>({
   farm_interval: 10,
   friend_interval: 10,
   enable_steal: true,
-  force_lowest: false
+  force_lowest: false,
+  enable_harvest: true,
+  enable_plant: true,
+  enable_sell: true,
+  enable_weed: true,
+  enable_bug: true,
+  enable_water: true,
+  enable_remove_dead: true,
+  enable_upgrade_land: true,
+  enable_help_friend: true,
+  enable_claim_task: true,
+  plant_crop_id: 0,
+  sell_crop_ids: '',
+  steal_crop_ids: ''
 })
 
 const qrCodeData = ref<QRCodeResponse | null>(null)
@@ -47,6 +61,26 @@ let qrPollInterval: number | null = null
 const autoStartAfterQR = ref(false)
 
 const dialogTitle = computed(() => isEdit.value ? '编辑账号' : '添加账号')
+
+const sellCropIdsArray = computed({
+  get: () => {
+    if (!formData.value.sell_crop_ids) return []
+    return formData.value.sell_crop_ids.split(',').map(Number).filter(n => n > 0)
+  },
+  set: (val: number[]) => {
+    formData.value.sell_crop_ids = val.join(',')
+  }
+})
+
+const stealCropIdsArray = computed({
+  get: () => {
+    if (!formData.value.steal_crop_ids) return []
+    return formData.value.steal_crop_ids.split(',').map(Number).filter(n => n > 0)
+  },
+  set: (val: number[]) => {
+    formData.value.steal_crop_ids = val.join(',')
+  }
+})
 
 const fetchAccounts = async () => {
   loading.value = true
@@ -60,6 +94,13 @@ const fetchAccounts = async () => {
   }
 }
 
+const fetchCrops = async () => {
+  try {
+    const response = await cropApi.getAll()
+    crops.value = response.data
+  } catch { }
+}
+
 const openAddDialog = () => {
   isEdit.value = false
   currentId.value = null
@@ -71,7 +112,20 @@ const openAddDialog = () => {
     farm_interval: 10,
     friend_interval: 10,
     enable_steal: true,
-    force_lowest: false
+    force_lowest: false,
+    enable_harvest: true,
+    enable_plant: true,
+    enable_sell: true,
+    enable_weed: true,
+    enable_bug: true,
+    enable_water: true,
+    enable_remove_dead: true,
+    enable_upgrade_land: true,
+    enable_help_friend: true,
+    enable_claim_task: true,
+    plant_crop_id: 0,
+    sell_crop_ids: '',
+    steal_crop_ids: ''
   }
   dialogVisible.value = true
 }
@@ -87,7 +141,20 @@ const openEditDialog = (row: Account) => {
     farm_interval: row.farm_interval,
     friend_interval: row.friend_interval,
     enable_steal: row.enable_steal,
-    force_lowest: row.force_lowest
+    force_lowest: row.force_lowest,
+    enable_harvest: row.enable_harvest,
+    enable_plant: row.enable_plant,
+    enable_sell: row.enable_sell,
+    enable_weed: row.enable_weed,
+    enable_bug: row.enable_bug,
+    enable_water: row.enable_water,
+    enable_remove_dead: row.enable_remove_dead,
+    enable_upgrade_land: row.enable_upgrade_land,
+    enable_help_friend: row.enable_help_friend,
+    enable_claim_task: row.enable_claim_task,
+    plant_crop_id: row.plant_crop_id,
+    sell_crop_ids: row.sell_crop_ids,
+    steal_crop_ids: row.steal_crop_ids
   }
   dialogVisible.value = true
 }
@@ -221,6 +288,7 @@ const getStatusText = (status: string): string => {
 
 onMounted(() => {
   fetchAccounts()
+  fetchCrops()
 })
 
 onUnmounted(() => {
@@ -319,73 +387,169 @@ onUnmounted(() => {
       </ElTable>
     </ElCard>
 
-    <!-- Add/Edit Dialog -->
+<!-- Add/Edit Dialog -->
     <ElDialog 
       v-model="dialogVisible" 
       :title="dialogTitle"
-      width="500px"
+      width="640px"
       destroy-on-close
       class="account-dialog"
     >
       <ElForm :model="formData" label-width="100px" class="account-form">
-        <ElFormItem label="名称" required>
-          <ElInput v-model="formData.name" placeholder="请输入账号名称" />
-        </ElFormItem>
-        
-        <ElFormItem label="平台" required>
-          <ElSelect v-model="formData.platform" style="width: 100%">
-            <ElOption label="QQ小程序" value="qq" />
-            <ElOption label="微信小程序" value="wx" />
-          </ElSelect>
-        </ElFormItem>
-        
-        <ElFormItem label="登录Code">
-          <ElInput 
-            v-model="formData.code" 
-            placeholder="请输入登录Code（QQ可扫码获取）" 
-            type="textarea"
-            :rows="2"
-          />
-        </ElFormItem>
-        
-        <ElFormItem label="自动启动">
-          <ElSwitch v-model="formData.auto_start" />
-        </ElFormItem>
-        
-        <ElFormItem label="农场间隔">
-          <div class="interval-input">
-            <ElInputNumber 
-              v-model="formData.farm_interval" 
-              :min="1" 
-              :max="60"
-              style="width: 120px"
+        <div class="form-section">
+          <div class="form-section-title">基本信息</div>
+          <ElFormItem label="名称" required>
+            <ElInput v-model="formData.name" placeholder="请输入账号名称" />
+          </ElFormItem>
+          <ElFormItem label="平台" required>
+            <ElSelect v-model="formData.platform" style="width: 100%">
+              <ElOption label="QQ小程序" value="qq" />
+              <ElOption label="微信小程序" value="wx" />
+            </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="登录Code">
+            <ElInput 
+              v-model="formData.code" 
+              placeholder="请输入登录Code（QQ可扫码获取）" 
+              type="textarea"
+              :rows="2"
             />
-            <span class="form-hint">秒</span>
+          </ElFormItem>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">自动化开关</div>
+          <div class="toggle-grid">
+            <div class="toggle-item">
+              <span class="toggle-label">自动收获</span>
+              <ElSwitch v-model="formData.enable_harvest" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动种植</span>
+              <ElSwitch v-model="formData.enable_plant" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动出售</span>
+              <ElSwitch v-model="formData.enable_sell" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动除草</span>
+              <ElSwitch v-model="formData.enable_weed" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动除虫</span>
+              <ElSwitch v-model="formData.enable_bug" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动浇水</span>
+              <ElSwitch v-model="formData.enable_water" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">自动铲除</span>
+              <ElSwitch v-model="formData.enable_remove_dead" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">升级土地</span>
+              <ElSwitch v-model="formData.enable_upgrade_land" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">帮好友</span>
+              <ElSwitch v-model="formData.enable_help_friend" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">允许偷菜</span>
+              <ElSwitch v-model="formData.enable_steal" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">领取任务</span>
+              <ElSwitch v-model="formData.enable_claim_task" />
+            </div>
+            <div class="toggle-item">
+              <span class="toggle-label">强制最低级</span>
+              <ElSwitch v-model="formData.force_lowest" />
+            </div>
           </div>
-        </ElFormItem>
-        
-        <ElFormItem label="好友间隔">
-          <div class="interval-input">
-            <ElInputNumber 
-              v-model="formData.friend_interval" 
-              :min="1" 
-              :max="60"
-              style="width: 120px"
-            />
-            <span class="form-hint">秒</span>
-          </div>
-        </ElFormItem>
-        
-        <ElFormItem label="允许偷菜">
-          <ElSwitch v-model="formData.enable_steal" />
-        </ElFormItem>
-        
-        <ElFormItem label="强制最低级">
-          <div class="switch-row">
-            <ElSwitch v-model="formData.force_lowest" />
-            <span class="form-hint">种植最低等级作物</span>
-          </div>
-        </ElFormItem>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">作物选择</div>
+          <ElFormItem label="种植作物">
+            <ElSelect v-model="formData.plant_crop_id" filterable style="width: 100%">
+              <ElOption :value="0" label="自动选择（最优经验）" />
+              <ElOption 
+                v-for="crop in crops" 
+                :key="crop.id" 
+                :value="crop.id" 
+                :label="crop.required_level ? `${crop.name} (Lv.${crop.required_level})` : crop.name"
+              />
+            </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="出售作物">
+            <ElSelect 
+              v-model="sellCropIdsArray" 
+              multiple 
+              filterable 
+              collapse-tags 
+              collapse-tags-tooltip
+              placeholder="全部出售"
+              style="width: 100%"
+            >
+              <ElOption 
+                v-for="crop in crops" 
+                :key="crop.id" 
+                :value="crop.id" 
+                :label="crop.name"
+              />
+            </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="偷取作物">
+            <ElSelect 
+              v-model="stealCropIdsArray" 
+              multiple 
+              filterable 
+              collapse-tags 
+              collapse-tags-tooltip
+              placeholder="全部偷取"
+              style="width: 100%"
+            >
+              <ElOption 
+                v-for="crop in crops" 
+                :key="crop.id" 
+                :value="crop.id" 
+                :label="crop.name"
+              />
+            </ElSelect>
+          </ElFormItem>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">运行设置</div>
+          <ElFormItem label="自动启动">
+            <ElSwitch v-model="formData.auto_start" />
+          </ElFormItem>
+          <ElFormItem label="农场间隔">
+            <div class="interval-input">
+              <ElInputNumber 
+                v-model="formData.farm_interval" 
+                :min="1" 
+                :max="60"
+                style="width: 120px"
+              />
+              <span class="form-hint">秒</span>
+            </div>
+          </ElFormItem>
+          <ElFormItem label="好友间隔">
+            <div class="interval-input">
+              <ElInputNumber 
+                v-model="formData.friend_interval" 
+                :min="1" 
+                :max="60"
+                style="width: 120px"
+              />
+              <span class="form-hint">秒</span>
+            </div>
+          </ElFormItem>
+        </div>
       </ElForm>
       
       <template #footer>
@@ -642,6 +806,34 @@ onUnmounted(() => {
 .form-hint {
   font-size: 13px;
   color: #6B7280;
+}
+
+.form-section {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+.form-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #14532D;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.toggle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+.toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.toggle-label {
+  font-size: 14px;
+  color: #374151;
 }
 
 .dialog-footer {

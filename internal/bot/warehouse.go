@@ -14,24 +14,27 @@ import (
 type WarehouseWorker struct {
 	net    *Network
 	logger *Logger
+	cfg    *BotConfig
 	gc     *GameConfig
 }
 
-func NewWarehouseWorker(net *Network, logger *Logger) *WarehouseWorker {
-	return &WarehouseWorker{net: net, logger: logger, gc: GetGameConfig()}
+func NewWarehouseWorker(net *Network, logger *Logger, cfg *BotConfig) *WarehouseWorker {
+	return &WarehouseWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig()}
 }
 
 func (ww *WarehouseWorker) RunLoop() {
+	if !ww.cfg.EnableSell {
+		return
+	}
+
 	select {
 	case <-time.After(10 * time.Second):
 	case <-ww.net.ctx.Done():
 		return
 	}
 
-	// Sell once at start
 	ww.sellAllFruits()
 
-	// Then every 60 seconds
 	for {
 		select {
 		case <-time.After(60 * time.Second):
@@ -43,7 +46,6 @@ func (ww *WarehouseWorker) RunLoop() {
 }
 
 func (ww *WarehouseWorker) sellAllFruits() {
-	// Get bag
 	req := &itempb.BagRequest{}
 	body, _ := proto.Marshal(req)
 	replyBody, err := ww.net.SendRequest("gamepb.itempb.ItemService", "Bag", body)
@@ -57,6 +59,9 @@ func (ww *WarehouseWorker) sellAllFruits() {
 		return
 	}
 
+	sellFilter := ParseCropIDs(ww.cfg.SellCropIDs)
+	hasSellFilter := len(sellFilter) > 0
+
 	var toSell []*corepb.Item
 	var names []string
 
@@ -64,6 +69,12 @@ func (ww *WarehouseWorker) sellAllFruits() {
 		id := int(item.Id)
 		count := item.Count
 		if ww.gc.IsFruitID(id) && count > 0 && item.Uid > 0 {
+			if hasSellFilter {
+				plantID := ww.gc.GetFruitPlantID(id)
+				if plantID == 0 || !sellFilter[plantID] {
+					continue
+				}
+			}
 			toSell = append(toSell, item)
 			names = append(names, fmt.Sprintf("%sx%d", ww.gc.GetFruitName(id), count))
 		}

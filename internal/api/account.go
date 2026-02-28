@@ -21,10 +21,8 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		var err error
 
 		if isAdmin {
-			// Admin sees all accounts
 			accounts, err = s.ListAccounts()
 		} else {
-			// Regular user sees only their own accounts
 			accounts, err = s.ListAccountsByUserID(userID)
 		}
 
@@ -33,7 +31,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			return
 		}
 
-		// Flatten status into response — frontend expects a flat "status" string field
 		type accountResponse struct {
 			model.Account
 			Status string `json:"status"`
@@ -55,7 +52,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			} else {
 				ar.Status = "stopped"
 			}
-			// Mask code for security
 			if len(ar.Code) > 8 {
 				ar.Code = ar.Code[:8] + "..."
 			}
@@ -74,12 +70,28 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			AutoStart      bool   `json:"auto_start"`
 			FarmInterval   int    `json:"farm_interval"`
 			FriendInterval int    `json:"friend_interval"`
-			EnableSteal    bool   `json:"enable_steal"`
+			EnableSteal    *bool  `json:"enable_steal"`
 			ForceLowest    bool   `json:"force_lowest"`
-			AutoUseFertilizer    bool `json:"auto_use_fertilizer"`
-			AutoBuyFertilizer    bool `json:"auto_buy_fertilizer"`
-			FertilizerTargetCount int  `json:"fertilizer_target_count"`
-			FertilizerBuyDailyLimit int `json:"fertilizer_buy_daily_limit"`
+			// Farm automation toggles
+			EnableHarvest     *bool `json:"enable_harvest"`
+			EnablePlant       *bool `json:"enable_plant"`
+			EnableSell        *bool `json:"enable_sell"`
+			EnableWeed        *bool `json:"enable_weed"`
+			EnableBug         *bool `json:"enable_bug"`
+			EnableWater       *bool `json:"enable_water"`
+			EnableRemoveDead  *bool `json:"enable_remove_dead"`
+			EnableUpgradeLand *bool `json:"enable_upgrade_land"`
+			EnableHelpFriend  *bool `json:"enable_help_friend"`
+			EnableClaimTask   *bool `json:"enable_claim_task"`
+			// Crop selection
+			PlantCropID  int    `json:"plant_crop_id"`
+			SellCropIDs  string `json:"sell_crop_ids"`
+			StealCropIDs string `json:"steal_crop_ids"`
+			// Fertilizer
+			AutoUseFertilizer       bool `json:"auto_use_fertilizer"`
+			AutoBuyFertilizer       bool `json:"auto_buy_fertilizer"`
+			FertilizerTargetCount   int  `json:"fertilizer_target_count"`
+			FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -103,11 +115,25 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			AutoStart:      req.AutoStart,
 			FarmInterval:   req.FarmInterval,
 			FriendInterval: req.FriendInterval,
-			EnableSteal:    req.EnableSteal,
+			EnableSteal:    ptrBoolDefault(req.EnableSteal, true),
 			ForceLowest:    req.ForceLowest,
-			AutoUseFertilizer:      req.AutoUseFertilizer,
-			AutoBuyFertilizer:      req.AutoBuyFertilizer,
-			FertilizerTargetCount:  req.FertilizerTargetCount,
+			// Default all automation toggles to true
+			EnableHarvest:           ptrBoolDefault(req.EnableHarvest, true),
+			EnablePlant:             ptrBoolDefault(req.EnablePlant, true),
+			EnableSell:              ptrBoolDefault(req.EnableSell, true),
+			EnableWeed:              ptrBoolDefault(req.EnableWeed, true),
+			EnableBug:               ptrBoolDefault(req.EnableBug, true),
+			EnableWater:             ptrBoolDefault(req.EnableWater, true),
+			EnableRemoveDead:        ptrBoolDefault(req.EnableRemoveDead, true),
+			EnableUpgradeLand:       ptrBoolDefault(req.EnableUpgradeLand, true),
+			EnableHelpFriend:        ptrBoolDefault(req.EnableHelpFriend, true),
+			EnableClaimTask:         ptrBoolDefault(req.EnableClaimTask, true),
+			PlantCropID:             req.PlantCropID,
+			SellCropIDs:             req.SellCropIDs,
+			StealCropIDs:            req.StealCropIDs,
+			AutoUseFertilizer:       req.AutoUseFertilizer,
+			AutoBuyFertilizer:       req.AutoBuyFertilizer,
+			FertilizerTargetCount:   req.FertilizerTargetCount,
 			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
 		}
 		if err := s.CreateAccount(account); err != nil {
@@ -128,7 +154,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			return
 		}
 
-		// Check ownership (admin can edit any)
 		if !isAdmin && account.UserID != userID {
 			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
 			return
@@ -143,9 +168,25 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FriendInterval *int    `json:"friend_interval"`
 			EnableSteal    *bool   `json:"enable_steal"`
 			ForceLowest    *bool   `json:"force_lowest"`
-			AutoUseFertilizer      *bool `json:"auto_use_fertilizer"`
-			AutoBuyFertilizer      *bool `json:"auto_buy_fertilizer"`
-			FertilizerTargetCount  *int  `json:"fertilizer_target_count"`
+			// Farm automation toggles
+			EnableHarvest     *bool `json:"enable_harvest"`
+			EnablePlant       *bool `json:"enable_plant"`
+			EnableSell        *bool `json:"enable_sell"`
+			EnableWeed        *bool `json:"enable_weed"`
+			EnableBug         *bool `json:"enable_bug"`
+			EnableWater       *bool `json:"enable_water"`
+			EnableRemoveDead  *bool `json:"enable_remove_dead"`
+			EnableUpgradeLand *bool `json:"enable_upgrade_land"`
+			EnableHelpFriend  *bool `json:"enable_help_friend"`
+			EnableClaimTask   *bool `json:"enable_claim_task"`
+			// Crop selection
+			PlantCropID  *int    `json:"plant_crop_id"`
+			SellCropIDs  *string `json:"sell_crop_ids"`
+			StealCropIDs *string `json:"steal_crop_ids"`
+			// Fertilizer
+			AutoUseFertilizer       *bool `json:"auto_use_fertilizer"`
+			AutoBuyFertilizer       *bool `json:"auto_buy_fertilizer"`
+			FertilizerTargetCount   *int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -177,6 +218,45 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		if req.ForceLowest != nil {
 			account.ForceLowest = *req.ForceLowest
 		}
+		if req.EnableHarvest != nil {
+			account.EnableHarvest = *req.EnableHarvest
+		}
+		if req.EnablePlant != nil {
+			account.EnablePlant = *req.EnablePlant
+		}
+		if req.EnableSell != nil {
+			account.EnableSell = *req.EnableSell
+		}
+		if req.EnableWeed != nil {
+			account.EnableWeed = *req.EnableWeed
+		}
+		if req.EnableBug != nil {
+			account.EnableBug = *req.EnableBug
+		}
+		if req.EnableWater != nil {
+			account.EnableWater = *req.EnableWater
+		}
+		if req.EnableRemoveDead != nil {
+			account.EnableRemoveDead = *req.EnableRemoveDead
+		}
+		if req.EnableUpgradeLand != nil {
+			account.EnableUpgradeLand = *req.EnableUpgradeLand
+		}
+		if req.EnableHelpFriend != nil {
+			account.EnableHelpFriend = *req.EnableHelpFriend
+		}
+		if req.EnableClaimTask != nil {
+			account.EnableClaimTask = *req.EnableClaimTask
+		}
+		if req.PlantCropID != nil {
+			account.PlantCropID = *req.PlantCropID
+		}
+		if req.SellCropIDs != nil {
+			account.SellCropIDs = *req.SellCropIDs
+		}
+		if req.StealCropIDs != nil {
+			account.StealCropIDs = *req.StealCropIDs
+		}
 		if req.AutoUseFertilizer != nil {
 			account.AutoUseFertilizer = *req.AutoUseFertilizer
 		}
@@ -203,7 +283,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 
 		id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 
-		// Check ownership (admin can delete any)
 		if !isAdmin {
 			account, err := s.GetAccount(id)
 			if err != nil {
@@ -216,7 +295,6 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			}
 		}
 
-		// Stop bot if running
 		mgr.StopBot(id)
 		if err := s.DeleteAccount(id); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -224,4 +302,21 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 	})
+
+	// Crops list endpoint for frontend dropdown
+	r.GET("/crops", func(c *gin.Context) {
+		gc := bot.GetGameConfig()
+		if gc == nil {
+			c.JSON(http.StatusOK, []interface{}{})
+			return
+		}
+		c.JSON(http.StatusOK, gc.GetCropList())
+	})
+}
+
+func ptrBoolDefault(p *bool, defaultVal bool) bool {
+	if p == nil {
+		return defaultVal
+	}
+	return *p
 }

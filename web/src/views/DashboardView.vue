@@ -126,6 +126,11 @@ const getPhaseType = (phase: string | undefined): 'success' | 'info' | 'warning'
   return 'info'
 }
 
+const getLandLevelName = (level: number): string => {
+  const names: Record<number, string> = { 1: '黄土', 2: '红土', 3: '黑土', 4: '金土' }
+  return names[level] || `Lv.${level}`
+}
+
 const formatLevelUpTime = (hours: number): string => {
   if (hours <= 0) return '-'  
   if (hours < 1) {
@@ -282,7 +287,7 @@ onUnmounted(() => {
               >
                 <div class="land-cell-header">
                   <span class="land-id">#{{ land.id }}</span>
-                  <span class="land-level">Lv.{{ land.level }}</span>
+                  <span class="land-level">{{ getLandLevelName(land.level) }}</span>
                 </div>
                 <div class="land-crop">{{ land.crop_name || '空地' }}</div>
                 <ElTag 

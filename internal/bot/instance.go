@@ -13,18 +13,35 @@ import (
 
 // BotConfig holds the runtime configuration for a bot instance.
 type BotConfig struct {
-	Platform       string
-	Code           string
-	ServerURL      string
-	ClientVersion  string
-	FarmInterval   int // seconds
-	FriendInterval int // seconds
-	EnableSteal    bool
-	ForceLowest    bool
-	AutoUseFertilizer      bool
-	AutoBuyFertilizer      bool
-	FertilizerTargetCount  int
+	Platform                string
+	Code                    string
+	ServerURL               string
+	ClientVersion           string
+	FarmInterval            int // seconds
+	FriendInterval          int // seconds
+	EnableSteal             bool
+	ForceLowest             bool
+	AutoUseFertilizer       bool
+	AutoBuyFertilizer       bool
+	FertilizerTargetCount   int
 	FertilizerBuyDailyLimit int
+
+	// Farm automation toggles
+	EnableHarvest     bool
+	EnablePlant       bool
+	EnableSell        bool
+	EnableWeed        bool
+	EnableBug         bool
+	EnableWater       bool
+	EnableRemoveDead  bool
+	EnableUpgradeLand bool
+	EnableHelpFriend  bool
+	EnableClaimTask   bool
+
+	// Crop selection & filtering
+	PlantCropID  int    // specific crop to plant (0 = auto)
+	SellCropIDs  string // comma-separated crop IDs to sell (empty = all)
+	StealCropIDs string // comma-separated crop IDs to steal (empty = all)
 }
 
 const (
@@ -58,20 +75,38 @@ type Instance struct {
 
 	stopCh chan struct{} // signals watchdog to stop
 }
+
 func NewInstance(account *model.Account, serverURL, clientVersion string, s *store.Store) *Instance {
 	cfg := &BotConfig{
-		Platform:       account.Platform,
-		Code:           account.Code,
-		ServerURL:      serverURL,
-		ClientVersion:  clientVersion,
-		FarmInterval:   account.FarmInterval,
-		FriendInterval: account.FriendInterval,
-		EnableSteal:    account.EnableSteal,
-		ForceLowest:    account.ForceLowest,
-		AutoUseFertilizer:      account.AutoUseFertilizer,
-		AutoBuyFertilizer:      account.AutoBuyFertilizer,
-		FertilizerTargetCount:  account.FertilizerTargetCount,
+		Platform:                account.Platform,
+		Code:                    account.Code,
+		ServerURL:               serverURL,
+		ClientVersion:           clientVersion,
+		FarmInterval:            account.FarmInterval,
+		FriendInterval:          account.FriendInterval,
+		EnableSteal:             account.EnableSteal,
+		ForceLowest:             account.ForceLowest,
+		AutoUseFertilizer:       account.AutoUseFertilizer,
+		AutoBuyFertilizer:       account.AutoBuyFertilizer,
+		FertilizerTargetCount:   account.FertilizerTargetCount,
 		FertilizerBuyDailyLimit: account.FertilizerBuyDailyLimit,
+
+		// Farm automation toggles
+		EnableHarvest:     account.EnableHarvest,
+		EnablePlant:       account.EnablePlant,
+		EnableSell:        account.EnableSell,
+		EnableWeed:        account.EnableWeed,
+		EnableBug:         account.EnableBug,
+		EnableWater:       account.EnableWater,
+		EnableRemoveDead:  account.EnableRemoveDead,
+		EnableUpgradeLand: account.EnableUpgradeLand,
+		EnableHelpFriend:  account.EnableHelpFriend,
+		EnableClaimTask:   account.EnableClaimTask,
+
+		// Crop selection & filtering
+		PlantCropID:  account.PlantCropID,
+		SellCropIDs:  account.SellCropIDs,
+		StealCropIDs: account.StealCropIDs,
 	}
 	if cfg.FarmInterval < 1 {
 		cfg.FarmInterval = 10
@@ -147,10 +182,10 @@ func (inst *Instance) connectAndRun() error {
 	friend := NewFriendWorker(net, inst.logger, inst.config, inst.stats)
 	go friend.RunLoop()
 
-	task := NewTaskWorker(net, inst.logger)
+	task := NewTaskWorker(net, inst.logger, inst.config)
 	go task.RunLoop()
 
-	warehouse := NewWarehouseWorker(net, inst.logger)
+	warehouse := NewWarehouseWorker(net, inst.logger, inst.config)
 	go warehouse.RunLoop()
 
 	fertilizer := NewFertilizerWorker(net, inst.logger, inst.config)

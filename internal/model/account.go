@@ -17,11 +17,28 @@ type Account struct {
 	EnableSteal    bool `json:"enable_steal"`
 	ForceLowest    bool `json:"force_lowest"` // force lowest level crop
 
+	// Farm automation toggles (all default true for backward compatibility)
+	EnableHarvest     bool `json:"enable_harvest"`
+	EnablePlant       bool `json:"enable_plant"`
+	EnableSell        bool `json:"enable_sell"`
+	EnableWeed        bool `json:"enable_weed"`
+	EnableBug         bool `json:"enable_bug"`
+	EnableWater       bool `json:"enable_water"`
+	EnableRemoveDead  bool `json:"enable_remove_dead"`
+	EnableUpgradeLand bool `json:"enable_upgrade_land"`
+	EnableHelpFriend  bool `json:"enable_help_friend"`
+	EnableClaimTask   bool `json:"enable_claim_task"`
+
+	// Crop selection & filtering
+	PlantCropID  int    `json:"plant_crop_id"`  // specific crop to plant (0 = auto select)
+	SellCropIDs  string `json:"sell_crop_ids"`  // comma-separated crop IDs to sell (empty = all)
+	StealCropIDs string `json:"steal_crop_ids"` // comma-separated crop IDs to steal (empty = all)
+
 	// Fertilizer config
-	AutoUseFertilizer    bool `json:"auto_use_fertilizer"`     // enable pack opening + surplus item usage
-	AutoBuyFertilizer    bool `json:"auto_buy_fertilizer"`     // enable coupon purchase
-	FertilizerTargetCount int  `json:"fertilizer_target_count"` // keep this many items, use surplus
-	FertilizerBuyDailyLimit int `json:"fertilizer_buy_daily_limit"` // max daily buys (0=unlimited)
+	AutoUseFertilizer       bool `json:"auto_use_fertilizer"`
+	AutoBuyFertilizer       bool `json:"auto_buy_fertilizer"`
+	FertilizerTargetCount   int  `json:"fertilizer_target_count"`
+	FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -41,10 +58,10 @@ type BotStatus struct {
 	Error     string     `json:"error,omitempty"`
 
 	// Exp tracking for level up estimation
-	ExpRatePerHour   float64 `json:"exp_rate_per_hour,omitempty"`   // exp gained per hour
-	NextLevelExp     int64   `json:"next_level_exp,omitempty"`      // total exp required for next level
-	ExpToNextLevel   int64   `json:"exp_to_next_level,omitempty"`   // remaining exp to next level
-	HoursToNextLevel float64 `json:"hours_to_next_level,omitempty"` // estimated hours to level up
+	ExpRatePerHour   float64 `json:"exp_rate_per_hour,omitempty"`
+	NextLevelExp     int64   `json:"next_level_exp,omitempty"`
+	ExpToNextLevel   int64   `json:"exp_to_next_level,omitempty"`
+	HoursToNextLevel float64 `json:"hours_to_next_level,omitempty"`
 
 	// Farm stats
 	TotalHarvest  int64        `json:"total_harvest"`
@@ -66,7 +83,6 @@ type LandStatus struct {
 	CropID   int64  `json:"crop_id,omitempty"`
 	Phase    string `json:"phase,omitempty"`
 }
-
 
 // LogEntry represents a bot log message.
 type LogEntry struct {
