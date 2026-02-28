@@ -1,0 +1,64 @@
+syntax = "proto3";
+package gamepb.sharepb;
+option go_package = "qq-farm-bot/proto/sharepb";
+
+enum ShareChannel {
+    SHARE_CHANNEL_UNKNOWN = 0;
+    SHARE_CHANNEL_PRIVATE = 1;
+    SHARE_CHANNEL_GROUP = 2;
+    SHARE_CHANNEL_ZONE = 3;
+}
+
+message ShareInfo {
+    int64 share_count = 1;
+    bool is_claimed = 2;
+}
+
+message InviteItem {
+    int64 gid = 1;
+    int64 time_at = 2;
+    string name = 3;
+    string avatar = 4;
+}
+
+message InviteAward {
+    int64 id = 1;
+    int64 need_num = 2;
+    bool awarded = 4;
+}
+
+message InviteInfo {
+    int64 invitee_num = 2;
+}
+
+message CheckCanShareRequest {}
+message CheckCanShareReply {
+    bool can_share = 1;
+}
+
+message ReportShareRequest {
+    int64 share_id = 1;
+    int32 channel = 3;
+}
+message ReportShareReply {}
+
+message ClaimShareRewardRequest {
+    int64 share_id = 1;
+}
+message ClaimShareRewardReply {}
+
+message GetInviteInfoRequest {}
+message GetInviteInfoReply {
+    repeated InviteItem invitees = 1;
+    repeated InviteAward awards = 2;
+    InviteInfo invite_info = 3;
+}
+
+message GetInviteAwardRequest {
+    int64 id = 1;
+}
+message GetInviteAwardReply {}
+
+message ShareInviteeAddNotify {
+    int64 invitee_num = 1;
+}

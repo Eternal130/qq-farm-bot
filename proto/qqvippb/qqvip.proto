@@ -1,0 +1,19 @@
+syntax = "proto3";
+package gamepb.qqvippb;
+option go_package = "qq-farm-bot/proto/qqvippb";
+
+message GetDailyGiftStatusRequest {}
+message GetDailyGiftStatusReply {
+    bool is_qq_vip = 1;
+    bool can_claim = 2;
+    bool claimed_today = 3;
+}
+
+message ClaimDailyGiftRequest {}
+message ClaimDailyGiftReply {}
+
+message DailyGiftStatusChangedNTF {
+    bool is_qq_vip = 1;
+    bool can_claim = 2;
+    bool claimed_today = 3;
+}

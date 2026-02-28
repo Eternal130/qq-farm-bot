@@ -21,9 +21,117 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SlotType int32
+
+const (
+	SlotType_SLOT_TYPE_UNKNOWN SlotType = 0
+	SlotType_GIFT_SHOP         SlotType = 1
+	SlotType_MONTH_CARD_SHOP   SlotType = 2
+	SlotType_RECHARGE_SHOP     SlotType = 3
+)
+
+// Enum value maps for SlotType.
+var (
+	SlotType_name = map[int32]string{
+		0: "SLOT_TYPE_UNKNOWN",
+		1: "GIFT_SHOP",
+		2: "MONTH_CARD_SHOP",
+		3: "RECHARGE_SHOP",
+	}
+	SlotType_value = map[string]int32{
+		"SLOT_TYPE_UNKNOWN": 0,
+		"GIFT_SHOP":         1,
+		"MONTH_CARD_SHOP":   2,
+		"RECHARGE_SHOP":     3,
+	}
+)
+
+func (x SlotType) Enum() *SlotType {
+	p := new(SlotType)
+	*p = x
+	return p
+}
+
+func (x SlotType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SlotType) Descriptor() protoreflect.EnumDescriptor {
+	return file_mallpb_mall_proto_enumTypes[0].Descriptor()
+}
+
+func (SlotType) Type() protoreflect.EnumType {
+	return &file_mallpb_mall_proto_enumTypes[0]
+}
+
+func (x SlotType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SlotType.Descriptor instead.
+func (SlotType) EnumDescriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{0}
+}
+
+type RestrictionType int32
+
+const (
+	RestrictionType_RESTRICTION_TYPE_UNKNOWN RestrictionType = 0
+	RestrictionType_DAILY                    RestrictionType = 1
+	RestrictionType_WEEKLY                   RestrictionType = 2
+	RestrictionType_MONTHLY                  RestrictionType = 3
+	RestrictionType_FOREVER                  RestrictionType = 4
+)
+
+// Enum value maps for RestrictionType.
+var (
+	RestrictionType_name = map[int32]string{
+		0: "RESTRICTION_TYPE_UNKNOWN",
+		1: "DAILY",
+		2: "WEEKLY",
+		3: "MONTHLY",
+		4: "FOREVER",
+	}
+	RestrictionType_value = map[string]int32{
+		"RESTRICTION_TYPE_UNKNOWN": 0,
+		"DAILY":                    1,
+		"WEEKLY":                   2,
+		"MONTHLY":                  3,
+		"FOREVER":                  4,
+	}
+)
+
+func (x RestrictionType) Enum() *RestrictionType {
+	p := new(RestrictionType)
+	*p = x
+	return p
+}
+
+func (x RestrictionType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RestrictionType) Descriptor() protoreflect.EnumDescriptor {
+	return file_mallpb_mall_proto_enumTypes[1].Descriptor()
+}
+
+func (RestrictionType) Type() protoreflect.EnumType {
+	return &file_mallpb_mall_proto_enumTypes[1]
+}
+
+func (x RestrictionType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RestrictionType.Descriptor instead.
+func (RestrictionType) EnumDescriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{1}
+}
+
+// Legacy messages (raw bytes approach — kept for backward compatibility)
 type GetMallListBySlotTypeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SlotType      int32                  `protobuf:"varint,1,opt,name=slot_type,json=slotType,proto3" json:"slot_type,omitempty"` // 商城类型 (1 = 默认)
+	SlotType      int32                  `protobuf:"varint,1,opt,name=slot_type,json=slotType,proto3" json:"slot_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,7 +175,7 @@ func (x *GetMallListBySlotTypeRequest) GetSlotType() int32 {
 
 type GetMallListBySlotTypeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GoodsList     [][]byte               `protobuf:"bytes,1,rep,name=goods_list,json=goodsList,proto3" json:"goods_list,omitempty"` // 商品列表 (每个元素是序列化的 MallGoods)
+	GoodsList     [][]byte               `protobuf:"bytes,1,rep,name=goods_list,json=goodsList,proto3" json:"goods_list,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -122,10 +230,10 @@ type MallGoods struct {
 	GoodsId       int32                  `protobuf:"varint,1,opt,name=goods_id,json=goodsId,proto3" json:"goods_id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Type          int32                  `protobuf:"varint,3,opt,name=type,proto3" json:"type,omitempty"`
-	ItemIds       []byte                 `protobuf:"bytes,4,opt,name=item_ids,json=itemIds,proto3" json:"item_ids,omitempty"` // 物品ID列表 (序列化数据)
-	Price         []byte                 `protobuf:"bytes,5,opt,name=price,proto3" json:"price,omitempty"`                    // 价格 (序列化数据, field=2 为点券价格)
+	ItemIds       []byte                 `protobuf:"bytes,4,opt,name=item_ids,json=itemIds,proto3" json:"item_ids,omitempty"`
+	Price         []byte                 `protobuf:"bytes,5,opt,name=price,proto3" json:"price,omitempty"`
 	IsFree        bool                   `protobuf:"varint,6,opt,name=is_free,json=isFree,proto3" json:"is_free,omitempty"`
-	Limit         []byte                 `protobuf:"bytes,7,opt,name=limit,proto3" json:"limit,omitempty"` // 限购信息 (序列化数据)
+	Limit         []byte                 `protobuf:"bytes,7,opt,name=limit,proto3" json:"limit,omitempty"`
 	IsLimited     bool                   `protobuf:"varint,8,opt,name=is_limited,json=isLimited,proto3" json:"is_limited,omitempty"`
 	Discount      string                 `protobuf:"bytes,10,opt,name=discount,proto3" json:"discount,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -345,6 +453,859 @@ func (x *PurchaseResponse) GetResult() []byte {
 	return nil
 }
 
+// Properly typed messages
+type MallProfile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	MallType      int32                  `protobuf:"varint,2,opt,name=mall_type,json=mallType,proto3" json:"mall_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MallProfile) Reset() {
+	*x = MallProfile{}
+	mi := &file_mallpb_mall_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MallProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MallProfile) ProtoMessage() {}
+
+func (x *MallProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MallProfile.ProtoReflect.Descriptor instead.
+func (*MallProfile) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *MallProfile) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *MallProfile) GetMallType() int32 {
+	if x != nil {
+		return x.MallType
+	}
+	return 0
+}
+
+type ProductInfo struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Id                  int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SlotType            int32                  `protobuf:"varint,3,opt,name=slot_type,json=slotType,proto3" json:"slot_type,omitempty"`
+	IsFree              bool                   `protobuf:"varint,6,opt,name=is_free,json=isFree,proto3" json:"is_free,omitempty"`
+	IsAvailablePurchase bool                   `protobuf:"varint,8,opt,name=is_available_purchase,json=isAvailablePurchase,proto3" json:"is_available_purchase,omitempty"`
+	Discount            string                 `protobuf:"bytes,9,opt,name=discount,proto3" json:"discount,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *ProductInfo) Reset() {
+	*x = ProductInfo{}
+	mi := &file_mallpb_mall_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProductInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProductInfo) ProtoMessage() {}
+
+func (x *ProductInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProductInfo.ProtoReflect.Descriptor instead.
+func (*ProductInfo) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ProductInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProductInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProductInfo) GetSlotType() int32 {
+	if x != nil {
+		return x.SlotType
+	}
+	return 0
+}
+
+func (x *ProductInfo) GetIsFree() bool {
+	if x != nil {
+		return x.IsFree
+	}
+	return false
+}
+
+func (x *ProductInfo) GetIsAvailablePurchase() bool {
+	if x != nil {
+		return x.IsAvailablePurchase
+	}
+	return false
+}
+
+func (x *ProductInfo) GetDiscount() string {
+	if x != nil {
+		return x.Discount
+	}
+	return ""
+}
+
+type RestrictionInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`
+	CurrentCount  int64                  `protobuf:"varint,2,opt,name=current_count,json=currentCount,proto3" json:"current_count,omitempty"`
+	MaxCount      int64                  `protobuf:"varint,3,opt,name=max_count,json=maxCount,proto3" json:"max_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RestrictionInfo) Reset() {
+	*x = RestrictionInfo{}
+	mi := &file_mallpb_mall_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RestrictionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RestrictionInfo) ProtoMessage() {}
+
+func (x *RestrictionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RestrictionInfo.ProtoReflect.Descriptor instead.
+func (*RestrictionInfo) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RestrictionInfo) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *RestrictionInfo) GetCurrentCount() int64 {
+	if x != nil {
+		return x.CurrentCount
+	}
+	return 0
+}
+
+func (x *RestrictionInfo) GetMaxCount() int64 {
+	if x != nil {
+		return x.MaxCount
+	}
+	return 0
+}
+
+type MonthCardInfo struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	HasRewardItems   bool                   `protobuf:"varint,3,opt,name=has_reward_items,json=hasRewardItems,proto3" json:"has_reward_items,omitempty"`
+	RemainingDays    int64                  `protobuf:"varint,4,opt,name=remaining_days,json=remainingDays,proto3" json:"remaining_days,omitempty"`
+	Count            int64                  `protobuf:"varint,5,opt,name=count,proto3" json:"count,omitempty"`
+	TotalCount       int64                  `protobuf:"varint,6,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	IsActive         bool                   `protobuf:"varint,7,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
+	Price            int64                  `protobuf:"varint,8,opt,name=price,proto3" json:"price,omitempty"`
+	DurationDays     int64                  `protobuf:"varint,9,opt,name=duration_days,json=durationDays,proto3" json:"duration_days,omitempty"`
+	PayProductId     string                 `protobuf:"bytes,10,opt,name=pay_product_id,json=payProductId,proto3" json:"pay_product_id,omitempty"`
+	HasActiveRewards bool                   `protobuf:"varint,12,opt,name=has_active_rewards,json=hasActiveRewards,proto3" json:"has_active_rewards,omitempty"`
+	CanBuy           bool                   `protobuf:"varint,13,opt,name=can_buy,json=canBuy,proto3" json:"can_buy,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *MonthCardInfo) Reset() {
+	*x = MonthCardInfo{}
+	mi := &file_mallpb_mall_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MonthCardInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MonthCardInfo) ProtoMessage() {}
+
+func (x *MonthCardInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MonthCardInfo.ProtoReflect.Descriptor instead.
+func (*MonthCardInfo) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *MonthCardInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetHasRewardItems() bool {
+	if x != nil {
+		return x.HasRewardItems
+	}
+	return false
+}
+
+func (x *MonthCardInfo) GetRemainingDays() int64 {
+	if x != nil {
+		return x.RemainingDays
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetTotalCount() int64 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *MonthCardInfo) GetPrice() int64 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetDurationDays() int64 {
+	if x != nil {
+		return x.DurationDays
+	}
+	return 0
+}
+
+func (x *MonthCardInfo) GetPayProductId() string {
+	if x != nil {
+		return x.PayProductId
+	}
+	return ""
+}
+
+func (x *MonthCardInfo) GetHasActiveRewards() bool {
+	if x != nil {
+		return x.HasActiveRewards
+	}
+	return false
+}
+
+func (x *MonthCardInfo) GetCanBuy() bool {
+	if x != nil {
+		return x.CanBuy
+	}
+	return false
+}
+
+type GetMallProfilesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMallProfilesRequest) Reset() {
+	*x = GetMallProfilesRequest{}
+	mi := &file_mallpb_mall_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMallProfilesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMallProfilesRequest) ProtoMessage() {}
+
+func (x *GetMallProfilesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMallProfilesRequest.ProtoReflect.Descriptor instead.
+func (*GetMallProfilesRequest) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{9}
+}
+
+type GetMallProfilesReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Profiles      []*MallProfile         `protobuf:"bytes,1,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMallProfilesReply) Reset() {
+	*x = GetMallProfilesReply{}
+	mi := &file_mallpb_mall_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMallProfilesReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMallProfilesReply) ProtoMessage() {}
+
+func (x *GetMallProfilesReply) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMallProfilesReply.ProtoReflect.Descriptor instead.
+func (*GetMallProfilesReply) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetMallProfilesReply) GetProfiles() []*MallProfile {
+	if x != nil {
+		return x.Profiles
+	}
+	return nil
+}
+
+type GetMallListBySlotTypeReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Products      []*ProductInfo         `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
+	RefreshTime   int64                  `protobuf:"varint,2,opt,name=refresh_time,json=refreshTime,proto3" json:"refresh_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMallListBySlotTypeReply) Reset() {
+	*x = GetMallListBySlotTypeReply{}
+	mi := &file_mallpb_mall_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMallListBySlotTypeReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMallListBySlotTypeReply) ProtoMessage() {}
+
+func (x *GetMallListBySlotTypeReply) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMallListBySlotTypeReply.ProtoReflect.Descriptor instead.
+func (*GetMallListBySlotTypeReply) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetMallListBySlotTypeReply) GetProducts() []*ProductInfo {
+	if x != nil {
+		return x.Products
+	}
+	return nil
+}
+
+func (x *GetMallListBySlotTypeReply) GetRefreshTime() int64 {
+	if x != nil {
+		return x.RefreshTime
+	}
+	return 0
+}
+
+type GetMonthCardInfosRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMonthCardInfosRequest) Reset() {
+	*x = GetMonthCardInfosRequest{}
+	mi := &file_mallpb_mall_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMonthCardInfosRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMonthCardInfosRequest) ProtoMessage() {}
+
+func (x *GetMonthCardInfosRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMonthCardInfosRequest.ProtoReflect.Descriptor instead.
+func (*GetMonthCardInfosRequest) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{12}
+}
+
+type GetMonthCardInfosReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MonthCards    []*MonthCardInfo       `protobuf:"bytes,1,rep,name=month_cards,json=monthCards,proto3" json:"month_cards,omitempty"`
+	RefreshTime   int64                  `protobuf:"varint,2,opt,name=refresh_time,json=refreshTime,proto3" json:"refresh_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMonthCardInfosReply) Reset() {
+	*x = GetMonthCardInfosReply{}
+	mi := &file_mallpb_mall_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMonthCardInfosReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMonthCardInfosReply) ProtoMessage() {}
+
+func (x *GetMonthCardInfosReply) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMonthCardInfosReply.ProtoReflect.Descriptor instead.
+func (*GetMonthCardInfosReply) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetMonthCardInfosReply) GetMonthCards() []*MonthCardInfo {
+	if x != nil {
+		return x.MonthCards
+	}
+	return nil
+}
+
+func (x *GetMonthCardInfosReply) GetRefreshTime() int64 {
+	if x != nil {
+		return x.RefreshTime
+	}
+	return 0
+}
+
+type PurchaseReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	IsFirstBuy    bool                   `protobuf:"varint,4,opt,name=is_first_buy,json=isFirstBuy,proto3" json:"is_first_buy,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PurchaseReply) Reset() {
+	*x = PurchaseReply{}
+	mi := &file_mallpb_mall_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PurchaseReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PurchaseReply) ProtoMessage() {}
+
+func (x *PurchaseReply) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PurchaseReply.ProtoReflect.Descriptor instead.
+func (*PurchaseReply) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *PurchaseReply) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PurchaseReply) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *PurchaseReply) GetIsFirstBuy() bool {
+	if x != nil {
+		return x.IsFirstBuy
+	}
+	return false
+}
+
+type ClaimMonthCardRewardRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimMonthCardRewardRequest) Reset() {
+	*x = ClaimMonthCardRewardRequest{}
+	mi := &file_mallpb_mall_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimMonthCardRewardRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimMonthCardRewardRequest) ProtoMessage() {}
+
+func (x *ClaimMonthCardRewardRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimMonthCardRewardRequest.ProtoReflect.Descriptor instead.
+func (*ClaimMonthCardRewardRequest) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ClaimMonthCardRewardRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ClaimMonthCardRewardReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClaimMonthCardRewardReply) Reset() {
+	*x = ClaimMonthCardRewardReply{}
+	mi := &file_mallpb_mall_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClaimMonthCardRewardReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClaimMonthCardRewardReply) ProtoMessage() {}
+
+func (x *ClaimMonthCardRewardReply) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClaimMonthCardRewardReply.ProtoReflect.Descriptor instead.
+func (*ClaimMonthCardRewardReply) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{16}
+}
+
+type NeedNotify struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	IsGiftShopShow      bool                   `protobuf:"varint,1,opt,name=is_gift_shop_show,json=isGiftShopShow,proto3" json:"is_gift_shop_show,omitempty"`
+	IsMonthCardShopShow bool                   `protobuf:"varint,2,opt,name=is_month_card_shop_show,json=isMonthCardShopShow,proto3" json:"is_month_card_shop_show,omitempty"`
+	IsRechargeShopShow  bool                   `protobuf:"varint,3,opt,name=is_recharge_shop_show,json=isRechargeShopShow,proto3" json:"is_recharge_shop_show,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *NeedNotify) Reset() {
+	*x = NeedNotify{}
+	mi := &file_mallpb_mall_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NeedNotify) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NeedNotify) ProtoMessage() {}
+
+func (x *NeedNotify) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NeedNotify.ProtoReflect.Descriptor instead.
+func (*NeedNotify) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *NeedNotify) GetIsGiftShopShow() bool {
+	if x != nil {
+		return x.IsGiftShopShow
+	}
+	return false
+}
+
+func (x *NeedNotify) GetIsMonthCardShopShow() bool {
+	if x != nil {
+		return x.IsMonthCardShopShow
+	}
+	return false
+}
+
+func (x *NeedNotify) GetIsRechargeShopShow() bool {
+	if x != nil {
+		return x.IsRechargeShopShow
+	}
+	return false
+}
+
+type MallMsg struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	IsGiftShopShow      bool                   `protobuf:"varint,1,opt,name=is_gift_shop_show,json=isGiftShopShow,proto3" json:"is_gift_shop_show,omitempty"`
+	IsMonthCardShopShow bool                   `protobuf:"varint,2,opt,name=is_month_card_shop_show,json=isMonthCardShopShow,proto3" json:"is_month_card_shop_show,omitempty"`
+	IsRechargeShopShow  bool                   `protobuf:"varint,3,opt,name=is_recharge_shop_show,json=isRechargeShopShow,proto3" json:"is_recharge_shop_show,omitempty"`
+	IsFirstLogin        bool                   `protobuf:"varint,4,opt,name=is_first_login,json=isFirstLogin,proto3" json:"is_first_login,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *MallMsg) Reset() {
+	*x = MallMsg{}
+	mi := &file_mallpb_mall_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MallMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MallMsg) ProtoMessage() {}
+
+func (x *MallMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MallMsg.ProtoReflect.Descriptor instead.
+func (*MallMsg) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *MallMsg) GetIsGiftShopShow() bool {
+	if x != nil {
+		return x.IsGiftShopShow
+	}
+	return false
+}
+
+func (x *MallMsg) GetIsMonthCardShopShow() bool {
+	if x != nil {
+		return x.IsMonthCardShopShow
+	}
+	return false
+}
+
+func (x *MallMsg) GetIsRechargeShopShow() bool {
+	if x != nil {
+		return x.IsRechargeShopShow
+	}
+	return false
+}
+
+func (x *MallMsg) GetIsFirstLogin() bool {
+	if x != nil {
+		return x.IsFirstLogin
+	}
+	return false
+}
+
+type MonthCardInfoNTF struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MonthCards    []*MonthCardInfo       `protobuf:"bytes,1,rep,name=month_cards,json=monthCards,proto3" json:"month_cards,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MonthCardInfoNTF) Reset() {
+	*x = MonthCardInfoNTF{}
+	mi := &file_mallpb_mall_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MonthCardInfoNTF) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MonthCardInfoNTF) ProtoMessage() {}
+
+func (x *MonthCardInfoNTF) ProtoReflect() protoreflect.Message {
+	mi := &file_mallpb_mall_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MonthCardInfoNTF.ProtoReflect.Descriptor instead.
+func (*MonthCardInfoNTF) Descriptor() ([]byte, []int) {
+	return file_mallpb_mall_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *MonthCardInfoNTF) GetMonthCards() []*MonthCardInfo {
+	if x != nil {
+		return x.MonthCards
+	}
+	return nil
+}
+
 var File_mallpb_mall_proto protoreflect.FileDescriptor
 
 const file_mallpb_mall_proto_rawDesc = "" +
@@ -376,7 +1337,79 @@ const file_mallpb_mall_proto_rawDesc = "" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x1f\n" +
 	"\vreward_info\x18\x03 \x01(\fR\n" +
 	"rewardInfo\x12\x16\n" +
-	"\x06result\x18\x05 \x01(\fR\x06resultB\x1aZ\x18qq-farm-bot/proto/mallpbb\x06proto3"
+	"\x06result\x18\x05 \x01(\fR\x06result\":\n" +
+	"\vMallProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
+	"\tmall_type\x18\x02 \x01(\x05R\bmallType\"\xb7\x01\n" +
+	"\vProductInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\tslot_type\x18\x03 \x01(\x05R\bslotType\x12\x17\n" +
+	"\ais_free\x18\x06 \x01(\bR\x06isFree\x122\n" +
+	"\x15is_available_purchase\x18\b \x01(\bR\x13isAvailablePurchase\x12\x1a\n" +
+	"\bdiscount\x18\t \x01(\tR\bdiscount\"g\n" +
+	"\x0fRestrictionInfo\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\x05R\x04type\x12#\n" +
+	"\rcurrent_count\x18\x02 \x01(\x03R\fcurrentCount\x12\x1b\n" +
+	"\tmax_count\x18\x03 \x01(\x03R\bmaxCount\"\xec\x02\n" +
+	"\rMonthCardInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12(\n" +
+	"\x10has_reward_items\x18\x03 \x01(\bR\x0ehasRewardItems\x12%\n" +
+	"\x0eremaining_days\x18\x04 \x01(\x03R\rremainingDays\x12\x14\n" +
+	"\x05count\x18\x05 \x01(\x03R\x05count\x12\x1f\n" +
+	"\vtotal_count\x18\x06 \x01(\x03R\n" +
+	"totalCount\x12\x1b\n" +
+	"\tis_active\x18\a \x01(\bR\bisActive\x12\x14\n" +
+	"\x05price\x18\b \x01(\x03R\x05price\x12#\n" +
+	"\rduration_days\x18\t \x01(\x03R\fdurationDays\x12$\n" +
+	"\x0epay_product_id\x18\n" +
+	" \x01(\tR\fpayProductId\x12,\n" +
+	"\x12has_active_rewards\x18\f \x01(\bR\x10hasActiveRewards\x12\x17\n" +
+	"\acan_buy\x18\r \x01(\bR\x06canBuy\"\x18\n" +
+	"\x16GetMallProfilesRequest\"N\n" +
+	"\x14GetMallProfilesReply\x126\n" +
+	"\bprofiles\x18\x01 \x03(\v2\x1a.gamepb.mallpb.MallProfileR\bprofiles\"w\n" +
+	"\x1aGetMallListBySlotTypeReply\x126\n" +
+	"\bproducts\x18\x01 \x03(\v2\x1a.gamepb.mallpb.ProductInfoR\bproducts\x12!\n" +
+	"\frefresh_time\x18\x02 \x01(\x03R\vrefreshTime\"\x1a\n" +
+	"\x18GetMonthCardInfosRequest\"z\n" +
+	"\x16GetMonthCardInfosReply\x12=\n" +
+	"\vmonth_cards\x18\x01 \x03(\v2\x1c.gamepb.mallpb.MonthCardInfoR\n" +
+	"monthCards\x12!\n" +
+	"\frefresh_time\x18\x02 \x01(\x03R\vrefreshTime\"[\n" +
+	"\rPurchaseReply\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12 \n" +
+	"\fis_first_buy\x18\x04 \x01(\bR\n" +
+	"isFirstBuy\"-\n" +
+	"\x1bClaimMonthCardRewardRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"\x1b\n" +
+	"\x19ClaimMonthCardRewardReply\"\xa0\x01\n" +
+	"\n" +
+	"NeedNotify\x12)\n" +
+	"\x11is_gift_shop_show\x18\x01 \x01(\bR\x0eisGiftShopShow\x124\n" +
+	"\x17is_month_card_shop_show\x18\x02 \x01(\bR\x13isMonthCardShopShow\x121\n" +
+	"\x15is_recharge_shop_show\x18\x03 \x01(\bR\x12isRechargeShopShow\"\xc3\x01\n" +
+	"\aMallMsg\x12)\n" +
+	"\x11is_gift_shop_show\x18\x01 \x01(\bR\x0eisGiftShopShow\x124\n" +
+	"\x17is_month_card_shop_show\x18\x02 \x01(\bR\x13isMonthCardShopShow\x121\n" +
+	"\x15is_recharge_shop_show\x18\x03 \x01(\bR\x12isRechargeShopShow\x12$\n" +
+	"\x0eis_first_login\x18\x04 \x01(\bR\fisFirstLogin\"Q\n" +
+	"\x10MonthCardInfoNTF\x12=\n" +
+	"\vmonth_cards\x18\x01 \x03(\v2\x1c.gamepb.mallpb.MonthCardInfoR\n" +
+	"monthCards*X\n" +
+	"\bSlotType\x12\x15\n" +
+	"\x11SLOT_TYPE_UNKNOWN\x10\x00\x12\r\n" +
+	"\tGIFT_SHOP\x10\x01\x12\x13\n" +
+	"\x0fMONTH_CARD_SHOP\x10\x02\x12\x11\n" +
+	"\rRECHARGE_SHOP\x10\x03*`\n" +
+	"\x0fRestrictionType\x12\x1c\n" +
+	"\x18RESTRICTION_TYPE_UNKNOWN\x10\x00\x12\t\n" +
+	"\x05DAILY\x10\x01\x12\n" +
+	"\n" +
+	"\x06WEEKLY\x10\x02\x12\v\n" +
+	"\aMONTHLY\x10\x03\x12\v\n" +
+	"\aFOREVER\x10\x04B\x1aZ\x18qq-farm-bot/proto/mallpbb\x06proto3"
 
 var (
 	file_mallpb_mall_proto_rawDescOnce sync.Once
@@ -390,20 +1423,42 @@ func file_mallpb_mall_proto_rawDescGZIP() []byte {
 	return file_mallpb_mall_proto_rawDescData
 }
 
-var file_mallpb_mall_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_mallpb_mall_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_mallpb_mall_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_mallpb_mall_proto_goTypes = []any{
-	(*GetMallListBySlotTypeRequest)(nil),  // 0: gamepb.mallpb.GetMallListBySlotTypeRequest
-	(*GetMallListBySlotTypeResponse)(nil), // 1: gamepb.mallpb.GetMallListBySlotTypeResponse
-	(*MallGoods)(nil),                     // 2: gamepb.mallpb.MallGoods
-	(*PurchaseRequest)(nil),               // 3: gamepb.mallpb.PurchaseRequest
-	(*PurchaseResponse)(nil),              // 4: gamepb.mallpb.PurchaseResponse
+	(SlotType)(0),                         // 0: gamepb.mallpb.SlotType
+	(RestrictionType)(0),                  // 1: gamepb.mallpb.RestrictionType
+	(*GetMallListBySlotTypeRequest)(nil),  // 2: gamepb.mallpb.GetMallListBySlotTypeRequest
+	(*GetMallListBySlotTypeResponse)(nil), // 3: gamepb.mallpb.GetMallListBySlotTypeResponse
+	(*MallGoods)(nil),                     // 4: gamepb.mallpb.MallGoods
+	(*PurchaseRequest)(nil),               // 5: gamepb.mallpb.PurchaseRequest
+	(*PurchaseResponse)(nil),              // 6: gamepb.mallpb.PurchaseResponse
+	(*MallProfile)(nil),                   // 7: gamepb.mallpb.MallProfile
+	(*ProductInfo)(nil),                   // 8: gamepb.mallpb.ProductInfo
+	(*RestrictionInfo)(nil),               // 9: gamepb.mallpb.RestrictionInfo
+	(*MonthCardInfo)(nil),                 // 10: gamepb.mallpb.MonthCardInfo
+	(*GetMallProfilesRequest)(nil),        // 11: gamepb.mallpb.GetMallProfilesRequest
+	(*GetMallProfilesReply)(nil),          // 12: gamepb.mallpb.GetMallProfilesReply
+	(*GetMallListBySlotTypeReply)(nil),    // 13: gamepb.mallpb.GetMallListBySlotTypeReply
+	(*GetMonthCardInfosRequest)(nil),      // 14: gamepb.mallpb.GetMonthCardInfosRequest
+	(*GetMonthCardInfosReply)(nil),        // 15: gamepb.mallpb.GetMonthCardInfosReply
+	(*PurchaseReply)(nil),                 // 16: gamepb.mallpb.PurchaseReply
+	(*ClaimMonthCardRewardRequest)(nil),   // 17: gamepb.mallpb.ClaimMonthCardRewardRequest
+	(*ClaimMonthCardRewardReply)(nil),     // 18: gamepb.mallpb.ClaimMonthCardRewardReply
+	(*NeedNotify)(nil),                    // 19: gamepb.mallpb.NeedNotify
+	(*MallMsg)(nil),                       // 20: gamepb.mallpb.MallMsg
+	(*MonthCardInfoNTF)(nil),              // 21: gamepb.mallpb.MonthCardInfoNTF
 }
 var file_mallpb_mall_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	7,  // 0: gamepb.mallpb.GetMallProfilesReply.profiles:type_name -> gamepb.mallpb.MallProfile
+	8,  // 1: gamepb.mallpb.GetMallListBySlotTypeReply.products:type_name -> gamepb.mallpb.ProductInfo
+	10, // 2: gamepb.mallpb.GetMonthCardInfosReply.month_cards:type_name -> gamepb.mallpb.MonthCardInfo
+	10, // 3: gamepb.mallpb.MonthCardInfoNTF.month_cards:type_name -> gamepb.mallpb.MonthCardInfo
+	4,  // [4:4] is the sub-list for method output_type
+	4,  // [4:4] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_mallpb_mall_proto_init() }
@@ -416,13 +1471,14 @@ func file_mallpb_mall_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mallpb_mall_proto_rawDesc), len(file_mallpb_mall_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   5,
+			NumEnums:      2,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_mallpb_mall_proto_goTypes,
 		DependencyIndexes: file_mallpb_mall_proto_depIdxs,
+		EnumInfos:         file_mallpb_mall_proto_enumTypes,
 		MessageInfos:      file_mallpb_mall_proto_msgTypes,
 	}.Build()
 	File_mallpb_mall_proto = out.File

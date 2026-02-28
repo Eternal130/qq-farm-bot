@@ -2,6 +2,51 @@ syntax = "proto3";
 package corepb;
 option go_package = "qq-farm-bot/proto/corepb";
 
+enum ItemId {
+    ITEM_ID_UNKNOWN = 0;
+    GOLD = 1001;
+    DIAMOND = 1002;
+    BALANCE = 1004;
+    PAYACC = 1005;
+    INORG_FERT = 1011;
+    ORG_FERT = 1012;
+    EXP = 1101;
+    ACTIVE_POINT = 4001;
+}
+
+enum Constant {
+    CONSTANT_UNKNOWN = 0;
+    CONSTANT_HEARTBEAT_INTERVAL = 30;
+    CONSTANT_HEARTBEAT_TIMEOUT = 91;
+}
+
+enum OSType {
+    OSTYPE_IOS = 0;
+    OSTYPE_ANDROID = 1;
+    OSTYPE_PC = 2;
+    OSTYPE_HARMONY = 12;
+}
+
+enum PlatFromType {
+    PLATFROMTYPE_UNKNOWN = 0;
+    PLATFROMTYPE_WX = 1;
+    PLATFROMTYPE_QQ = 2;
+    PLATFROMTYPE_PC = 100;
+}
+
+enum Gender {
+    GENDER_UNKNOWN = 0;
+    MALE = 1;
+    FEMALE = 2;
+}
+
+message ItemPreview {
+    int64 id = 1;
+    int64 lower_count = 2;
+    int64 upper_count = 3;
+    int64 expire_time = 4;
+}
+
 message Item {
     int64 id = 1;
     int64 count = 2;
@@ -9,6 +54,11 @@ message Item {
     int64 uid = 6;
     bool is_new = 7;
     repeated int64 mutant_types = 8;
+}
+
+message ItemShow {
+    int64 sell_price = 1;
+    int64 sell_price_id = 2;
 }
 
 message ItemBag {

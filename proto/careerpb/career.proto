@@ -1,0 +1,20 @@
+syntax = "proto3";
+package gamepb.careerpb;
+option go_package = "qq-farm-bot/proto/careerpb";
+
+message CareerInfoGetRequest {
+    int64 gid = 1;
+}
+
+message CareerInfoGetReply {
+    int64 total_harvested = 2;
+    int64 total_stolen = 3;
+    string name = 4;
+    string avatar_url = 5;
+    string remark = 6;
+    string signature = 7;
+    int32 gender = 8;
+    int64 level = 9;
+    int64 exp = 10;
+    int64 gid = 11;
+}

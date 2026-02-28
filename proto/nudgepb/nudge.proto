@@ -1,0 +1,28 @@
+syntax = "proto3";
+package gamepb.nudgepb;
+option go_package = "qq-farm-bot/proto/nudgepb";
+
+message HandleNudgeResponseRequest {
+    int64 friend_gid = 1;
+    int64 event_id = 2;
+    bool clicked = 3;
+    bool disable_popup = 4;
+}
+
+message HandleNudgeResponseReply {
+    bool disable_popup = 1;
+}
+
+message SSCheckAndIncrDailyNudgedCountRequest {
+    int64 limit = 1;
+}
+message SSCheckAndIncrDailyNudgedCountReply {
+    bool allowed = 1;
+    int64 current_count = 2;
+    bool disable_nudge = 3;
+}
+
+message SSGetDailyNudgedCountRequest {}
+message SSGetDailyNudgedCountReply {
+    int64 count = 1;
+}

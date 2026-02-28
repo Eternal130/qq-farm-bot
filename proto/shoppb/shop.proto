@@ -4,6 +4,25 @@ option go_package = "qq-farm-bot/proto/shoppb";
 
 import "corepb/core.proto";
 
+enum ShopType {
+    SHOP_TYPE_UNKNOWN = 0;
+    ITEM = 1;
+    SEED = 2;
+    PET = 3;
+}
+
+enum System {
+    SYSTEM_UNKNOWN = 0;
+    GM = 1;
+    FixMe = 2;
+    RoleBasic = 101;
+    Shop = 102;
+    Plant = 104;
+    Share = 105;
+    Task = 106;
+    Bag = 107;
+}
+
 message ShopProfile {
     int64 shop_id = 1;
     string shop_name = 2;
@@ -32,6 +51,11 @@ message Cond {
     int64 param = 2;
 }
 
+message TemplateStatus {
+    string template_id = 1;
+    bool subscribed = 2;
+}
+
 message ShopProfilesRequest {}
 message ShopProfilesReply { repeated ShopProfile shop_profiles = 1; }
 
@@ -47,6 +71,16 @@ message BuyGoodsReply {
     GoodsInfo goods = 1;
     repeated corepb.Item get_items = 2;
     repeated corepb.Item cost_items = 3;
+}
+
+message SetSubscribeMessageStatusRequest {
+    repeated TemplateStatus statuses = 1;
+}
+message SetSubscribeMessageStatusReply {}
+
+message GetSubscribeMessageStatusRequest {}
+message GetSubscribeMessageStatusReply {
+    repeated TemplateStatus statuses = 1;
 }
 
 message GoodsUnlockNotify { repeated GoodsInfo goods_list = 1; }

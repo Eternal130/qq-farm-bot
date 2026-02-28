@@ -3,14 +3,29 @@ package gamepb.mallpb;
 option go_package = "qq-farm-bot/proto/mallpb";
 
 // MallService — 商城服务 (点券购买化肥礼包等)
-// Ported from other/qq-farm-bot/proto/mallpb.proto
 
+enum SlotType {
+    SLOT_TYPE_UNKNOWN = 0;
+    GIFT_SHOP = 1;
+    MONTH_CARD_SHOP = 2;
+    RECHARGE_SHOP = 3;
+}
+
+enum RestrictionType {
+    RESTRICTION_TYPE_UNKNOWN = 0;
+    DAILY = 1;
+    WEEKLY = 2;
+    MONTHLY = 3;
+    FOREVER = 4;
+}
+
+// Legacy messages (raw bytes approach — kept for backward compatibility)
 message GetMallListBySlotTypeRequest {
-    int32 slot_type = 1;  // 商城类型 (1 = 默认)
+    int32 slot_type = 1;
 }
 
 message GetMallListBySlotTypeResponse {
-    repeated bytes goods_list = 1;  // 商品列表 (每个元素是序列化的 MallGoods)
+    repeated bytes goods_list = 1;
     int64 timestamp = 2;
 }
 
@@ -18,10 +33,10 @@ message MallGoods {
     int32 goods_id = 1;
     string name = 2;
     int32 type = 3;
-    bytes item_ids = 4;    // 物品ID列表 (序列化数据)
-    bytes price = 5;       // 价格 (序列化数据, field=2 为点券价格)
+    bytes item_ids = 4;
+    bytes price = 5;
     bool is_free = 6;
-    bytes limit = 7;       // 限购信息 (序列化数据)
+    bytes limit = 7;
     bool is_limited = 8;
     string discount = 10;
 }
@@ -36,4 +51,83 @@ message PurchaseResponse {
     int32 count = 2;
     bytes reward_info = 3;
     bytes result = 5;
+}
+
+// Properly typed messages
+message MallProfile {
+    int64 id = 1;
+    int32 mall_type = 2;
+}
+
+message ProductInfo {
+    int64 id = 1;
+    string name = 2;
+    int32 slot_type = 3;
+    bool is_free = 6;
+    bool is_available_purchase = 8;
+    string discount = 9;
+}
+
+message RestrictionInfo {
+    int32 type = 1;
+    int64 current_count = 2;
+    int64 max_count = 3;
+}
+
+message MonthCardInfo {
+    int64 id = 1;
+    bool has_reward_items = 3;
+    int64 remaining_days = 4;
+    int64 count = 5;
+    int64 total_count = 6;
+    bool is_active = 7;
+    int64 price = 8;
+    int64 duration_days = 9;
+    string pay_product_id = 10;
+    bool has_active_rewards = 12;
+    bool can_buy = 13;
+}
+
+message GetMallProfilesRequest {}
+message GetMallProfilesReply {
+    repeated MallProfile profiles = 1;
+}
+
+message GetMallListBySlotTypeReply {
+    repeated ProductInfo products = 1;
+    int64 refresh_time = 2;
+}
+
+message GetMonthCardInfosRequest {}
+message GetMonthCardInfosReply {
+    repeated MonthCardInfo month_cards = 1;
+    int64 refresh_time = 2;
+}
+
+message PurchaseReply {
+    int64 id = 1;
+    bool success = 2;
+    bool is_first_buy = 4;
+}
+
+message ClaimMonthCardRewardRequest {
+    int64 id = 1;
+}
+message ClaimMonthCardRewardReply {}
+
+message NeedNotify {
+    bool is_gift_shop_show = 1;
+    bool is_month_card_shop_show = 2;
+    bool is_recharge_shop_show = 3;
+}
+
+message MallMsg {
+    bool is_gift_shop_show = 1;
+    bool is_month_card_shop_show = 2;
+    bool is_recharge_shop_show = 3;
+    bool is_first_login = 4;
+}
+
+message MonthCardInfoNTF {
+    repeated MonthCardInfo month_cards = 1;
 }

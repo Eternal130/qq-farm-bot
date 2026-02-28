@@ -32,6 +32,11 @@ message GameFriend {
     int32 authorized_status = 10;
 }
 
+message Illustrated {
+    int32 normal_progress = 1;
+    int32 premium_progress = 2;
+}
+
 message GetAllRequest {}
 message GetAllReply {
     repeated GameFriend game_friends = 1;
@@ -53,6 +58,11 @@ message Application {
     int64 level = 6;
 }
 
+message Invitation {
+    string open_id = 1;
+    int64 time_at = 2;
+}
+
 message GetApplicationsRequest {}
 message GetApplicationsReply {
     repeated Application applications = 1;
@@ -68,5 +78,29 @@ message RejectFriendsReply {}
 message SetBlockApplicationsRequest { bool block = 1; }
 message SetBlockApplicationsReply { bool block = 1; }
 
+message GetGameFriendsRequest {}
+message GetGameFriendsReply {
+    repeated GameFriend game_friends = 1;
+}
+
+message SetTagsRequest {
+    int64 friend_gid = 1;
+    Tags tags = 2;
+}
+message SetTagsReply {}
+
+message ReportInvitationRequest {
+    string open_id = 1;
+}
+message ReportInvitationReply {}
+
+message DelFriendRequest {
+    int64 gid = 1;
+}
+message DelFriendReply {}
+
 message FriendApplicationReceivedNotify { repeated Application applications = 1; }
 message FriendAddedNotify { repeated GameFriend friends = 1; }
+message DelFriendNotify {
+    int64 gid = 1;
+}

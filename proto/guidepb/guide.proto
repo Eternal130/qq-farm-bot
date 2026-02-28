@@ -1,0 +1,40 @@
+syntax = "proto3";
+package gamepb.guidepb;
+option go_package = "qq-farm-bot/proto/guidepb";
+
+enum Nodestatus {
+    NODESTATUS_UNKNOWN = 0;
+    COMPLETED = 1;
+    UNCOMPLETED = 2;
+    REWARDED = 3;
+}
+
+message GuideInfo {
+    int64 curr_node_id = 1;
+}
+
+message WeakGuideNode {
+    int64 id = 1;
+    int32 status = 2;
+}
+
+message SetCurrNodeRequest {
+    int64 node_id = 1;
+}
+message SetCurrNodeReply {}
+
+message GetInfoRequest {}
+message GetInfoReply {
+    GuideInfo guide_info = 1;
+    repeated WeakGuideNode weak_guide_nodes = 2;
+}
+
+message SetWeakGuideNodeCompleteRequest {
+    int64 node_id = 1;
+}
+message SetWeakGuideNodeCompleteReply {}
+
+message ClaimWeakGuideRewardRequest {
+    int64 node_id = 1;
+}
+message ClaimWeakGuideRewardReply {}

@@ -486,6 +486,94 @@ func (x *BatchUseReply) GetItems() []*corepb.Item {
 	return nil
 }
 
+type CannelNewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        int64                  `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CannelNewRequest) Reset() {
+	*x = CannelNewRequest{}
+	mi := &file_itempb_item_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CannelNewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CannelNewRequest) ProtoMessage() {}
+
+func (x *CannelNewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_itempb_item_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CannelNewRequest.ProtoReflect.Descriptor instead.
+func (*CannelNewRequest) Descriptor() ([]byte, []int) {
+	return file_itempb_item_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CannelNewRequest) GetItemId() int64 {
+	if x != nil {
+		return x.ItemId
+	}
+	return 0
+}
+
+type CannelNewReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        int64                  `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CannelNewReply) Reset() {
+	*x = CannelNewReply{}
+	mi := &file_itempb_item_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CannelNewReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CannelNewReply) ProtoMessage() {}
+
+func (x *CannelNewReply) ProtoReflect() protoreflect.Message {
+	mi := &file_itempb_item_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CannelNewReply.ProtoReflect.Descriptor instead.
+func (*CannelNewReply) Descriptor() ([]byte, []int) {
+	return file_itempb_item_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CannelNewReply) GetItemId() int64 {
+	if x != nil {
+		return x.ItemId
+	}
+	return 0
+}
+
 var File_itempb_item_proto protoreflect.FileDescriptor
 
 const file_itempb_item_proto_rawDesc = "" +
@@ -517,7 +605,11 @@ const file_itempb_item_proto_rawDesc = "" +
 	"\x0fBatchUseRequest\x121\n" +
 	"\x05items\x18\x01 \x03(\v2\x1b.gamepb.itempb.BatchUseItemR\x05items\"3\n" +
 	"\rBatchUseReply\x12\"\n" +
-	"\x05items\x18\x01 \x03(\v2\f.corepb.ItemR\x05itemsB\x1aZ\x18qq-farm-bot/proto/itempbb\x06proto3"
+	"\x05items\x18\x01 \x03(\v2\f.corepb.ItemR\x05items\"+\n" +
+	"\x10CannelNewRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\x03R\x06itemId\")\n" +
+	"\x0eCannelNewReply\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\x03R\x06itemIdB\x1aZ\x18qq-farm-bot/proto/itempbb\x06proto3"
 
 var (
 	file_itempb_item_proto_rawDescOnce sync.Once
@@ -531,31 +623,33 @@ func file_itempb_item_proto_rawDescGZIP() []byte {
 	return file_itempb_item_proto_rawDescData
 }
 
-var file_itempb_item_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_itempb_item_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_itempb_item_proto_goTypes = []any{
-	(*BagRequest)(nil),      // 0: gamepb.itempb.BagRequest
-	(*BagReply)(nil),        // 1: gamepb.itempb.BagReply
-	(*SellRequest)(nil),     // 2: gamepb.itempb.SellRequest
-	(*SellReply)(nil),       // 3: gamepb.itempb.SellReply
-	(*UseRequest)(nil),      // 4: gamepb.itempb.UseRequest
-	(*UseReply)(nil),        // 5: gamepb.itempb.UseReply
-	(*ItemNotify)(nil),      // 6: gamepb.itempb.ItemNotify
-	(*BatchUseItem)(nil),    // 7: gamepb.itempb.BatchUseItem
-	(*BatchUseRequest)(nil), // 8: gamepb.itempb.BatchUseRequest
-	(*BatchUseReply)(nil),   // 9: gamepb.itempb.BatchUseReply
-	(*corepb.ItemBag)(nil),  // 10: corepb.ItemBag
-	(*corepb.Item)(nil),     // 11: corepb.Item
-	(*corepb.ItemChg)(nil),  // 12: corepb.ItemChg
+	(*BagRequest)(nil),       // 0: gamepb.itempb.BagRequest
+	(*BagReply)(nil),         // 1: gamepb.itempb.BagReply
+	(*SellRequest)(nil),      // 2: gamepb.itempb.SellRequest
+	(*SellReply)(nil),        // 3: gamepb.itempb.SellReply
+	(*UseRequest)(nil),       // 4: gamepb.itempb.UseRequest
+	(*UseReply)(nil),         // 5: gamepb.itempb.UseReply
+	(*ItemNotify)(nil),       // 6: gamepb.itempb.ItemNotify
+	(*BatchUseItem)(nil),     // 7: gamepb.itempb.BatchUseItem
+	(*BatchUseRequest)(nil),  // 8: gamepb.itempb.BatchUseRequest
+	(*BatchUseReply)(nil),    // 9: gamepb.itempb.BatchUseReply
+	(*CannelNewRequest)(nil), // 10: gamepb.itempb.CannelNewRequest
+	(*CannelNewReply)(nil),   // 11: gamepb.itempb.CannelNewReply
+	(*corepb.ItemBag)(nil),   // 12: corepb.ItemBag
+	(*corepb.Item)(nil),      // 13: corepb.Item
+	(*corepb.ItemChg)(nil),   // 14: corepb.ItemChg
 }
 var file_itempb_item_proto_depIdxs = []int32{
-	10, // 0: gamepb.itempb.BagReply.item_bag:type_name -> corepb.ItemBag
-	11, // 1: gamepb.itempb.SellRequest.items:type_name -> corepb.Item
-	11, // 2: gamepb.itempb.SellReply.sell_items:type_name -> corepb.Item
-	11, // 3: gamepb.itempb.SellReply.get_items:type_name -> corepb.Item
-	11, // 4: gamepb.itempb.UseReply.items:type_name -> corepb.Item
-	12, // 5: gamepb.itempb.ItemNotify.items:type_name -> corepb.ItemChg
+	12, // 0: gamepb.itempb.BagReply.item_bag:type_name -> corepb.ItemBag
+	13, // 1: gamepb.itempb.SellRequest.items:type_name -> corepb.Item
+	13, // 2: gamepb.itempb.SellReply.sell_items:type_name -> corepb.Item
+	13, // 3: gamepb.itempb.SellReply.get_items:type_name -> corepb.Item
+	13, // 4: gamepb.itempb.UseReply.items:type_name -> corepb.Item
+	14, // 5: gamepb.itempb.ItemNotify.items:type_name -> corepb.ItemChg
 	7,  // 6: gamepb.itempb.BatchUseRequest.items:type_name -> gamepb.itempb.BatchUseItem
-	11, // 7: gamepb.itempb.BatchUseReply.items:type_name -> corepb.Item
+	13, // 7: gamepb.itempb.BatchUseReply.items:type_name -> corepb.Item
 	8,  // [8:8] is the sub-list for method output_type
 	8,  // [8:8] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
@@ -574,7 +668,7 @@ func file_itempb_item_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_itempb_item_proto_rawDesc), len(file_itempb_item_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

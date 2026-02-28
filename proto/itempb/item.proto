@@ -28,3 +28,10 @@ message BatchUseItem {
 }
 message BatchUseRequest { repeated BatchUseItem items = 1; }
 message BatchUseReply { repeated corepb.Item items = 1; }
+
+message CannelNewRequest {
+    int64 item_id = 1;
+}
+message CannelNewReply {
+    int64 item_id = 1;
+}

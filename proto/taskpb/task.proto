@@ -4,6 +4,25 @@ option go_package = "qq-farm-bot/proto/taskpb";
 
 import "corepb/core.proto";
 
+enum TaskType {
+    TASK_TYPE_UNKNOWN = 0;
+    GROWTH_TASK = 1;
+    DAILY_TASK = 2;
+    SIDE_QUEST = 3;
+}
+
+enum ActiveType {
+    ACTIVE_TYPE_UNKNOWN = 0;
+    DAILYACTIVE = 1;
+    WEEKLYACTIVE = 2;
+}
+
+enum ActiveStatus {
+    NONE_UNKNOWN = 0;
+    WAIT = 1;
+    DONE = 2;
+}
+
 message Task {
     int64 id = 1;
     int64 progress = 2;
@@ -24,6 +43,12 @@ message Active {
     int64 id = 1;
     int32 status = 2;
     repeated corepb.Item items = 3;
+}
+
+message ActiveReward {
+    int64 point_id = 1;
+    int64 need_progress = 2;
+    int32 status = 3;
 }
 
 message TaskInfo {
@@ -55,5 +80,16 @@ message BatchClaimTaskRewardReply {
     TaskInfo task_info = 2;
     repeated corepb.Item compensated_items = 3;
 }
+
+message ClientReportProgressRequest {
+    int64 task_id = 1;
+    int64 progress = 2;
+}
+message ClientReportProgressReply {}
+
+message ClaimDailyRewardRequest {
+    int32 type = 1;
+}
+message ClaimDailyRewardReply {}
 
 message TaskInfoNotify { TaskInfo task_info = 1; }

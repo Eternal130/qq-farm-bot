@@ -1,0 +1,76 @@
+syntax = "proto3";
+package gamepb.paypb;
+option go_package = "qq-farm-bot/proto/paypb";
+
+message RechargeInfo {
+    int64 balance = 1;
+    int64 gen_balance = 2;
+    int64 save_sum = 3;
+    int64 direct_sum = 4;
+}
+
+message DiamondItem {
+    int64 id = 1;
+    string name = 2;
+    string icon = 3;
+    int64 price = 4;
+    int64 diamond = 5;
+    int64 bonus = 6;
+    string product_id = 7;
+    bool first_charged = 8;
+}
+
+message PayOrderInfo {
+    string order_id = 1;
+    string product_id = 2;
+    string sign_data = 10;
+    string pay_sig = 11;
+    string signature = 12;
+    string pre_pay_id = 20;
+    int64 star_currency = 21;
+    int64 set_env = 22;
+    string offer_id = 23;
+    string token_url = 24;
+    string pf = 25;
+    string zone_id = 26;
+    string open_id = 27;
+    string open_key = 28;
+    string session_id = 29;
+    string session_type = 30;
+}
+
+message GetRechargeInfoRequest {
+    string reason = 1;
+}
+message GetRechargeInfoReply {
+    RechargeInfo recharge_info = 1;
+}
+
+message RechargeInfoNotify {
+    string reason = 2;
+}
+
+message GetDiamondItemsRequest {}
+message GetDiamondItemsReply {
+    repeated DiamondItem items = 1;
+}
+
+message PayDiamondRequest {
+    int64 id = 1;
+}
+message PayDiamondReply {
+    PayOrderInfo order_info = 1;
+}
+
+message PayDirectBuyRequest {
+    int64 id = 1;
+    int64 num = 2;
+}
+message PayDirectBuyReply {}
+
+message PayDoneReportRequest {
+    int64 error_code = 1;
+    string order_id = 2;
+    string product_id = 3;
+}
+message PayDoneReportReply {}

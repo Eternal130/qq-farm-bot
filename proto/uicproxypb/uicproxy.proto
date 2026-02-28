@@ -1,0 +1,56 @@
+syntax = "proto3";
+package gamepb.uicproxypb;
+option go_package = "qq-farm-bot/proto/uicproxypb";
+
+message Text {
+    string result_text = 2;
+    bool is_dirty = 3;
+    string reason = 4;
+}
+
+message TextItem {
+    string text = 1;
+    string reason = 2;
+}
+
+message Pic {
+    string result_url = 1;
+    bool is_dirty = 2;
+    int64 dirty_type = 3;
+    string reason = 4;
+}
+
+message PicItem {
+    string pic_url = 1;
+    string reason = 2;
+}
+
+message ModerateTextRequest {
+    string text = 1;
+    string reason = 2;
+}
+message ModerateTextReply {
+    string reason = 2;
+}
+
+message BatchModerateTextRequest {
+    repeated TextItem items = 1;
+}
+message BatchModerateTextReply {
+    repeated Text results = 1;
+}
+
+message ModeratePicRequest {
+    string pic_url = 1;
+    string reason = 2;
+}
+message ModeratePicReply {
+    string reason = 2;
+}
+
+message BatchModeratePicRequest {
+    repeated PicItem items = 1;
+}
+message BatchModeratePicReply {
+    repeated Pic results = 1;
+}

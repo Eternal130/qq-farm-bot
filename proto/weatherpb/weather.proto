@@ -1,0 +1,20 @@
+syntax = "proto3";
+package gamepb.weatherpb;
+option go_package = "qq-farm-bot/proto/weatherpb";
+
+message WeatherSlot {
+    int64 start_time = 1;
+    int64 end_time = 2;
+    int64 weather = 3;
+    bool is_current = 4;
+}
+
+message GetTodayWeatherRequest {}
+message GetTodayWeatherReply {
+    repeated WeatherSlot slots = 1;
+}
+
+message GetCurrentWeatherRequest {}
+message GetCurrentWeatherReply {
+    WeatherSlot current = 1;
+}

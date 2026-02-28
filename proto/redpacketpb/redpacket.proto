@@ -1,0 +1,38 @@
+syntax = "proto3";
+package gamepb.redpacketpb;
+option go_package = "qq-farm-bot/proto/redpacketpb";
+
+enum ActivityStatus {
+    ACTIVITY_STATUS_UNKNOWN = 0;
+    ACTIVITY_STATUS_NORMAL = 1;
+    ACTIVITY_STATUS_NOT_STARTED = 2;
+    ACTIVITY_STATUS_ENDED = 3;
+    ACTIVITY_STATUS_NOT_UNLOCKED = 4;
+    ACTIVITY_STATUS_LIMIT_REACHED = 5;
+}
+
+message ActivityStatusInfo {
+    int64 activity_id = 1;
+    bool claimed_today = 2;
+    int32 status = 3;
+    string act_description = 4;
+    string act_name = 5;
+    string act_time = 6;
+    string act_instructions = 7;
+}
+
+message GetTodayClaimStatusRequest {}
+message GetTodayClaimStatusReply {
+    repeated ActivityStatusInfo activities = 1;
+}
+
+message GetTodayClaimStatusNotify {
+    repeated ActivityStatusInfo activities = 1;
+}
+
+message ClaimRedPacketRequest {
+    int64 activity_id = 1;
+}
+message ClaimRedPacketReply {
+    int32 status = 1;
+}

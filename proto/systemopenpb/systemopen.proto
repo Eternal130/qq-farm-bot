@@ -1,0 +1,21 @@
+syntax = "proto3";
+package gamepb.systemopenpb;
+option go_package = "qq-farm-bot/proto/systemopenpb";
+
+enum SystemName {
+    SYSTEM_NAME_UNKNOWN = 0;
+    FRIEND_TREE = 101;
+    ILLUSTRATED = 104;
+    RECHARGE_BONUS = 105;
+    WEATHER = 106;
+    MUTANT = 107;
+    MALL = 108;
+    FRIEND_RECOMMEND = 109;
+    PET = 110;
+    LAND_UPGRADE = 111;
+    PRECISION_FERTILIZATION = 112;
+}
+
+message SystemUnlockNotify {
+    repeated int64 system_ids = 1;
+}

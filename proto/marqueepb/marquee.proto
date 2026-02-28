@@ -1,0 +1,27 @@
+syntax = "proto3";
+package gamepb.marqueepb;
+option go_package = "qq-farm-bot/proto/marqueepb";
+
+enum MarqueeType {
+    MARQUEE_UNKNOWN = 0;
+    PERSISTENT = 1;
+}
+
+message Msg {
+    int64 uuid = 1;
+    int32 config_id = 2;
+    int64 expire_time = 3;
+    int32 type = 4;
+    string content = 5;
+    int32 priority = 6;
+    int32 display_count = 7;
+}
+
+message GetMarqueeRequest {}
+message GetMarqueeReply {
+    repeated Msg messages = 1;
+}
+
+message MarqueeNotify {
+    repeated Msg messages = 1;
+}

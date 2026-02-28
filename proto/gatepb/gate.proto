@@ -9,6 +9,40 @@ enum MessageType {
     Notify = 3;
 }
 
+enum KickoutReason {
+    KICKOUT_REASON_UNKNOWN = 0;
+    Elsewhere = 1;
+    NotOnline = 2;
+    ServerShutdown = 3;
+    Stopping = 4;
+    InternalTestShutdown = 5;
+    ServerFull = 6;
+    RegisterLimit = 7;
+    NotEarlyBird = 8;
+    Ban = 9;
+}
+
+enum Error {
+    OK = 0;
+    ErrSystem = 1020001;
+    ErrUnknownMethod = 1020002;
+    ErrUnavailable = 1020003;
+    ErrRequestTimeout = 1020004;
+    ErrLoginAgain = 1020005;
+    ErrRedirect = 1020006;
+    ErrLoginElsewhere = 1020007;
+    ErrProtocolRetry = 1020008;
+    ErrServerNotOpen = 1020009;
+    ErrClientSeqWindBack = 1020010;
+    ErrServerSeqSkipTooMuch = 1020011;
+    ErrRequestFrequencyTooFast = 1020012;
+    ErrLoginRateLimited = 1020013;
+    ErrRequestInProgress = 1020014;
+    ErrRequestRateLimited = 1020015;
+    ErrClientVersionLimit = 1020016;
+    ErrUnrecoverableSeq = 1020017;
+}
+
 message Meta {
     string service_name = 1;
     string method_name = 2;
@@ -33,4 +67,8 @@ message EventMessage {
 message KickoutNotify {
     int64 reason = 1;
     string reason_message = 2;
+}
+
+message RedirectNotify {
+    string redirect_to = 1;
 }

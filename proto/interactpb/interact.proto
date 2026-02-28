@@ -1,0 +1,35 @@
+syntax = "proto3";
+package gamepb.interactpb;
+option go_package = "qq-farm-bot/proto/interactpb";
+
+message Record {
+    int64 time = 1;
+    int64 interact_type = 2;
+    int64 opr_gid = 3;
+    string opr_nickname = 4;
+    string opr_avatar_url = 5;
+    int64 steal_item_id = 6;
+    int64 steal_item_num = 7;
+    int64 count = 8;
+    int32 authorized_status = 9;
+    int64 level = 10;
+}
+
+message InteractRecordsRequest {
+    int64 from = 1;
+    int64 count = 2;
+}
+message InteractRecordsReply {
+    repeated Record records = 1;
+}
+
+message InteractNewRecordNotify {
+    bool has_unread = 1;
+    int64 last_read_time = 2;
+}
+
+message GetInteractInfoRequest {}
+message GetInteractInfoReply {
+    bool has_unread = 1;
+    int64 last_read_time = 2;
+}

@@ -1,0 +1,101 @@
+syntax = "proto3";
+package gamepb.dogpb;
+option go_package = "qq-farm-bot/proto/dogpb";
+
+message BriefDogInfo {
+    int64 dog_id = 1;
+    int64 food_last_sec = 2;
+}
+
+message DogInfo {
+    int64 id = 1;
+    string name = 2;
+    int64 protect_probability = 3;
+    int64 lost_gold_range_min = 4;
+    int64 lost_gold_range_max = 5;
+    bool owned = 6;
+    bool activated = 7;
+    int64 price = 8;
+}
+
+message FoodInfo {
+    int64 id = 1;
+    int64 time = 2;
+    int64 own_count = 3;
+}
+
+message ProtectLog {
+    int64 role_level = 1;
+    string role_name = 2;
+    string role_avatar_url = 3;
+    bool role_online = 4;
+    int64 protect_timestamp = 5;
+    int64 protect_count = 6;
+    int64 reward_gold = 7;
+    int64 dog_id = 8;
+    string dog_name = 9;
+    int64 gid = 10;
+    int64 last_online_timestamp = 11;
+    bool is_read = 12;
+    int32 authorized_status = 13;
+}
+
+message GetDogInfoRequest {}
+message GetDogInfoReply {
+    repeated DogInfo dogs = 1;
+    int64 current_deployed_dog_id = 2;
+    int64 food_last_sec = 3;
+    int64 max_food_last_sec = 4;
+    bool is_exist_new_log = 6;
+}
+
+message BuyAndActivateDogRequest {
+    int64 dog_id = 1;
+    int64 price = 2;
+}
+message BuyAndActivateDogReply {}
+
+message ActivateDogRequest {
+    int64 dog_id = 1;
+}
+message ActivateDogReply {}
+
+message DeployDogRequest {
+    int64 dog_id = 1;
+}
+message DeployDogReply {
+    int64 deployed_dog_id = 1;
+    int64 previous_deployed_dog_id = 2;
+}
+
+message WithdrawDogRequest {}
+message WithdrawDogReply {
+    int64 withdrawn_dog_id = 1;
+}
+
+message GetProtectLogsRequest {
+    int64 from = 1;
+    int64 count = 2;
+}
+message GetProtectLogsReply {
+    repeated ProtectLog logs = 1;
+    int64 total_count = 2;
+}
+
+message AddFoodRequest {
+    int64 food_id = 1;
+    int64 count = 2;
+}
+message AddFoodReply {
+    int64 food_last_sec = 1;
+}
+
+message NewProtectLogNotify {}
+
+message DogStatusNotify {
+    int64 deployed_dog_id = 1;
+    int64 previous_deployed_dog_id = 2;
+    int64 food_last_sec = 3;
+}
+
+message DogProtectionNotify {}

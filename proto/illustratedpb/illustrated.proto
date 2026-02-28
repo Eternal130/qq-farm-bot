@@ -1,0 +1,73 @@
+syntax = "proto3";
+package gamepb.illustratedpb;
+option go_package = "qq-farm-bot/proto/illustratedpb";
+
+message IllustratedInfoV2 {
+    int32 fruit_id = 1;
+    int32 rarity = 2;
+    bool unlocked = 3;
+    int32 progress = 4;
+    int32 layer = 5;
+    bool is_new = 7;
+}
+
+message GetIllustratedListV2Request {}
+message GetIllustratedListV2Reply {
+    repeated IllustratedInfoV2 items = 1;
+    int32 total_progress = 2;
+    int32 current_level = 3;
+    int32 type = 6;
+    int32 next_level_progress = 7;
+    bool has_claimable_reward = 8;
+    bool has_claimed_reward = 9;
+}
+
+message IllustratedLevelInfoV2 {
+    int32 level = 1;
+    int32 point_condition = 2;
+    bool can_claim = 4;
+    bool claimed = 5;
+}
+
+message GetIllustratedLevelListV2Request {
+    int32 type = 1;
+}
+message GetIllustratedLevelListV2Reply {
+    int32 current_level = 1;
+    int32 total_progress = 2;
+    repeated IllustratedLevelInfoV2 levels = 3;
+}
+
+message ClaimAllRewardsV2Request {
+    int32 type = 1;
+}
+message ClaimAllRewardsV2Reply {
+    int32 current_level = 3;
+}
+
+message UnlockedFruitInfo {
+    int32 fruit_id = 1;
+    int32 progress = 2;
+    int32 progress_to_next_level = 3;
+    int32 total_progress_before = 4;
+    int32 total_progress_after = 5;
+    int32 level_before = 6;
+    int32 level_after = 7;
+}
+
+message IllustratedChangeNotifyV2 {
+    repeated UnlockedFruitInfo fruits = 1;
+    int32 old_level = 2;
+    int32 new_level = 3;
+    int32 type = 4;
+    int32 old_progress = 5;
+    int32 current_progress = 6;
+}
+
+message IllustratedRewardRedDotNotifyV2 {
+    bool normal_reward_available = 1;
+    bool premium_reward_available = 2;
+}
+
+message ClearNewUnlockedFruitsV2Request {}
+message ClearNewUnlockedFruitsV2Reply {}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+package gamepb.bulletinboardpb;
+option go_package = "qq-farm-bot/proto/bulletinboardpb";
+
+enum PopType {
+    POP_TYPE_UNKNOWN = 0;
+    POP_TYPE_NONE = 1;
+    POP_TYPE_ONE_TIME = 2;
+    POP_TYPE_DAILY = 3;
+}
+
+message BulletinBrief {
+    int64 id = 1;
+    string title = 2;
+    bool is_read = 3;
+    bool is_forced = 4;
+    int32 pop_type = 5;
+}
+
+message GetBulletinListRequest {
+    int64 from = 1;
+    int64 count = 2;
+}
+message GetBulletinListReply {
+    repeated BulletinBrief bulletins = 1;
+}
+
+message GetBulletinDetailRequest {
+    int64 id = 1;
+}
+message GetBulletinDetailReply {
+    string title = 1;
+    string content = 2;
+    string start_time = 3;
+    string end_time = 4;
+}
+
+message BulletinListChangedNTF {}

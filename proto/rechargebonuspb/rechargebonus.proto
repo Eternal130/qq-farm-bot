@@ -1,0 +1,29 @@
+syntax = "proto3";
+package gamepb.rechargebonuspb;
+option go_package = "qq-farm-bot/proto/rechargebonuspb";
+
+message RechargeBonusConfig {
+    int64 id = 1;
+    int64 start_at = 2;
+    int64 end_at = 3;
+    int64 unlock_conds = 5;
+}
+
+message RangeToRatio {
+    int64 recharge_range_min = 1;
+    int64 recharge_range_max = 2;
+    int64 return_ratio = 3;
+}
+
+message GetConfigRequest {}
+message GetConfigReply {
+    bool is_active = 1;
+    repeated RechargeBonusConfig configs = 2;
+    repeated RangeToRatio ranges = 3;
+}
+
+message GetPlayerDataRequest {}
+message GetPlayerDataReply {
+    int64 total_recharge_amount = 1;
+    int64 total_return_amount = 2;
+}

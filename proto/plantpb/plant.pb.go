@@ -32,6 +32,7 @@ const (
 	PlantPhase_BLOOMING      PlantPhase = 5
 	PlantPhase_MATURE        PlantPhase = 6
 	PlantPhase_DEAD          PlantPhase = 7
+	PlantPhase_ERASED        PlantPhase = 8
 )
 
 // Enum value maps for PlantPhase.
@@ -45,6 +46,7 @@ var (
 		5: "BLOOMING",
 		6: "MATURE",
 		7: "DEAD",
+		8: "ERASED",
 	}
 	PlantPhase_value = map[string]int32{
 		"PHASE_UNKNOWN": 0,
@@ -55,6 +57,7 @@ var (
 		"BLOOMING":      5,
 		"MATURE":        6,
 		"DEAD":          7,
+		"ERASED":        8,
 	}
 )
 
@@ -353,6 +356,58 @@ func (x *LandUpgradeCondition) GetNeedGold() int64 {
 	return 0
 }
 
+type NeedColorCount struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Level         int64                  `protobuf:"varint,1,opt,name=level,proto3" json:"level,omitempty"`
+	Count         int64                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NeedColorCount) Reset() {
+	*x = NeedColorCount{}
+	mi := &file_plantpb_plant_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NeedColorCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NeedColorCount) ProtoMessage() {}
+
+func (x *NeedColorCount) ProtoReflect() protoreflect.Message {
+	mi := &file_plantpb_plant_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NeedColorCount.ProtoReflect.Descriptor instead.
+func (*NeedColorCount) Descriptor() ([]byte, []int) {
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *NeedColorCount) GetLevel() int64 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+func (x *NeedColorCount) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
 type PlantInfo struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	Id                 int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -379,7 +434,7 @@ type PlantInfo struct {
 
 func (x *PlantInfo) Reset() {
 	*x = PlantInfo{}
-	mi := &file_plantpb_plant_proto_msgTypes[3]
+	mi := &file_plantpb_plant_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -391,7 +446,7 @@ func (x *PlantInfo) String() string {
 func (*PlantInfo) ProtoMessage() {}
 
 func (x *PlantInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[3]
+	mi := &file_plantpb_plant_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -404,7 +459,7 @@ func (x *PlantInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlantInfo.ProtoReflect.Descriptor instead.
 func (*PlantInfo) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{3}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *PlantInfo) GetId() int64 {
@@ -549,7 +604,7 @@ type PlantPhaseInfo struct {
 
 func (x *PlantPhaseInfo) Reset() {
 	*x = PlantPhaseInfo{}
-	mi := &file_plantpb_plant_proto_msgTypes[4]
+	mi := &file_plantpb_plant_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -561,7 +616,7 @@ func (x *PlantPhaseInfo) String() string {
 func (*PlantPhaseInfo) ProtoMessage() {}
 
 func (x *PlantPhaseInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[4]
+	mi := &file_plantpb_plant_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -574,7 +629,7 @@ func (x *PlantPhaseInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlantPhaseInfo.ProtoReflect.Descriptor instead.
 func (*PlantPhaseInfo) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{4}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PlantPhaseInfo) GetPhase() int32 {
@@ -644,7 +699,7 @@ type MutantInfo struct {
 
 func (x *MutantInfo) Reset() {
 	*x = MutantInfo{}
-	mi := &file_plantpb_plant_proto_msgTypes[5]
+	mi := &file_plantpb_plant_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -656,7 +711,7 @@ func (x *MutantInfo) String() string {
 func (*MutantInfo) ProtoMessage() {}
 
 func (x *MutantInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[5]
+	mi := &file_plantpb_plant_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -669,7 +724,7 @@ func (x *MutantInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MutantInfo.ProtoReflect.Descriptor instead.
 func (*MutantInfo) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{5}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *MutantInfo) GetMutantTime() int64 {
@@ -708,7 +763,7 @@ type OperationLimit struct {
 
 func (x *OperationLimit) Reset() {
 	*x = OperationLimit{}
-	mi := &file_plantpb_plant_proto_msgTypes[6]
+	mi := &file_plantpb_plant_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +775,7 @@ func (x *OperationLimit) String() string {
 func (*OperationLimit) ProtoMessage() {}
 
 func (x *OperationLimit) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[6]
+	mi := &file_plantpb_plant_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,7 +788,7 @@ func (x *OperationLimit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationLimit.ProtoReflect.Descriptor instead.
 func (*OperationLimit) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{6}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *OperationLimit) GetId() int64 {
@@ -794,7 +849,7 @@ type AllLandsRequest struct {
 
 func (x *AllLandsRequest) Reset() {
 	*x = AllLandsRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[7]
+	mi := &file_plantpb_plant_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -806,7 +861,7 @@ func (x *AllLandsRequest) String() string {
 func (*AllLandsRequest) ProtoMessage() {}
 
 func (x *AllLandsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[7]
+	mi := &file_plantpb_plant_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -819,7 +874,7 @@ func (x *AllLandsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AllLandsRequest.ProtoReflect.Descriptor instead.
 func (*AllLandsRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{7}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AllLandsRequest) GetHostGid() int64 {
@@ -839,7 +894,7 @@ type AllLandsReply struct {
 
 func (x *AllLandsReply) Reset() {
 	*x = AllLandsReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[8]
+	mi := &file_plantpb_plant_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -851,7 +906,7 @@ func (x *AllLandsReply) String() string {
 func (*AllLandsReply) ProtoMessage() {}
 
 func (x *AllLandsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[8]
+	mi := &file_plantpb_plant_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -864,7 +919,7 @@ func (x *AllLandsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AllLandsReply.ProtoReflect.Descriptor instead.
 func (*AllLandsReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{8}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AllLandsReply) GetLands() []*LandInfo {
@@ -892,7 +947,7 @@ type HarvestRequest struct {
 
 func (x *HarvestRequest) Reset() {
 	*x = HarvestRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[9]
+	mi := &file_plantpb_plant_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -904,7 +959,7 @@ func (x *HarvestRequest) String() string {
 func (*HarvestRequest) ProtoMessage() {}
 
 func (x *HarvestRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[9]
+	mi := &file_plantpb_plant_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -917,7 +972,7 @@ func (x *HarvestRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HarvestRequest.ProtoReflect.Descriptor instead.
 func (*HarvestRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{9}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *HarvestRequest) GetLandIds() []int64 {
@@ -945,13 +1000,14 @@ type HarvestReply struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Land            []*LandInfo            `protobuf:"bytes,1,rep,name=land,proto3" json:"land,omitempty"`
 	OperationLimits []*OperationLimit      `protobuf:"bytes,4,rep,name=operation_limits,json=operationLimits,proto3" json:"operation_limits,omitempty"`
+	Warnings        map[int64]string       `protobuf:"bytes,5,rep,name=warnings,proto3" json:"warnings,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
 func (x *HarvestReply) Reset() {
 	*x = HarvestReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[10]
+	mi := &file_plantpb_plant_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -963,7 +1019,7 @@ func (x *HarvestReply) String() string {
 func (*HarvestReply) ProtoMessage() {}
 
 func (x *HarvestReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[10]
+	mi := &file_plantpb_plant_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -976,7 +1032,7 @@ func (x *HarvestReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HarvestReply.ProtoReflect.Descriptor instead.
 func (*HarvestReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{10}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *HarvestReply) GetLand() []*LandInfo {
@@ -993,6 +1049,13 @@ func (x *HarvestReply) GetOperationLimits() []*OperationLimit {
 	return nil
 }
 
+func (x *HarvestReply) GetWarnings() map[int64]string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
 type WaterLandRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LandIds       []int64                `protobuf:"varint,1,rep,packed,name=land_ids,json=landIds,proto3" json:"land_ids,omitempty"`
@@ -1003,7 +1066,7 @@ type WaterLandRequest struct {
 
 func (x *WaterLandRequest) Reset() {
 	*x = WaterLandRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[11]
+	mi := &file_plantpb_plant_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1015,7 +1078,7 @@ func (x *WaterLandRequest) String() string {
 func (*WaterLandRequest) ProtoMessage() {}
 
 func (x *WaterLandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[11]
+	mi := &file_plantpb_plant_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1028,7 +1091,7 @@ func (x *WaterLandRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaterLandRequest.ProtoReflect.Descriptor instead.
 func (*WaterLandRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{11}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *WaterLandRequest) GetLandIds() []int64 {
@@ -1055,7 +1118,7 @@ type WaterLandReply struct {
 
 func (x *WaterLandReply) Reset() {
 	*x = WaterLandReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[12]
+	mi := &file_plantpb_plant_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1067,7 +1130,7 @@ func (x *WaterLandReply) String() string {
 func (*WaterLandReply) ProtoMessage() {}
 
 func (x *WaterLandReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[12]
+	mi := &file_plantpb_plant_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1080,7 +1143,7 @@ func (x *WaterLandReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaterLandReply.ProtoReflect.Descriptor instead.
 func (*WaterLandReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{12}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *WaterLandReply) GetLand() []*LandInfo {
@@ -1107,7 +1170,7 @@ type WeedOutRequest struct {
 
 func (x *WeedOutRequest) Reset() {
 	*x = WeedOutRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[13]
+	mi := &file_plantpb_plant_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1119,7 +1182,7 @@ func (x *WeedOutRequest) String() string {
 func (*WeedOutRequest) ProtoMessage() {}
 
 func (x *WeedOutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[13]
+	mi := &file_plantpb_plant_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1132,7 +1195,7 @@ func (x *WeedOutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WeedOutRequest.ProtoReflect.Descriptor instead.
 func (*WeedOutRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{13}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *WeedOutRequest) GetLandIds() []int64 {
@@ -1159,7 +1222,7 @@ type WeedOutReply struct {
 
 func (x *WeedOutReply) Reset() {
 	*x = WeedOutReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[14]
+	mi := &file_plantpb_plant_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1171,7 +1234,7 @@ func (x *WeedOutReply) String() string {
 func (*WeedOutReply) ProtoMessage() {}
 
 func (x *WeedOutReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[14]
+	mi := &file_plantpb_plant_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1184,7 +1247,7 @@ func (x *WeedOutReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WeedOutReply.ProtoReflect.Descriptor instead.
 func (*WeedOutReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{14}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *WeedOutReply) GetLand() []*LandInfo {
@@ -1211,7 +1274,7 @@ type InsecticideRequest struct {
 
 func (x *InsecticideRequest) Reset() {
 	*x = InsecticideRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[15]
+	mi := &file_plantpb_plant_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1223,7 +1286,7 @@ func (x *InsecticideRequest) String() string {
 func (*InsecticideRequest) ProtoMessage() {}
 
 func (x *InsecticideRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[15]
+	mi := &file_plantpb_plant_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1236,7 +1299,7 @@ func (x *InsecticideRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InsecticideRequest.ProtoReflect.Descriptor instead.
 func (*InsecticideRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{15}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *InsecticideRequest) GetLandIds() []int64 {
@@ -1263,7 +1326,7 @@ type InsecticideReply struct {
 
 func (x *InsecticideReply) Reset() {
 	*x = InsecticideReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[16]
+	mi := &file_plantpb_plant_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1275,7 +1338,7 @@ func (x *InsecticideReply) String() string {
 func (*InsecticideReply) ProtoMessage() {}
 
 func (x *InsecticideReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[16]
+	mi := &file_plantpb_plant_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1288,7 +1351,7 @@ func (x *InsecticideReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InsecticideReply.ProtoReflect.Descriptor instead.
 func (*InsecticideReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{16}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *InsecticideReply) GetLand() []*LandInfo {
@@ -1316,7 +1379,7 @@ type PlantItem struct {
 
 func (x *PlantItem) Reset() {
 	*x = PlantItem{}
-	mi := &file_plantpb_plant_proto_msgTypes[17]
+	mi := &file_plantpb_plant_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1328,7 +1391,7 @@ func (x *PlantItem) String() string {
 func (*PlantItem) ProtoMessage() {}
 
 func (x *PlantItem) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[17]
+	mi := &file_plantpb_plant_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1341,7 +1404,7 @@ func (x *PlantItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlantItem.ProtoReflect.Descriptor instead.
 func (*PlantItem) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{17}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *PlantItem) GetSeedId() int64 {
@@ -1375,7 +1438,7 @@ type PlantRequest struct {
 
 func (x *PlantRequest) Reset() {
 	*x = PlantRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[18]
+	mi := &file_plantpb_plant_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1387,7 +1450,7 @@ func (x *PlantRequest) String() string {
 func (*PlantRequest) ProtoMessage() {}
 
 func (x *PlantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[18]
+	mi := &file_plantpb_plant_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1400,7 +1463,7 @@ func (x *PlantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlantRequest.ProtoReflect.Descriptor instead.
 func (*PlantRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{18}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *PlantRequest) GetLandAndSeed() map[int64]int64 {
@@ -1427,7 +1490,7 @@ type PlantReply struct {
 
 func (x *PlantReply) Reset() {
 	*x = PlantReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[19]
+	mi := &file_plantpb_plant_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1439,7 +1502,7 @@ func (x *PlantReply) String() string {
 func (*PlantReply) ProtoMessage() {}
 
 func (x *PlantReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[19]
+	mi := &file_plantpb_plant_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1452,7 +1515,7 @@ func (x *PlantReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlantReply.ProtoReflect.Descriptor instead.
 func (*PlantReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{19}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *PlantReply) GetLand() []*LandInfo {
@@ -1478,7 +1541,7 @@ type RemovePlantRequest struct {
 
 func (x *RemovePlantRequest) Reset() {
 	*x = RemovePlantRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[20]
+	mi := &file_plantpb_plant_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1490,7 +1553,7 @@ func (x *RemovePlantRequest) String() string {
 func (*RemovePlantRequest) ProtoMessage() {}
 
 func (x *RemovePlantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[20]
+	mi := &file_plantpb_plant_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1503,7 +1566,7 @@ func (x *RemovePlantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemovePlantRequest.ProtoReflect.Descriptor instead.
 func (*RemovePlantRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{20}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RemovePlantRequest) GetLandIds() []int64 {
@@ -1523,7 +1586,7 @@ type RemovePlantReply struct {
 
 func (x *RemovePlantReply) Reset() {
 	*x = RemovePlantReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[21]
+	mi := &file_plantpb_plant_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1535,7 +1598,7 @@ func (x *RemovePlantReply) String() string {
 func (*RemovePlantReply) ProtoMessage() {}
 
 func (x *RemovePlantReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[21]
+	mi := &file_plantpb_plant_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1548,7 +1611,7 @@ func (x *RemovePlantReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemovePlantReply.ProtoReflect.Descriptor instead.
 func (*RemovePlantReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{21}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RemovePlantReply) GetLand() []*LandInfo {
@@ -1575,7 +1638,7 @@ type FertilizeRequest struct {
 
 func (x *FertilizeRequest) Reset() {
 	*x = FertilizeRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[22]
+	mi := &file_plantpb_plant_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1587,7 +1650,7 @@ func (x *FertilizeRequest) String() string {
 func (*FertilizeRequest) ProtoMessage() {}
 
 func (x *FertilizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[22]
+	mi := &file_plantpb_plant_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1600,7 +1663,7 @@ func (x *FertilizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FertilizeRequest.ProtoReflect.Descriptor instead.
 func (*FertilizeRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{22}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *FertilizeRequest) GetLandIds() []int64 {
@@ -1628,7 +1691,7 @@ type FertilizeReply struct {
 
 func (x *FertilizeReply) Reset() {
 	*x = FertilizeReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[23]
+	mi := &file_plantpb_plant_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1640,7 +1703,7 @@ func (x *FertilizeReply) String() string {
 func (*FertilizeReply) ProtoMessage() {}
 
 func (x *FertilizeReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[23]
+	mi := &file_plantpb_plant_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1653,7 +1716,7 @@ func (x *FertilizeReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FertilizeReply.ProtoReflect.Descriptor instead.
 func (*FertilizeReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{23}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *FertilizeReply) GetLand() []*LandInfo {
@@ -1687,7 +1750,7 @@ type PutInsectsRequest struct {
 
 func (x *PutInsectsRequest) Reset() {
 	*x = PutInsectsRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[24]
+	mi := &file_plantpb_plant_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1699,7 +1762,7 @@ func (x *PutInsectsRequest) String() string {
 func (*PutInsectsRequest) ProtoMessage() {}
 
 func (x *PutInsectsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[24]
+	mi := &file_plantpb_plant_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1712,7 +1775,7 @@ func (x *PutInsectsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutInsectsRequest.ProtoReflect.Descriptor instead.
 func (*PutInsectsRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{24}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *PutInsectsRequest) GetLandIds() []int64 {
@@ -1739,7 +1802,7 @@ type PutInsectsReply struct {
 
 func (x *PutInsectsReply) Reset() {
 	*x = PutInsectsReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[25]
+	mi := &file_plantpb_plant_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1751,7 +1814,7 @@ func (x *PutInsectsReply) String() string {
 func (*PutInsectsReply) ProtoMessage() {}
 
 func (x *PutInsectsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[25]
+	mi := &file_plantpb_plant_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1764,7 +1827,7 @@ func (x *PutInsectsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutInsectsReply.ProtoReflect.Descriptor instead.
 func (*PutInsectsReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{25}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *PutInsectsReply) GetLand() []*LandInfo {
@@ -1791,7 +1854,7 @@ type PutWeedsRequest struct {
 
 func (x *PutWeedsRequest) Reset() {
 	*x = PutWeedsRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[26]
+	mi := &file_plantpb_plant_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1803,7 +1866,7 @@ func (x *PutWeedsRequest) String() string {
 func (*PutWeedsRequest) ProtoMessage() {}
 
 func (x *PutWeedsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[26]
+	mi := &file_plantpb_plant_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1816,7 +1879,7 @@ func (x *PutWeedsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutWeedsRequest.ProtoReflect.Descriptor instead.
 func (*PutWeedsRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{26}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *PutWeedsRequest) GetLandIds() []int64 {
@@ -1843,7 +1906,7 @@ type PutWeedsReply struct {
 
 func (x *PutWeedsReply) Reset() {
 	*x = PutWeedsReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[27]
+	mi := &file_plantpb_plant_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1855,7 +1918,7 @@ func (x *PutWeedsReply) String() string {
 func (*PutWeedsReply) ProtoMessage() {}
 
 func (x *PutWeedsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[27]
+	mi := &file_plantpb_plant_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1868,7 +1931,7 @@ func (x *PutWeedsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PutWeedsReply.ProtoReflect.Descriptor instead.
 func (*PutWeedsReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{27}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *PutWeedsReply) GetLand() []*LandInfo {
@@ -1895,7 +1958,7 @@ type LandsNotify struct {
 
 func (x *LandsNotify) Reset() {
 	*x = LandsNotify{}
-	mi := &file_plantpb_plant_proto_msgTypes[28]
+	mi := &file_plantpb_plant_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1907,7 +1970,7 @@ func (x *LandsNotify) String() string {
 func (*LandsNotify) ProtoMessage() {}
 
 func (x *LandsNotify) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[28]
+	mi := &file_plantpb_plant_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1920,7 +1983,7 @@ func (x *LandsNotify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LandsNotify.ProtoReflect.Descriptor instead.
 func (*LandsNotify) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{28}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *LandsNotify) GetLands() []*LandInfo {
@@ -1940,13 +2003,14 @@ func (x *LandsNotify) GetHostGid() int64 {
 type UnlockLandRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LandId        int64                  `protobuf:"varint,1,opt,name=land_id,json=landId,proto3" json:"land_id,omitempty"`
+	DoShared      bool                   `protobuf:"varint,2,opt,name=do_shared,json=doShared,proto3" json:"do_shared,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UnlockLandRequest) Reset() {
 	*x = UnlockLandRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[29]
+	mi := &file_plantpb_plant_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1958,7 +2022,7 @@ func (x *UnlockLandRequest) String() string {
 func (*UnlockLandRequest) ProtoMessage() {}
 
 func (x *UnlockLandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[29]
+	mi := &file_plantpb_plant_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1971,7 +2035,7 @@ func (x *UnlockLandRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlockLandRequest.ProtoReflect.Descriptor instead.
 func (*UnlockLandRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{29}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *UnlockLandRequest) GetLandId() int64 {
@@ -1979,6 +2043,13 @@ func (x *UnlockLandRequest) GetLandId() int64 {
 		return x.LandId
 	}
 	return 0
+}
+
+func (x *UnlockLandRequest) GetDoShared() bool {
+	if x != nil {
+		return x.DoShared
+	}
+	return false
 }
 
 type UnlockLandReply struct {
@@ -1990,7 +2061,7 @@ type UnlockLandReply struct {
 
 func (x *UnlockLandReply) Reset() {
 	*x = UnlockLandReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[30]
+	mi := &file_plantpb_plant_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2002,7 +2073,7 @@ func (x *UnlockLandReply) String() string {
 func (*UnlockLandReply) ProtoMessage() {}
 
 func (x *UnlockLandReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[30]
+	mi := &file_plantpb_plant_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2015,7 +2086,7 @@ func (x *UnlockLandReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnlockLandReply.ProtoReflect.Descriptor instead.
 func (*UnlockLandReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{30}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *UnlockLandReply) GetLand() []*LandInfo {
@@ -2034,7 +2105,7 @@ type UpgradeLandRequest struct {
 
 func (x *UpgradeLandRequest) Reset() {
 	*x = UpgradeLandRequest{}
-	mi := &file_plantpb_plant_proto_msgTypes[31]
+	mi := &file_plantpb_plant_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2046,7 +2117,7 @@ func (x *UpgradeLandRequest) String() string {
 func (*UpgradeLandRequest) ProtoMessage() {}
 
 func (x *UpgradeLandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[31]
+	mi := &file_plantpb_plant_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2059,7 +2130,7 @@ func (x *UpgradeLandRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpgradeLandRequest.ProtoReflect.Descriptor instead.
 func (*UpgradeLandRequest) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{31}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *UpgradeLandRequest) GetLandId() int64 {
@@ -2078,7 +2149,7 @@ type UpgradeLandReply struct {
 
 func (x *UpgradeLandReply) Reset() {
 	*x = UpgradeLandReply{}
-	mi := &file_plantpb_plant_proto_msgTypes[32]
+	mi := &file_plantpb_plant_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2090,7 +2161,7 @@ func (x *UpgradeLandReply) String() string {
 func (*UpgradeLandReply) ProtoMessage() {}
 
 func (x *UpgradeLandReply) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[32]
+	mi := &file_plantpb_plant_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2103,7 +2174,7 @@ func (x *UpgradeLandReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpgradeLandReply.ProtoReflect.Descriptor instead.
 func (*UpgradeLandReply) Descriptor() ([]byte, []int) {
-	return file_plantpb_plant_proto_rawDescGZIP(), []int{32}
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *UpgradeLandReply) GetLand() []*LandInfo {
@@ -2111,6 +2182,110 @@ func (x *UpgradeLandReply) GetLand() []*LandInfo {
 		return x.Land
 	}
 	return nil
+}
+
+type CheckCanOperateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	HostGid       int64                  `protobuf:"varint,1,opt,name=host_gid,json=hostGid,proto3" json:"host_gid,omitempty"`
+	OperationId   int64                  `protobuf:"varint,2,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckCanOperateRequest) Reset() {
+	*x = CheckCanOperateRequest{}
+	mi := &file_plantpb_plant_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCanOperateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCanOperateRequest) ProtoMessage() {}
+
+func (x *CheckCanOperateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plantpb_plant_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCanOperateRequest.ProtoReflect.Descriptor instead.
+func (*CheckCanOperateRequest) Descriptor() ([]byte, []int) {
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *CheckCanOperateRequest) GetHostGid() int64 {
+	if x != nil {
+		return x.HostGid
+	}
+	return 0
+}
+
+func (x *CheckCanOperateRequest) GetOperationId() int64 {
+	if x != nil {
+		return x.OperationId
+	}
+	return 0
+}
+
+type CheckCanOperateReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CanOperate    bool                   `protobuf:"varint,1,opt,name=can_operate,json=canOperate,proto3" json:"can_operate,omitempty"`
+	CanStealNum   int64                  `protobuf:"varint,2,opt,name=can_steal_num,json=canStealNum,proto3" json:"can_steal_num,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckCanOperateReply) Reset() {
+	*x = CheckCanOperateReply{}
+	mi := &file_plantpb_plant_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckCanOperateReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckCanOperateReply) ProtoMessage() {}
+
+func (x *CheckCanOperateReply) ProtoReflect() protoreflect.Message {
+	mi := &file_plantpb_plant_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckCanOperateReply.ProtoReflect.Descriptor instead.
+func (*CheckCanOperateReply) Descriptor() ([]byte, []int) {
+	return file_plantpb_plant_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *CheckCanOperateReply) GetCanOperate() bool {
+	if x != nil {
+		return x.CanOperate
+	}
+	return false
+}
+
+func (x *CheckCanOperateReply) GetCanStealNum() int64 {
+	if x != nil {
+		return x.CanStealNum
+	}
+	return 0
 }
 
 type LandInfo_Buff struct {
@@ -2124,7 +2299,7 @@ type LandInfo_Buff struct {
 
 func (x *LandInfo_Buff) Reset() {
 	*x = LandInfo_Buff{}
-	mi := &file_plantpb_plant_proto_msgTypes[33]
+	mi := &file_plantpb_plant_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2136,7 +2311,7 @@ func (x *LandInfo_Buff) String() string {
 func (*LandInfo_Buff) ProtoMessage() {}
 
 func (x *LandInfo_Buff) ProtoReflect() protoreflect.Message {
-	mi := &file_plantpb_plant_proto_msgTypes[33]
+	mi := &file_plantpb_plant_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2208,7 +2383,10 @@ const file_plantpb_plant_proto_rawDesc = "" +
 	"\x14LandUpgradeCondition\x12\x1d\n" +
 	"\n" +
 	"need_level\x18\x01 \x01(\x03R\tneedLevel\x12\x1b\n" +
-	"\tneed_gold\x18\x02 \x01(\x03R\bneedGold\"\xdc\x04\n" +
+	"\tneed_gold\x18\x02 \x01(\x03R\bneedGold\"<\n" +
+	"\x0eNeedColorCount\x12\x14\n" +
+	"\x05level\x18\x01 \x01(\x03R\x05level\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x03R\x05count\"\xdc\x04\n" +
 	"\tPlantInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x126\n" +
@@ -2272,10 +2450,14 @@ const file_plantpb_plant_proto_rawDesc = "" +
 	"\x0eHarvestRequest\x12\x19\n" +
 	"\bland_ids\x18\x01 \x03(\x03R\alandIds\x12\x19\n" +
 	"\bhost_gid\x18\x02 \x01(\x03R\ahostGid\x12\x15\n" +
-	"\x06is_all\x18\x03 \x01(\bR\x05isAll\"\x87\x01\n" +
+	"\x06is_all\x18\x03 \x01(\bR\x05isAll\"\x8c\x02\n" +
 	"\fHarvestReply\x12,\n" +
 	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land\x12I\n" +
-	"\x10operation_limits\x18\x04 \x03(\v2\x1e.gamepb.plantpb.OperationLimitR\x0foperationLimits\"H\n" +
+	"\x10operation_limits\x18\x04 \x03(\v2\x1e.gamepb.plantpb.OperationLimitR\x0foperationLimits\x12F\n" +
+	"\bwarnings\x18\x05 \x03(\v2*.gamepb.plantpb.HarvestReply.WarningsEntryR\bwarnings\x1a;\n" +
+	"\rWarningsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"H\n" +
 	"\x10WaterLandRequest\x12\x19\n" +
 	"\bland_ids\x18\x01 \x03(\x03R\alandIds\x12\x19\n" +
 	"\bhost_gid\x18\x02 \x01(\x03R\ahostGid\"\x89\x01\n" +
@@ -2337,15 +2519,23 @@ const file_plantpb_plant_proto_rawDesc = "" +
 	"\x10operation_limits\x18\x02 \x03(\v2\x1e.gamepb.plantpb.OperationLimitR\x0foperationLimits\"X\n" +
 	"\vLandsNotify\x12.\n" +
 	"\x05lands\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x05lands\x12\x19\n" +
-	"\bhost_gid\x18\x02 \x01(\x03R\ahostGid\",\n" +
+	"\bhost_gid\x18\x02 \x01(\x03R\ahostGid\"I\n" +
 	"\x11UnlockLandRequest\x12\x17\n" +
-	"\aland_id\x18\x01 \x01(\x03R\x06landId\"?\n" +
+	"\aland_id\x18\x01 \x01(\x03R\x06landId\x12\x1b\n" +
+	"\tdo_shared\x18\x02 \x01(\bR\bdoShared\"?\n" +
 	"\x0fUnlockLandReply\x12,\n" +
 	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land\"-\n" +
 	"\x12UpgradeLandRequest\x12\x17\n" +
 	"\aland_id\x18\x01 \x01(\x03R\x06landId\"@\n" +
 	"\x10UpgradeLandReply\x12,\n" +
-	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land*\x82\x01\n" +
+	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land\"V\n" +
+	"\x16CheckCanOperateRequest\x12\x19\n" +
+	"\bhost_gid\x18\x01 \x01(\x03R\ahostGid\x12!\n" +
+	"\foperation_id\x18\x02 \x01(\x03R\voperationId\"[\n" +
+	"\x14CheckCanOperateReply\x12\x1f\n" +
+	"\vcan_operate\x18\x01 \x01(\bR\n" +
+	"canOperate\x12\"\n" +
+	"\rcan_steal_num\x18\x02 \x01(\x03R\vcanStealNum*\x8e\x01\n" +
 	"\n" +
 	"PlantPhase\x12\x11\n" +
 	"\rPHASE_UNKNOWN\x10\x00\x12\b\n" +
@@ -2356,7 +2546,9 @@ const file_plantpb_plant_proto_rawDesc = "" +
 	"\bBLOOMING\x10\x05\x12\n" +
 	"\n" +
 	"\x06MATURE\x10\x06\x12\b\n" +
-	"\x04DEAD\x10\aB\x1bZ\x19qq-farm-bot/proto/plantpbb\x06proto3"
+	"\x04DEAD\x10\a\x12\n" +
+	"\n" +
+	"\x06ERASED\x10\bB\x1bZ\x19qq-farm-bot/proto/plantpbb\x06proto3"
 
 var (
 	file_plantpb_plant_proto_rawDescOnce sync.Once
@@ -2371,84 +2563,89 @@ func file_plantpb_plant_proto_rawDescGZIP() []byte {
 }
 
 var file_plantpb_plant_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_plantpb_plant_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_plantpb_plant_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_plantpb_plant_proto_goTypes = []any{
-	(PlantPhase)(0),              // 0: gamepb.plantpb.PlantPhase
-	(*LandInfo)(nil),             // 1: gamepb.plantpb.LandInfo
-	(*LandUnlockCondition)(nil),  // 2: gamepb.plantpb.LandUnlockCondition
-	(*LandUpgradeCondition)(nil), // 3: gamepb.plantpb.LandUpgradeCondition
-	(*PlantInfo)(nil),            // 4: gamepb.plantpb.PlantInfo
-	(*PlantPhaseInfo)(nil),       // 5: gamepb.plantpb.PlantPhaseInfo
-	(*MutantInfo)(nil),           // 6: gamepb.plantpb.MutantInfo
-	(*OperationLimit)(nil),       // 7: gamepb.plantpb.OperationLimit
-	(*AllLandsRequest)(nil),      // 8: gamepb.plantpb.AllLandsRequest
-	(*AllLandsReply)(nil),        // 9: gamepb.plantpb.AllLandsReply
-	(*HarvestRequest)(nil),       // 10: gamepb.plantpb.HarvestRequest
-	(*HarvestReply)(nil),         // 11: gamepb.plantpb.HarvestReply
-	(*WaterLandRequest)(nil),     // 12: gamepb.plantpb.WaterLandRequest
-	(*WaterLandReply)(nil),       // 13: gamepb.plantpb.WaterLandReply
-	(*WeedOutRequest)(nil),       // 14: gamepb.plantpb.WeedOutRequest
-	(*WeedOutReply)(nil),         // 15: gamepb.plantpb.WeedOutReply
-	(*InsecticideRequest)(nil),   // 16: gamepb.plantpb.InsecticideRequest
-	(*InsecticideReply)(nil),     // 17: gamepb.plantpb.InsecticideReply
-	(*PlantItem)(nil),            // 18: gamepb.plantpb.PlantItem
-	(*PlantRequest)(nil),         // 19: gamepb.plantpb.PlantRequest
-	(*PlantReply)(nil),           // 20: gamepb.plantpb.PlantReply
-	(*RemovePlantRequest)(nil),   // 21: gamepb.plantpb.RemovePlantRequest
-	(*RemovePlantReply)(nil),     // 22: gamepb.plantpb.RemovePlantReply
-	(*FertilizeRequest)(nil),     // 23: gamepb.plantpb.FertilizeRequest
-	(*FertilizeReply)(nil),       // 24: gamepb.plantpb.FertilizeReply
-	(*PutInsectsRequest)(nil),    // 25: gamepb.plantpb.PutInsectsRequest
-	(*PutInsectsReply)(nil),      // 26: gamepb.plantpb.PutInsectsReply
-	(*PutWeedsRequest)(nil),      // 27: gamepb.plantpb.PutWeedsRequest
-	(*PutWeedsReply)(nil),        // 28: gamepb.plantpb.PutWeedsReply
-	(*LandsNotify)(nil),          // 29: gamepb.plantpb.LandsNotify
-	(*UnlockLandRequest)(nil),    // 30: gamepb.plantpb.UnlockLandRequest
-	(*UnlockLandReply)(nil),      // 31: gamepb.plantpb.UnlockLandReply
-	(*UpgradeLandRequest)(nil),   // 32: gamepb.plantpb.UpgradeLandRequest
-	(*UpgradeLandReply)(nil),     // 33: gamepb.plantpb.UpgradeLandReply
-	(*LandInfo_Buff)(nil),        // 34: gamepb.plantpb.LandInfo.Buff
-	nil,                          // 35: gamepb.plantpb.PlantPhaseInfo.FertsUsedEntry
-	nil,                          // 36: gamepb.plantpb.PlantRequest.LandAndSeedEntry
+	(PlantPhase)(0),                // 0: gamepb.plantpb.PlantPhase
+	(*LandInfo)(nil),               // 1: gamepb.plantpb.LandInfo
+	(*LandUnlockCondition)(nil),    // 2: gamepb.plantpb.LandUnlockCondition
+	(*LandUpgradeCondition)(nil),   // 3: gamepb.plantpb.LandUpgradeCondition
+	(*NeedColorCount)(nil),         // 4: gamepb.plantpb.NeedColorCount
+	(*PlantInfo)(nil),              // 5: gamepb.plantpb.PlantInfo
+	(*PlantPhaseInfo)(nil),         // 6: gamepb.plantpb.PlantPhaseInfo
+	(*MutantInfo)(nil),             // 7: gamepb.plantpb.MutantInfo
+	(*OperationLimit)(nil),         // 8: gamepb.plantpb.OperationLimit
+	(*AllLandsRequest)(nil),        // 9: gamepb.plantpb.AllLandsRequest
+	(*AllLandsReply)(nil),          // 10: gamepb.plantpb.AllLandsReply
+	(*HarvestRequest)(nil),         // 11: gamepb.plantpb.HarvestRequest
+	(*HarvestReply)(nil),           // 12: gamepb.plantpb.HarvestReply
+	(*WaterLandRequest)(nil),       // 13: gamepb.plantpb.WaterLandRequest
+	(*WaterLandReply)(nil),         // 14: gamepb.plantpb.WaterLandReply
+	(*WeedOutRequest)(nil),         // 15: gamepb.plantpb.WeedOutRequest
+	(*WeedOutReply)(nil),           // 16: gamepb.plantpb.WeedOutReply
+	(*InsecticideRequest)(nil),     // 17: gamepb.plantpb.InsecticideRequest
+	(*InsecticideReply)(nil),       // 18: gamepb.plantpb.InsecticideReply
+	(*PlantItem)(nil),              // 19: gamepb.plantpb.PlantItem
+	(*PlantRequest)(nil),           // 20: gamepb.plantpb.PlantRequest
+	(*PlantReply)(nil),             // 21: gamepb.plantpb.PlantReply
+	(*RemovePlantRequest)(nil),     // 22: gamepb.plantpb.RemovePlantRequest
+	(*RemovePlantReply)(nil),       // 23: gamepb.plantpb.RemovePlantReply
+	(*FertilizeRequest)(nil),       // 24: gamepb.plantpb.FertilizeRequest
+	(*FertilizeReply)(nil),         // 25: gamepb.plantpb.FertilizeReply
+	(*PutInsectsRequest)(nil),      // 26: gamepb.plantpb.PutInsectsRequest
+	(*PutInsectsReply)(nil),        // 27: gamepb.plantpb.PutInsectsReply
+	(*PutWeedsRequest)(nil),        // 28: gamepb.plantpb.PutWeedsRequest
+	(*PutWeedsReply)(nil),          // 29: gamepb.plantpb.PutWeedsReply
+	(*LandsNotify)(nil),            // 30: gamepb.plantpb.LandsNotify
+	(*UnlockLandRequest)(nil),      // 31: gamepb.plantpb.UnlockLandRequest
+	(*UnlockLandReply)(nil),        // 32: gamepb.plantpb.UnlockLandReply
+	(*UpgradeLandRequest)(nil),     // 33: gamepb.plantpb.UpgradeLandRequest
+	(*UpgradeLandReply)(nil),       // 34: gamepb.plantpb.UpgradeLandReply
+	(*CheckCanOperateRequest)(nil), // 35: gamepb.plantpb.CheckCanOperateRequest
+	(*CheckCanOperateReply)(nil),   // 36: gamepb.plantpb.CheckCanOperateReply
+	(*LandInfo_Buff)(nil),          // 37: gamepb.plantpb.LandInfo.Buff
+	nil,                            // 38: gamepb.plantpb.PlantPhaseInfo.FertsUsedEntry
+	nil,                            // 39: gamepb.plantpb.HarvestReply.WarningsEntry
+	nil,                            // 40: gamepb.plantpb.PlantRequest.LandAndSeedEntry
 }
 var file_plantpb_plant_proto_depIdxs = []int32{
 	2,  // 0: gamepb.plantpb.LandInfo.unlock_condition:type_name -> gamepb.plantpb.LandUnlockCondition
 	3,  // 1: gamepb.plantpb.LandInfo.upgrade_condition:type_name -> gamepb.plantpb.LandUpgradeCondition
-	34, // 2: gamepb.plantpb.LandInfo.buff:type_name -> gamepb.plantpb.LandInfo.Buff
-	4,  // 3: gamepb.plantpb.LandInfo.plant:type_name -> gamepb.plantpb.PlantInfo
-	5,  // 4: gamepb.plantpb.PlantInfo.phases:type_name -> gamepb.plantpb.PlantPhaseInfo
-	35, // 5: gamepb.plantpb.PlantPhaseInfo.ferts_used:type_name -> gamepb.plantpb.PlantPhaseInfo.FertsUsedEntry
-	6,  // 6: gamepb.plantpb.PlantPhaseInfo.mutants:type_name -> gamepb.plantpb.MutantInfo
+	37, // 2: gamepb.plantpb.LandInfo.buff:type_name -> gamepb.plantpb.LandInfo.Buff
+	5,  // 3: gamepb.plantpb.LandInfo.plant:type_name -> gamepb.plantpb.PlantInfo
+	6,  // 4: gamepb.plantpb.PlantInfo.phases:type_name -> gamepb.plantpb.PlantPhaseInfo
+	38, // 5: gamepb.plantpb.PlantPhaseInfo.ferts_used:type_name -> gamepb.plantpb.PlantPhaseInfo.FertsUsedEntry
+	7,  // 6: gamepb.plantpb.PlantPhaseInfo.mutants:type_name -> gamepb.plantpb.MutantInfo
 	1,  // 7: gamepb.plantpb.AllLandsReply.lands:type_name -> gamepb.plantpb.LandInfo
-	7,  // 8: gamepb.plantpb.AllLandsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	8,  // 8: gamepb.plantpb.AllLandsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
 	1,  // 9: gamepb.plantpb.HarvestReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 10: gamepb.plantpb.HarvestReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 11: gamepb.plantpb.WaterLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 12: gamepb.plantpb.WaterLandReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 13: gamepb.plantpb.WeedOutReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 14: gamepb.plantpb.WeedOutReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 15: gamepb.plantpb.InsecticideReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 16: gamepb.plantpb.InsecticideReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	36, // 17: gamepb.plantpb.PlantRequest.land_and_seed:type_name -> gamepb.plantpb.PlantRequest.LandAndSeedEntry
-	18, // 18: gamepb.plantpb.PlantRequest.items:type_name -> gamepb.plantpb.PlantItem
-	1,  // 19: gamepb.plantpb.PlantReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 20: gamepb.plantpb.PlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 21: gamepb.plantpb.RemovePlantReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 22: gamepb.plantpb.RemovePlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 23: gamepb.plantpb.FertilizeReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 24: gamepb.plantpb.FertilizeReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 25: gamepb.plantpb.PutInsectsReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 26: gamepb.plantpb.PutInsectsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 27: gamepb.plantpb.PutWeedsReply.land:type_name -> gamepb.plantpb.LandInfo
-	7,  // 28: gamepb.plantpb.PutWeedsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 29: gamepb.plantpb.LandsNotify.lands:type_name -> gamepb.plantpb.LandInfo
-	1,  // 30: gamepb.plantpb.UnlockLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	1,  // 31: gamepb.plantpb.UpgradeLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	32, // [32:32] is the sub-list for method output_type
-	32, // [32:32] is the sub-list for method input_type
-	32, // [32:32] is the sub-list for extension type_name
-	32, // [32:32] is the sub-list for extension extendee
-	0,  // [0:32] is the sub-list for field type_name
+	8,  // 10: gamepb.plantpb.HarvestReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	39, // 11: gamepb.plantpb.HarvestReply.warnings:type_name -> gamepb.plantpb.HarvestReply.WarningsEntry
+	1,  // 12: gamepb.plantpb.WaterLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 13: gamepb.plantpb.WaterLandReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 14: gamepb.plantpb.WeedOutReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 15: gamepb.plantpb.WeedOutReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 16: gamepb.plantpb.InsecticideReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 17: gamepb.plantpb.InsecticideReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	40, // 18: gamepb.plantpb.PlantRequest.land_and_seed:type_name -> gamepb.plantpb.PlantRequest.LandAndSeedEntry
+	19, // 19: gamepb.plantpb.PlantRequest.items:type_name -> gamepb.plantpb.PlantItem
+	1,  // 20: gamepb.plantpb.PlantReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 21: gamepb.plantpb.PlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 22: gamepb.plantpb.RemovePlantReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 23: gamepb.plantpb.RemovePlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 24: gamepb.plantpb.FertilizeReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 25: gamepb.plantpb.FertilizeReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 26: gamepb.plantpb.PutInsectsReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 27: gamepb.plantpb.PutInsectsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 28: gamepb.plantpb.PutWeedsReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 29: gamepb.plantpb.PutWeedsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 30: gamepb.plantpb.LandsNotify.lands:type_name -> gamepb.plantpb.LandInfo
+	1,  // 31: gamepb.plantpb.UnlockLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	1,  // 32: gamepb.plantpb.UpgradeLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	33, // [33:33] is the sub-list for method output_type
+	33, // [33:33] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_plantpb_plant_proto_init() }
@@ -2462,7 +2659,7 @@ func file_plantpb_plant_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plantpb_plant_proto_rawDesc), len(file_plantpb_plant_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   36,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

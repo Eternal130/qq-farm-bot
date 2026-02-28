@@ -1,0 +1,286 @@
+syntax = "proto3";
+package gamepb.emailpb;
+option go_package = "qq-farm-bot/proto/emailpb";
+
+enum EmailType {
+    EMAIL_TYPE_UNKNOWN = 0;
+    EMAIL_TYPE_SYSTEM = 1;
+    EMAIL_TYPE_PLAYER = 2;
+}
+
+enum GameError {
+    OK = 0;
+    PlayerNotFound = 1000011;
+    PlayerNotRegistered = 1000012;
+    PlayerNotLoggedIn = 1000013;
+    PlayerLoginElseWhere = 1000014;
+    LoginDenied = 1000016;
+    AccountDeleted = 1000017;
+    PlayerRegisteredLimited = 1000018;
+    ItemNotEnough = 1000019;
+    InvalidRequest = 1000020;
+    ConfigNotFound = 1000021;
+    ServerShutdown = 1000022;
+    AccountNotCertified = 1000023;
+    AccountCertInfoMismatch = 1000024;
+    AccountDeleteFailed = 1000025;
+    FeatureNotEnabled = 1000026;
+    NotEarlyBird = 1000027;
+    CertIDCheckFormatError = 1000028;
+    CertIDCheckRateLimit = 1000029;
+    CertIDCheckSystemError = 1000030;
+    AccountBanned = 1000031;
+    RequestTooFrequent = 1000032;
+    LandNotUnlocked = 1001001;
+    LandAlreadyUnlocked = 1001002;
+    PrecedingLandNotUnlocked = 1001003;
+    PrecedingLandLevelNotEnough = 1001004;
+    LandAlreadyMaxLevel = 1001005;
+    PrecedingLandsCountNotEnough = 1001006;
+    PlayerLevelNotEnough = 1001007;
+    LandAlreadyPlanted = 1001008;
+    PlantConfigNotFound = 1001009;
+    LandLevelNotEnough = 1001010;
+    LandNotPlanted = 1001011;
+    PlantNotNeedWater = 1001012;
+    PlantAlreadyWatered = 1001013;
+    PlantNotDryYet = 1001014;
+    PlantNotNeedWeeding = 1001015;
+    PlantAlreadyWeeded = 1001016;
+    PlantNotWeedsYet = 1001017;
+    PlantNotNeedInsectRemoval = 1001018;
+    PlantAlreadyInsectRemoved = 1001019;
+    PlantNotInsectYet = 1001020;
+    PlantNotMature = 1001021;
+    PlantAlreadyDead = 1001022;
+    NoLandCouldHarvest = 1001023;
+    PlantCannotFertilize = 1001024;
+    FertilizerAlreadyUsed = 1001025;
+    FertilizerTimesLimit = 1001026;
+    NoLandCouldFertilize = 1001027;
+    NoLandCouldPlant = 1001028;
+    NoLandCouldWater = 1001029;
+    NoLandCouldWeedOut = 1001030;
+    NoLandCouldInsecticide = 1001031;
+    NoLandCouldRemove = 1001032;
+    PlantNoPlankTimes = 1001033;
+    PlantCannotPutWeeds = 1001034;
+    PlantAlreadyHasWeeds = 1001035;
+    PlantMaxWeedsReached = 1001036;
+    PlantCannotPutInsects = 1001037;
+    PlantAlreadyHasInsects = 1001038;
+    PlantMaxInsectsReached = 1001039;
+    PlantAllreadyStoled = 1001040;
+    NoLandCouldPutWeeds = 1001041;
+    NoLandCouldPutInsects = 1001042;
+    FertilizerConfigNotFound = 1001043;
+    LandConfigNotFound = 1001044;
+    PlantStealNumLimit = 1001045;
+    PlantOpreateTimesLimit = 1001046;
+    PlantBadOpreateTimesLimit = 1001047;
+    PlantNotFriend = 1001048;
+    PlantStealTimesLimit = 1001049;
+    PlantMuliLandPlantVer = 1001050;
+    PlantMultiLandBanUpgrade = 1001051;
+    PlantMultiLandInvalidGrid = 1001052;
+    PlantIntimacyLevelNotEnough = 1001053;
+    PlantLandColorLess = 1001054;
+    PlantNotVistor = 1001055;
+    VisitAllreadyLeaved = 1002001;
+    VisitNotFriend = 1002002;
+    VisitAccountBanned = 1002003;
+    VisitAccountDeleted = 1002004;
+    VisitNotPlatFriend = 1002005;
+    VisitVisitorFull = 1002006;
+    BagFull = 1003001;
+    CurrentUpper = 1003002;
+    ItemCountLimit = 1003003;
+    RandomPackOpenMayByLimit = 1003004;
+    ShopNotFound = 1004001;
+    GoodsNotFound = 1004002;
+    GoodsLocked = 1004003;
+    GoodsLimited = 1004004;
+    GoodsCondNotYet = 1004005;
+    GoodsDiffPrice = 1004006;
+    GoodsPlayerLevelLess = 1004007;
+    FriendNotFound = 1005001;
+    FriendInvitationMaxNum = 1005002;
+    FriendAlreadyExists = 1005003;
+    FriendLimitReached = 1005004;
+    FriendNotInNormalState = 1005005;
+    FriendAlreadyFriend = 1005006;
+    FriendApplicationBlocked = 1005007;
+    FriendNoRequest = 1005008;
+    FriendNotInApplicationState = 1005009;
+    FriendCannotAddSelf = 1005010;
+    FriendGidsEmpty = 1005011;
+    FriendAlreadyAppliedToday = 1005012;
+    FriendPlatformMismatch = 1005013;
+    FriendInvalidParam = 1005014;
+    FriendTargetLimitReached = 1005015;
+    FriendAlreadyAppliedMe = 1005016;
+    FriendNotQQFriend = 1005017;
+    BulletinNotFound = 1006001;
+    InvalidFromParam = 1006002;
+    InvalidCountParam = 1006003;
+    BulletinNotVisible = 1006004;
+    BulletinExpired = 1006005;
+    DogNotOwned = 1007002;
+    DogAlreadyOwned = 1007003;
+    DogNotActivated = 1007004;
+    DogAlreadyActivated = 1007005;
+    DogAlreadyDeployed = 1007006;
+    DogNotDeployed = 1007007;
+    NoDogDeployed = 1007008;
+    DogConfigNotFound = 1007009;
+    DogPriceMismatch = 1007010;
+    InsufficientGold = 1007011;
+    FoodConfigNotFound = 1007012;
+    InsufficientFood = 1007013;
+    TaskProgressNotEnough = 1008001;
+    TaskAlreadyClaimed = 1008002;
+    TaskNotUnlocked = 1008003;
+    ShareAlreadyClaimed = 1009001;
+    ShareShareCountNotEnough = 1009002;
+    ShareInviteAwardClaimed = 1009004;
+    ShareInviteAwardLessNum = 1009005;
+    PayNotAllowed = 1010001;
+    InputInvalidCharacter = 1011001;
+    EmailNotFound = 1012001;
+    EmailExpired = 1012002;
+    EmailAlreadyClaimed = 1012003;
+    EmailNoRewards = 1012004;
+    EmailNoClaimableRewards = 1012005;
+    IllustratedConfigNotFound = 1013001;
+    IllustratedNotUnlocked = 1013002;
+    IllustratedHarvestCountNotEnough = 1013003;
+    CollectorLevelConfigNotFound = 1013004;
+    CollectorProgressNotEnough = 1013005;
+    CollectorRewardAlreadyClaimed = 1013006;
+    IllustratedProgressUpdateFailed = 1013007;
+    WeakGuideNodeNotExist = 1015001;
+    WeakGuideNodeHasCompleted = 1015002;
+    WeakGuideNodeHasNoRewards = 1015003;
+    WeakGuideNodeRewardsHasClaimed = 1015004;
+    WeakGuideNodeUnComplete = 1015005;
+    LuckyDrawMachineCfgNotFound = 1016001;
+    LuckyDrawMachineIsLocked = 1016002;
+    LuckyDrawMachineOpGiftsIsClaimed = 1016003;
+    LuckyCoinIsNotEnougth = 1016004;
+    InvalidItemIDForLuckyDraw = 1016005;
+    LuckyDrawInvalidDrawCount = 1016006;
+    LuckyDrawFailed = 1016007;
+    LuckyDrawGiftNotFound = 1016008;
+    LuckyDrawTotalCountNotReached = 1016009;
+    LuckyDrawItemNotInGiftRewards = 1016010;
+    LoveHutRabbitNotFound = 1017001;
+    LoveHutInvalidFruit = 1017002;
+    LoveHutSelfFeedLimitReached = 1017003;
+    LoveHutFriendFeedLimitReached = 1017004;
+    LoveHutDailyRefreshLimitReached = 1017005;
+    LoveHutCannotFinishEarly = 1017006;
+    LoveHutSystemNotUnlocked = 1017007;
+    LoveHutFruitAlreadyFull = 1017008;
+    LoveHutFeedTooMuch = 1017009;
+    LoveHutSettleError = 1017010;
+    LoveHutAlreadySettled = 1017011;
+    RedPacketCfgNotFound = 1018001;
+    RedPacketNotUnlocked = 1018002;
+    RedPacketNotStarted = 1018003;
+    RedPacketAlreadyEnded = 1018004;
+    RedPacketJoinLimitReached = 1018005;
+    RedPacketRewardCfgNotFound = 1018006;
+    RedPacketActivityNotFound = 1018007;
+    NudgeConfigNotLoaded = 1019001;
+    NudgeFriendNotExist = 1019002;
+    NudgeEventNotAllowed = 1019003;
+    NudgeEventTriggerNotMet = 1019004;
+    NudgeEventConfigNotFound = 1019005;
+    QQVipNotQQVip = 1021001;
+    QQVipGiftAlreadyClaimed = 1021002;
+    QQVipGiftConfigNotFound = 1021003;
+    PayBalanceLess = 1030001;
+    PayDeviceTypeNotSupported = 1030002;
+    PayNotFoundDiamondCfg = 1030003;
+    PayCantBuyWithDiamond = 1030004;
+    PayEditorNotEnable = 1030005;
+    PayInvalidPlatform = 1030006;
+    PayInvalidMidasErr = 1030007;
+    PayOpenKeyTimeout = 1030008;
+    PayOpenKeyInvalid = 1030009;
+    MallProductNotFound = 1031001;
+    MallProductNotAvailable = 1031002;
+    MallPurchaseLimitReached = 1031003;
+    MallInsufficientCurrency = 1031004;
+    MallInvalidProductID = 1031005;
+    MallNotMonthCard = 1031006;
+    MallMonthCardNotPurchased = 1031007;
+    MallMonthCardAlreadyClaimed = 1031008;
+    MallMonthCardConfigNotFound = 1031009;
+    MallMonthCardAlreadyActive = 1031010;
+    MallMonthCardAchievedMaxDays = 1031011;
+    ItemGuardTriggered = 1032001;
+    ItemGuardHarvestOtherCountLimitReached = 1032002;
+    ItemGuardHarvestDifferentFriendCountLimitReached = 1032003;
+}
+
+message EmailPreview {
+    string email_id = 1;
+    int32 email_type = 2;
+    string title = 3;
+    bool is_read = 4;
+    bool has_reward = 5;
+    int64 send_time = 6;
+    string desc = 7;
+    int64 expire_time = 8;
+    string tips = 9;
+}
+
+message EmailDetail {
+    string email_id = 1;
+    int32 email_type = 2;
+    string title = 3;
+    string content = 4;
+    int64 send_time = 6;
+    int64 expire_time = 7;
+    bool is_read = 8;
+    string reason = 9;
+    bool is_claimed = 10;
+    string tips = 11;
+}
+
+message GetEmailListRequest {
+    int32 email_type = 1;
+}
+message GetEmailListReply {
+    repeated EmailPreview emails = 1;
+}
+
+message ReadEmailRequest {
+    int32 email_type = 1;
+    string email_id = 2;
+}
+message ReadEmailReply {}
+
+message BatchReadEmailRequest {
+    int32 email_type = 1;
+}
+message BatchReadEmailReply {}
+
+message ClaimEmailRequest {
+    int32 email_type = 1;
+    string email_id = 2;
+}
+message ClaimEmailReply {}
+
+message BatchClaimEmailRequest {
+    int32 email_type = 1;
+}
+message BatchClaimEmailReply {}
+
+message BatchDeleteEmailRequest {
+    int32 email_type = 1;
+}
+message BatchDeleteEmailReply {}
+
+message NewEmailNotify {}

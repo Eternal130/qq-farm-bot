@@ -1,0 +1,19 @@
+syntax = "proto3";
+package gamepb.mutantpb;
+option go_package = "qq-farm-bot/proto/mutantpb";
+
+message MutantFruitInfo {
+    int64 fruit_id = 1;
+    int64 get_time = 2;
+    bool is_new = 3;
+    bool is_shared = 4;
+}
+
+message GetSystemOpenInfoRequest {}
+message GetSystemOpenInfoReply {
+    string tips = 1;
+}
+
+message NewMutantFruitNotify {
+    int64 fruit_id = 1;
+}

@@ -12,6 +12,10 @@ enum EnterReason {
     ENTER_REASON_INTERACT = 3;
 }
 
+message NudgeInfo {
+    bool disable_popup = 2;
+}
+
 message EnterRequest {
     int64 host_gid = 1;
     int32 reason = 2;
@@ -24,3 +28,6 @@ message EnterReply {
 
 message LeaveRequest { int64 host_gid = 1; }
 message LeaveReply {}
+
+message KeepRequest { int64 host_gid = 1; }
+message KeepReply {}

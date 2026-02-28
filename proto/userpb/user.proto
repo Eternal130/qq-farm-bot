@@ -2,6 +2,20 @@ syntax = "proto3";
 package gamepb.userpb;
 option go_package = "qq-farm-bot/proto/userpb";
 
+enum VersionStatus {
+    VERSION_STATUS_UNKNOWN = 0;
+    VERSION_STATUS_RECOMMEND = 1;
+    VERSION_STATUS_FORCE = 2;
+}
+
+enum CertType {
+    CERT_TYPE_CHINA_ID_CARD = 0;
+    CERT_TYPE_OVERSEAS_PASSPORT = 414;
+    CERT_TYPE_HK_MACAU_TAIWAN = 516;
+    CERT_TYPE_FOREIGN_PERMANENT = 553;
+    CERT_TYPE_OTHER = 555;
+}
+
 message LoginRequest {
     int64 sharer_id = 3;
     string sharer_open_id = 4;
@@ -86,6 +100,30 @@ message HeartbeatReply {
     VersionInfo version_info = 2;
 }
 
+message FriendInfo {
+    string open_id = 1;
+}
+
+message QQVipInfo {
+    bool is_vip = 1;
+}
+
+message SetDisplayInfoRequest {
+    string name = 1;
+    string avatar_url = 2;
+    string signature = 3;
+    int32 gender = 5;
+    string remark = 6;
+}
+
+message SetDisplayInfoReply {
+    string name = 1;
+    string avatar_url = 2;
+    string signature = 3;
+    int32 gender = 5;
+    string remark = 6;
+}
+
 message ReportArkClickRequest {
     int64 sharer_id = 1;
     string sharer_open_id = 2;
@@ -97,4 +135,110 @@ message ReportArkClickReply {}
 
 message BasicNotify {
     BasicInfo basic = 1;
+}
+
+message LogoutRequest {
+    string reason = 1;
+}
+
+message LogoutReply {}
+
+message ClientReportFlowRequest {
+    int32 os_type = 1;
+    int32 plat_from_type = 2;
+    string open_id = 3;
+    int64 gid = 4;
+    string name = 5;
+    int64 now = 6;
+    int64 level = 7;
+    int64 flow_type = 101;
+    string flow_type_str = 102;
+    int64 param_int1 = 103;
+    int64 param_int2 = 104;
+    int64 param_int3 = 105;
+    int64 param_int4 = 106;
+    int64 param_int5 = 107;
+    string param_str6 = 108;
+    string param_str7 = 109;
+    string param_str8 = 110;
+    string param_str9 = 111;
+    string param_str10 = 112;
+}
+
+message ClientReportFlowReply {}
+
+message BatchClientReportFlowRequest {
+    repeated ClientReportFlowRequest requests = 1;
+}
+
+message BatchClientReportFlowReply {
+    int32 success_count = 1;
+    int32 fail_count = 2;
+}
+
+message CommandNotify {
+    string type = 1;
+    string data = 2;
+}
+
+message ReportRequest {
+    int64 reported_gid = 1;
+    int32 report_category = 2;
+    int32 report_scene = 4;
+    string report_desc = 5;
+    string report_content = 6;
+    string report_group_id = 10;
+    string report_group_name = 11;
+    string report_battle_id = 12;
+    int64 report_battle_time = 13;
+    int32 report_entrance = 14;
+}
+
+message ReportReply {
+    bool success = 1;
+    string msg = 2;
+    string trace_id = 3;
+}
+
+message DeleteAccountRequest {
+    string name = 1;
+    string cert_id = 2;
+    int32 cert_type = 3;
+}
+
+message DeleteAccountReply {
+    bool success = 1;
+    string msg = 2;
+}
+
+message SetQQFriendRecommendAuthorizedRequest {
+    int64 authorized = 1;
+}
+
+message SetQQFriendRecommendAuthorizedReply {
+    int64 authorized = 1;
+}
+
+message UserSettings {
+    bool disable_nudge = 1;
+}
+
+message SetUserSettingsRequest {
+    bool disable_nudge = 1;
+}
+
+message SetUserSettingsReply {}
+
+message GetUserSettingsRequest {}
+
+message GetUserSettingsReply {
+    UserSettings settings = 1;
+}
+
+message BatchGetBasicInfoRequest {
+    repeated int64 gids = 1;
+}
+
+message BatchGetBasicInfoReply {
+    repeated BasicInfo basics = 1;
 }
