@@ -128,6 +128,7 @@ func scanAccount(scanner interface {
 		&a.PlantCropID, &a.SellCropIDs, &a.StealCropIDs,
 		&autoUseFert, &autoBuyFert, &a.FertilizerTargetCount, &a.FertilizerBuyDailyLimit,
 		&enableAntiDetection,
+		&a.CreatedAt, &a.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
