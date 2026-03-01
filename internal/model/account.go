@@ -40,6 +40,8 @@ type Account struct {
 	FertilizerTargetCount   int  `json:"fertilizer_target_count"`
 	FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
 
+	// Anti-detection
+	EnableAntiDetection bool `json:"enable_anti_detection"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -92,6 +92,8 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			AutoBuyFertilizer       bool `json:"auto_buy_fertilizer"`
 			FertilizerTargetCount   int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
+			// Anti-detection
+			EnableAntiDetection bool `json:"enable_anti_detection"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -135,6 +137,7 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			AutoBuyFertilizer:       req.AutoBuyFertilizer,
 			FertilizerTargetCount:   req.FertilizerTargetCount,
 			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
+			EnableAntiDetection:     req.EnableAntiDetection,
 		}
 		if err := s.CreateAccount(account); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -188,6 +191,8 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			AutoBuyFertilizer       *bool `json:"auto_buy_fertilizer"`
 			FertilizerTargetCount   *int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
+			// Anti-detection
+			EnableAntiDetection *bool `json:"enable_anti_detection"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -268,6 +273,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.FertilizerBuyDailyLimit != nil {
 			account.FertilizerBuyDailyLimit = *req.FertilizerBuyDailyLimit
+		}
+		if req.EnableAntiDetection != nil {
+			account.EnableAntiDetection = *req.EnableAntiDetection
 		}
 
 		if err := s.UpdateAccount(account); err != nil {

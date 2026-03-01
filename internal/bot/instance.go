@@ -42,6 +42,8 @@ type BotConfig struct {
 	PlantCropID  int    // specific crop to plant (0 = auto)
 	SellCropIDs  string // comma-separated crop IDs to sell (empty = all)
 	StealCropIDs string // comma-separated crop IDs to steal (empty = all)
+	// Anti-detection
+	EnableAntiDetection bool
 }
 
 const (
@@ -107,6 +109,8 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		PlantCropID:  account.PlantCropID,
 		SellCropIDs:  account.SellCropIDs,
 		StealCropIDs: account.StealCropIDs,
+
+		EnableAntiDetection: account.EnableAntiDetection,
 	}
 	if cfg.FarmInterval < 1 {
 		cfg.FarmInterval = 10

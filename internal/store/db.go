@@ -38,6 +38,7 @@ const accountColumns = `id, user_id, name, platform, code, auto_start,
 	enable_remove_dead, enable_upgrade_land, enable_help_friend, enable_claim_task,
 	plant_crop_id, sell_crop_ids, steal_crop_ids,
 	auto_use_fertilizer, auto_buy_fertilizer, fertilizer_target_count, fertilizer_buy_daily_limit,
+	enable_anti_detection,
 	created_at, updated_at`
 
 func (s *Store) migrate() error {
@@ -103,6 +104,8 @@ func (s *Store) migrate() error {
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN plant_crop_id INTEGER NOT NULL DEFAULT 0`)
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN sell_crop_ids TEXT NOT NULL DEFAULT ''`)
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN steal_crop_ids TEXT NOT NULL DEFAULT ''`)
+	// Migration: add anti-detection column
+	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN enable_anti_detection INTEGER NOT NULL DEFAULT 0`)
 
 	return err
 }
@@ -115,7 +118,7 @@ func scanAccount(scanner interface {
 	var autoStart, enableSteal, forceLowest int
 	var enableHarvest, enablePlant, enableSell, enableWeed, enableBug, enableWater int
 	var enableRemoveDead, enableUpgradeLand, enableHelpFriend, enableClaimTask int
-	var autoUseFert, autoBuyFert int
+	var autoUseFert, autoBuyFert, enableAntiDetection int
 
 	if err := scanner.Scan(
 		&a.ID, &a.UserID, &a.Name, &a.Platform, &a.Code, &autoStart,
@@ -124,7 +127,7 @@ func scanAccount(scanner interface {
 		&enableRemoveDead, &enableUpgradeLand, &enableHelpFriend, &enableClaimTask,
 		&a.PlantCropID, &a.SellCropIDs, &a.StealCropIDs,
 		&autoUseFert, &autoBuyFert, &a.FertilizerTargetCount, &a.FertilizerBuyDailyLimit,
-		&a.CreatedAt, &a.UpdatedAt,
+		&enableAntiDetection,
 	); err != nil {
 		return nil, err
 	}
@@ -144,6 +147,7 @@ func scanAccount(scanner interface {
 	a.EnableClaimTask = enableClaimTask == 1
 	a.AutoUseFertilizer = autoUseFert == 1
 	a.AutoBuyFertilizer = autoBuyFert == 1
+	a.EnableAntiDetection = enableAntiDetection == 1
 
 	return &a, nil
 }
@@ -202,8 +206,9 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		enable_remove_dead, enable_upgrade_land, enable_help_friend, enable_claim_task,
 		plant_crop_id, sell_crop_ids, steal_crop_ids,
 		auto_use_fertilizer, auto_buy_fertilizer, fertilizer_target_count, fertilizer_buy_daily_limit,
+		enable_anti_detection,
 		created_at, updated_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		a.UserID, a.Name, a.Platform, a.Code, boolToInt(a.AutoStart),
 		a.FarmInterval, a.FriendInterval, boolToInt(a.EnableSteal), boolToInt(a.ForceLowest),
 		boolToInt(a.EnableHarvest), boolToInt(a.EnablePlant), boolToInt(a.EnableSell),
@@ -213,6 +218,7 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		a.PlantCropID, a.SellCropIDs, a.StealCropIDs,
 		boolToInt(a.AutoUseFertilizer), boolToInt(a.AutoBuyFertilizer),
 		a.FertilizerTargetCount, a.FertilizerBuyDailyLimit,
+		boolToInt(a.EnableAntiDetection),
 		now, now)
 	if err != nil {
 		return err
@@ -230,6 +236,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		enable_remove_dead=?, enable_upgrade_land=?, enable_help_friend=?, enable_claim_task=?,
 		plant_crop_id=?, sell_crop_ids=?, steal_crop_ids=?,
 		auto_use_fertilizer=?, auto_buy_fertilizer=?, fertilizer_target_count=?, fertilizer_buy_daily_limit=?,
+		enable_anti_detection=?,
 		updated_at=?
 	WHERE id=?`,
 		a.Name, a.Platform, a.Code, boolToInt(a.AutoStart),
@@ -241,6 +248,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		a.PlantCropID, a.SellCropIDs, a.StealCropIDs,
 		boolToInt(a.AutoUseFertilizer), boolToInt(a.AutoBuyFertilizer),
 		a.FertilizerTargetCount, a.FertilizerBuyDailyLimit,
+		boolToInt(a.EnableAntiDetection),
 		a.UpdatedAt, a.ID)
 	return err
 }
