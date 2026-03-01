@@ -103,10 +103,10 @@ const (
 	// loginTimeout is the deadline for the Login RPC (longer than default to
 	// tolerate slow initial handshakes).
 	loginTimeout = 30 * time.Second
-	// maxHeartbeatFailures is consecutive heartbeat failures before forced disconnect.
-	maxHeartbeatFailures = 3
 	// heartbeatResponseDeadline is elapsed time since last successful heartbeat
-	// response before the connection is considered unhealthy.
+	// response before the watchdog forces a disconnect. Matching the official
+	// game client's approach: time-based health detection rather than counting
+	// consecutive failures.
 	heartbeatResponseDeadline = 60 * time.Second
 )
 
@@ -543,15 +543,18 @@ func (n *Network) Login(clientVersion string) error {
 
 // StartHeartbeat runs the heartbeat loop until context is cancelled.
 //
-// Improvements over the basic version:
-//   - Tracks time since last successful response for richer diagnostics
-//   - Proactively clears stale pending calls when health degrades
-//   - Syncs server time delta from HeartbeatReply
+// Optimised to match the official game client's behaviour:
+//   - Fire-and-forget: each heartbeat is sent in its own goroutine so the
+//     ticker is never blocked by slow or timed-out responses.
+//   - Time-based disconnect: if no successful heartbeat response is received
+//     within heartbeatResponseDeadline (60 s), the connection is considered
+//     dead and forcibly closed — replacing the old consecutive-failure counter
+//     which could take up to ~105 s to trigger.
+//   - Syncs server time delta from HeartbeatReply on every success.
 func (n *Network) StartHeartbeat(clientVersion string, interval time.Duration) {
 	go func() {
 		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
-		consecutiveFailures := 0
 		for {
 			select {
 			case <-n.ctx.Done():
@@ -562,41 +565,42 @@ func (n *Network) StartHeartbeat(clientVersion string, interval time.Duration) {
 					continue
 				}
 
-				// Diagnostic: check elapsed time since last successful heartbeat
+				// Time-based health check (matches official game client).
+				// If no heartbeat response within the deadline, the connection
+				// is dead — disconnect immediately and let the watchdog reconnect.
 				lastMs := n.lastHeartbeatAt.Load()
 				elapsed := time.Since(time.UnixMilli(lastMs))
 				if elapsed > heartbeatResponseDeadline {
-					n.logger.Warnf("心跳", "连接可能已断开 (%ds 无响应, pending=%d)",
+					n.logger.Warnf("心跳", "超过 %ds 无心跳响应，断开连接 (pending=%d)",
 						int(elapsed.Seconds()), n.pendingCount())
+					n.clearPendingCalls("心跳响应超时")
+					n.disconnectWithReason(DisconnectHeartbeatTimeout)
+					return
 				}
 
-				req := &userpb.HeartbeatRequest{Gid: gid, ClientVersion: clientVersion}
-				body, _ := proto.Marshal(req)
-				replyBody, err := n.SendRequest("gamepb.userpb.UserService", "Heartbeat", body)
-				if err != nil {
-					consecutiveFailures++
-					n.logger.Warnf("心跳", "失败 (%d/%d): %v", consecutiveFailures, maxHeartbeatFailures, err)
-
-					// Health degradation: clear stale pending calls to prevent
-					// memory leaks and goroutine pile-up.
-					if consecutiveFailures >= 2 {
-						n.clearPendingCalls("心跳连续失败，清理残留请求")
-					}
-
-					if consecutiveFailures >= maxHeartbeatFailures {
-						n.logger.Warnf("心跳", "连续失败 %d 次，断开连接", maxHeartbeatFailures)
-						n.disconnectWithReason(DisconnectHeartbeatTimeout)
-						return
-					}
-				} else {
-					consecutiveFailures = 0
-					n.lastHeartbeatAt.Store(time.Now().UnixMilli())
-					// Sync server time from heartbeat reply
-					n.syncServerTime(replyBody)
-				}
+				// Fire-and-forget: send heartbeat without blocking the ticker
+				// so the next tick always fires exactly on schedule.
+				go n.doHeartbeat(clientVersion, gid)
 			}
 		}
 	}()
+}
+
+// doHeartbeat sends a single heartbeat and processes the response.
+// It runs in its own goroutine, launched by StartHeartbeat, so the heartbeat
+// ticker is never blocked by network latency or timeouts.
+func (n *Network) doHeartbeat(clientVersion string, gid int64) {
+	req := &userpb.HeartbeatRequest{Gid: gid, ClientVersion: clientVersion}
+	body, _ := proto.Marshal(req)
+	replyBody, err := n.SendRequest("gamepb.userpb.UserService", "Heartbeat", body)
+	if err != nil {
+		if n.ctx.Err() == nil {
+			n.logger.Warnf("心跳", "失败: %v", err)
+		}
+		return
+	}
+	n.lastHeartbeatAt.Store(time.Now().UnixMilli())
+	n.syncServerTime(replyBody)
 }
 
 // pendingCount returns the number of in-flight pending requests.
