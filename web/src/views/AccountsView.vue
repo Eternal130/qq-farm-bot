@@ -54,7 +54,8 @@ const formData = ref<CreateAccountRequest>({
   enable_claim_task: true,
   plant_crop_id: 0,
   sell_crop_ids: '',
-  steal_crop_ids: ''
+  steal_crop_ids: '',
+  enable_anti_detection: false
 })
 
 const qrCodeData = ref<QRCodeResponse | null>(null)
@@ -129,7 +130,8 @@ const openAddDialog = () => {
     enable_claim_task: true,
     plant_crop_id: 0,
     sell_crop_ids: '',
-    steal_crop_ids: ''
+    steal_crop_ids: '',
+    enable_anti_detection: false
   }
   dialogVisible.value = true
 }
@@ -158,7 +160,8 @@ const openEditDialog = (row: Account) => {
     enable_claim_task: row.enable_claim_task,
     plant_crop_id: row.plant_crop_id,
     sell_crop_ids: row.sell_crop_ids,
-    steal_crop_ids: row.steal_crop_ids
+    steal_crop_ids: row.steal_crop_ids,
+    enable_anti_detection: row.enable_anti_detection
   }
   dialogVisible.value = true
 }
@@ -536,7 +539,7 @@ onUnmounted(() => {
               <ElInputNumber 
                 v-model="formData.farm_interval" 
                 :min="1" 
-                :max="60"
+                :max="3600"
                 style="width: 120px"
               />
               <span class="form-hint">秒</span>
@@ -547,10 +550,16 @@ onUnmounted(() => {
               <ElInputNumber 
                 v-model="formData.friend_interval" 
                 :min="1" 
-                :max="60"
+                :max="3600"
                 style="width: 120px"
               />
               <span class="form-hint">秒</span>
+            </div>
+          </ElFormItem>
+          <ElFormItem label="防检测">
+            <div class="switch-row">
+              <ElSwitch v-model="formData.enable_anti_detection" />
+              <span class="form-hint">随机化访问顺序与间隔，降低被检测风险</span>
             </div>
           </ElFormItem>
         </div>

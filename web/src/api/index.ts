@@ -89,6 +89,8 @@ export interface Account {
   auto_buy_fertilizer: boolean
   fertilizer_target_count: number
   fertilizer_buy_daily_limit: number
+  // Anti-detection
+  enable_anti_detection: boolean
   // Runtime status
   status: 'running' | 'stopped' | 'error'
   level: number
@@ -122,6 +124,8 @@ export interface CreateAccountRequest {
   plant_crop_id: number
   sell_crop_ids: string
   steal_crop_ids: string
+  // Anti-detection
+  enable_anti_detection: boolean
 }
 
 export interface CropInfo {
