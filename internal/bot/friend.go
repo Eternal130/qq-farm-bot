@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -31,8 +32,13 @@ func NewFriendWorker(net *Network, logger *Logger, cfg *BotConfig, stats *BotSta
 }
 
 func (fw *FriendWorker) RunLoop() {
+	// Initial delay: add jitter if anti-detection enabled
+	initDelay := 5 * time.Second
+	if fw.cfg.EnableAntiDetection {
+		initDelay = time.Duration(3+rand.Intn(5)) * time.Second
+	}
 	select {
-	case <-time.After(5 * time.Second):
+	case <-time.After(initDelay):
 	case <-fw.net.ctx.Done():
 		return
 	}
@@ -41,8 +47,15 @@ func (fw *FriendWorker) RunLoop() {
 
 	for {
 		fw.checkFriends()
+		waitTime := time.Duration(fw.cfg.FriendInterval) * time.Second
+		if fw.cfg.EnableAntiDetection {
+			// Add ±30% random jitter to the interval
+			base := float64(fw.cfg.FriendInterval)
+			jitter := base * (0.7 + rand.Float64()*0.6) // 0.7x ~ 1.3x
+			waitTime = time.Duration(jitter * float64(time.Second))
+		}
 		select {
-		case <-time.After(time.Duration(fw.cfg.FriendInterval) * time.Second):
+		case <-time.After(waitTime):
 		case <-fw.net.ctx.Done():
 			return
 		}
@@ -104,6 +117,13 @@ func (fw *FriendWorker) checkFriends() {
 		return
 	}
 
+	// Anti-detection: shuffle friend visit order
+	if fw.cfg.EnableAntiDetection {
+		rand.Shuffle(len(targets), func(i, j int) {
+			targets[i], targets[j] = targets[j], targets[i]
+		})
+	}
+
 	totalActions := struct {
 		steal, water, weed, bug int
 	}{}
@@ -114,7 +134,12 @@ func (fw *FriendWorker) checkFriends() {
 		totalActions.water += actions.water
 		totalActions.weed += actions.weed
 		totalActions.bug += actions.bug
-		time.Sleep(500 * time.Millisecond)
+		if fw.cfg.EnableAntiDetection {
+			// Random delay between friend visits: 1~3 seconds
+			time.Sleep(time.Duration(1000+rand.Intn(2000)) * time.Millisecond)
+		} else {
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 
 	var summary []string
@@ -178,7 +203,7 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WeedOut", body); err == nil {
 					actions.weed++
 				}
-				time.Sleep(100 * time.Millisecond)
+				fw.antiDetectionDelay(100)
 			}
 		}
 		if len(status.needBug) > 0 {
@@ -188,7 +213,7 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Insecticide", body); err == nil {
 					actions.bug++
 				}
-				time.Sleep(100 * time.Millisecond)
+				fw.antiDetectionDelay(100)
 			}
 		}
 		if len(status.needWater) > 0 {
@@ -198,7 +223,7 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 				if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "WaterLand", body); err == nil {
 					actions.water++
 				}
-				time.Sleep(100 * time.Millisecond)
+				fw.antiDetectionDelay(100)
 			}
 		}
 	}
@@ -217,7 +242,7 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Harvest", body); err == nil {
 				actions.steal++
 			}
-			time.Sleep(100 * time.Millisecond)
+			fw.antiDetectionDelay(100)
 		}
 	}
 
@@ -313,5 +338,15 @@ func (fw *FriendWorker) checkAndAcceptApplications() {
 	acceptBody, _ := proto.Marshal(acceptReq)
 	if _, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "AcceptFriends", acceptBody); err == nil {
 		fw.logger.Infof("申请", "已同意 %d 人: %s", len(gids), strings.Join(names, ", "))
+	}
+}
+
+// antiDetectionDelay sleeps for baseMs when anti-detection is off,
+// or a randomized duration (2x ~ 4x baseMs) when anti-detection is on.
+func (fw *FriendWorker) antiDetectionDelay(baseMs int) {
+	if fw.cfg.EnableAntiDetection {
+		time.Sleep(time.Duration(baseMs*2+rand.Intn(baseMs*2)) * time.Millisecond)
+	} else {
+		time.Sleep(time.Duration(baseMs) * time.Millisecond)
 	}
 }

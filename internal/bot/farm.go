@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -38,17 +39,28 @@ func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCach
 
 // RunLoop runs the farm check loop until context is cancelled.
 func (f *FarmWorker) RunLoop() {
-	// Initial delay
+	// Initial delay: add jitter if anti-detection enabled
+	initDelay := 2 * time.Second
+	if f.cfg.EnableAntiDetection {
+		initDelay = time.Duration(1+rand.Intn(3)) * time.Second
+	}
 	select {
-	case <-time.After(2 * time.Second):
+	case <-time.After(initDelay):
 	case <-f.net.ctx.Done():
 		return
 	}
 
 	for {
 		f.checkFarm()
+		waitTime := time.Duration(f.cfg.FarmInterval) * time.Second
+		if f.cfg.EnableAntiDetection {
+			// Add ±30% random jitter to the interval
+			base := float64(f.cfg.FarmInterval)
+			jitter := base * (0.7 + rand.Float64()*0.6) // 0.7x ~ 1.3x
+			waitTime = time.Duration(jitter * float64(time.Second))
+		}
 		select {
-		case <-time.After(time.Duration(f.cfg.FarmInterval) * time.Second):
+		case <-time.After(waitTime):
 		case <-f.net.ctx.Done():
 			return
 		}
