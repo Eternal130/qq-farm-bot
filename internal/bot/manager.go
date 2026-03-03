@@ -105,3 +105,15 @@ func (m *Manager) StopAll() {
 		inst.Stop()
 	}
 }
+
+// UpdateBotConfig applies updated account settings to a running bot instance.
+// If the bot is not running, this is a no-op (config will be loaded on next start).
+func (m *Manager) UpdateBotConfig(accountID int64, account *model.Account) {
+	m.mu.RLock()
+	inst, ok := m.instances[accountID]
+	m.mu.RUnlock()
+
+	if ok && inst.IsRunning() {
+		inst.UpdateConfig(account)
+	}
+}

@@ -63,28 +63,29 @@ func RegisterDashboardRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manage
 				Status:   "stopped",
 			}
 			bs := mgr.GetStatus(a.ID)
+			// Always populate fields from bot status (persisted even when stopped)
+			card.Level = bs.Level
+			card.Gold = bs.Gold
+			card.Exp = bs.Exp
+			card.TotalSteal = bs.TotalSteal
+			card.TotalHelp = bs.TotalHelp
+			card.FriendsCount = bs.FriendsCount
+			card.TotalLands = bs.TotalLands
+			card.UnlockedLands = bs.UnlockedLands
+			if bs.Lands != nil {
+				card.Lands = bs.Lands
+			} else {
+				card.Lands = []model.LandStatus{}
+			}
 			if bs.Running {
 				runningCount++
 				totalGold += bs.Gold
 				card.Status = "running"
-				card.Level = bs.Level
-				card.Gold = bs.Gold
-				card.Exp = bs.Exp
-				card.TotalSteal = bs.TotalSteal
-				card.TotalHelp = bs.TotalHelp
-				card.FriendsCount = bs.FriendsCount
-				card.TotalLands = bs.TotalLands
-				card.UnlockedLands = bs.UnlockedLands
-				// Level up estimation
+				// Level up estimation only for running bots
 				card.ExpRatePerHour = bs.ExpRatePerHour
 				card.NextLevelExp = bs.NextLevelExp
 				card.ExpToNextLevel = bs.ExpToNextLevel
 				card.HoursToNextLevel = bs.HoursToNextLevel
-				if bs.Lands != nil {
-					card.Lands = bs.Lands
-				} else {
-					card.Lands = []model.LandStatus{}
-				}
 			} else if bs.Error != "" {
 				card.Status = "error"
 			}

@@ -101,7 +101,6 @@ export interface Account {
 }
 
 export interface CreateAccountRequest {
-  name: string
   platform: 'qq' | 'wx'
   code: string
   auto_start: boolean

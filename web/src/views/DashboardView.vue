@@ -221,13 +221,13 @@ onUnmounted(() => {
           :lg="6"
           class="bot-col"
         >
-          <ElCard class="bot-card" :body-style="{ padding: '16px' }" shadow="hover">
+          <ElCard class="bot-card" :class="{ 'bot-card--stopped': bot.status !== 'running' }" :body-style="{ padding: '16px' }" shadow="hover">
             <div class="bot-header">
               <div class="bot-name">
                 <span class="platform-tag" :class="bot.platform === 'qq' ? 'platform-qq' : 'platform-wx'">
                   {{ bot.platform.toUpperCase() }}
                 </span>
-                <span class="bot-name-text">{{ bot.name }}</span>
+                <span class="bot-name-text">{{ bot.name || '账号 #' + bot.id }}</span>
               </div>
               <ElTag :type="getStatusType(bot.status)" size="small" class="status-tag">
                 {{ getStatusText(bot.status) }}
@@ -458,6 +458,14 @@ onUnmounted(() => {
 
 .bot-card:hover {
   box-shadow: 0 4px 12px rgba(21, 128, 61, 0.12), 0 8px 24px rgba(21, 128, 61, 0.08);
+}
+
+.bot-card--stopped {
+  opacity: 0.7;
+}
+
+.bot-card--stopped:hover {
+  opacity: 0.85;
 }
 
 .bot-header {

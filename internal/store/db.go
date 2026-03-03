@@ -254,6 +254,13 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 	return err
 }
 
+// UpdateAccountName updates only the display name of an account.
+// Used by the bot to persist the name obtained from the game server after login.
+func (s *Store) UpdateAccountName(id int64, name string) error {
+	_, err := s.db.Exec(`UPDATE accounts SET name=?, updated_at=? WHERE id=?`, name, time.Now(), id)
+	return err
+}
+
 func (s *Store) DeleteAccount(id int64) error {
 	_, err := s.db.Exec(`DELETE FROM accounts WHERE id = ?`, id)
 	if err != nil {

@@ -34,7 +34,6 @@ const isEdit = ref(false)
 const currentId = ref<number | null>(null)
 
 const formData = ref<CreateAccountRequest>({
-  name: '',
   platform: 'qq',
   code: '',
   auto_start: false,
@@ -110,7 +109,6 @@ const openAddDialog = () => {
   isEdit.value = false
   currentId.value = null
   formData.value = {
-    name: '',
     platform: 'qq',
     code: '',
     auto_start: false,
@@ -140,7 +138,6 @@ const openEditDialog = (row: Account) => {
   isEdit.value = true
   currentId.value = row.id
   formData.value = {
-    name: row.name,
     platform: row.platform,
     code: row.code,
     auto_start: row.auto_start,
@@ -319,7 +316,7 @@ onUnmounted(() => {
         <ElTableColumn prop="id" label="ID" width="70" align="center" />
         <ElTableColumn prop="name" label="名称" min-width="120">
           <template #default="{ row }">
-            <span class="account-name">{{ row.name }}</span>
+            <span class="account-name">{{ row.name || '账号 #' + row.id }}</span>
           </template>
         </ElTableColumn>
         <ElTableColumn prop="platform" label="平台" width="90" align="center">
@@ -405,9 +402,6 @@ onUnmounted(() => {
       <ElForm :model="formData" label-width="100px" class="account-form">
         <div class="form-section">
           <div class="form-section-title">基本信息</div>
-          <ElFormItem label="名称" required>
-            <ElInput v-model="formData.name" placeholder="请输入账号名称" />
-          </ElFormItem>
           <ElFormItem label="平台" required>
             <ElSelect v-model="formData.platform" style="width: 100%">
               <ElOption label="QQ小程序" value="qq" />

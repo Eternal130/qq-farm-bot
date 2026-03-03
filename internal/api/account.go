@@ -34,19 +34,20 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		type accountResponse struct {
 			model.Account
 			Status string `json:"status"`
-			Level  int64  `json:"level,omitempty"`
-			Gold   int64  `json:"gold,omitempty"`
-			Exp    int64  `json:"exp,omitempty"`
+			Level  int64  `json:"level"`
+			Gold   int64  `json:"gold"`
+			Exp    int64  `json:"exp"`
 		}
 		var result []accountResponse
 		for _, a := range accounts {
 			ar := accountResponse{Account: a}
 			bs := mgr.GetStatus(a.ID)
+			// Always populate level/gold/exp from bot status (persisted even when stopped)
+			ar.Level = bs.Level
+			ar.Gold = bs.Gold
+			ar.Exp = bs.Exp
 			if bs.Running {
 				ar.Status = "running"
-				ar.Level = bs.Level
-				ar.Gold = bs.Gold
-				ar.Exp = bs.Exp
 			} else if bs.Error != "" {
 				ar.Status = "error"
 			} else {
@@ -282,6 +283,8 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		// Hot-reload: apply config to running bot instance (if any)
+		mgr.UpdateBotConfig(id, account)
 		c.JSON(http.StatusOK, account)
 	})
 

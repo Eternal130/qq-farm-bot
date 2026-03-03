@@ -69,6 +69,7 @@ type Instance struct {
 	config  *BotConfig
 	net     *Network
 	logger  *Logger
+	store   *store.Store
 	stats   *BotStats
 	lands   *LandCache
 	running bool
@@ -123,6 +124,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		account: account,
 		config:  cfg,
 		logger:  NewLogger(account.ID, s),
+		store:   s,
 		stats:   &BotStats{},
 		lands:   NewLandCache(),
 	}
@@ -175,6 +177,20 @@ func (inst *Instance) connectAndRun() error {
 	inst.startAt = time.Now()
 	inst.err = ""
 	inst.mu.Unlock()
+
+	// After login, persist account name from game server to database
+	_, _, _, _, loginName := net.state.Get()
+	if loginName != "" && inst.store != nil {
+		inst.mu.Lock()
+		needsUpdate := loginName != inst.account.Name
+		if needsUpdate {
+			inst.account.Name = loginName
+		}
+		inst.mu.Unlock()
+		if needsUpdate {
+			inst.store.UpdateAccountName(inst.account.ID, loginName)
+		}
+	}
 
 	// Start heartbeat
 	net.StartHeartbeat(inst.config.ClientVersion, 25*time.Second)
@@ -313,22 +329,29 @@ func (inst *Instance) Status() *model.BotStatus {
 		Error:     inst.err,
 	}
 
-	if inst.running && inst.net != nil {
+	// Read state from net even when stopped — net object is closed but not nil'd,
+	// so state persists after disconnect/stop.
+	if inst.net != nil {
 		gid, level, exp, gold, name := inst.net.state.Get()
 		s.GID = gid
 		s.Name = name
 		s.Level = level
 		s.Exp = exp
 		s.Gold = gold
+	}
+
+	if !inst.startAt.IsZero() {
 		startAt := inst.startAt
 		s.StartedAt = &startAt
+	}
 
-		// Calculate level up estimation from crop harvest data
+	// Calculate level up estimation only when running
+	if inst.running && s.Level > 0 {
 		gc := GetGameConfig()
 		if gc != nil {
-			if nextExp, hasNext := gc.GetNextLevelExp(int(level)); hasNext {
+			if nextExp, hasNext := gc.GetNextLevelExp(int(s.Level)); hasNext {
 				s.NextLevelExp = nextExp
-				s.ExpToNextLevel = nextExp - exp
+				s.ExpToNextLevel = nextExp - s.Exp
 				if s.ExpToNextLevel < 0 {
 					s.ExpToNextLevel = 0
 				}
@@ -491,4 +514,49 @@ func (inst *Instance) IsRunning() bool {
 	inst.mu.RLock()
 	defer inst.mu.RUnlock()
 	return inst.running
+}
+
+// UpdateConfig applies updated account settings to the running bot config.
+// Workers read config fields via the shared pointer each loop iteration,
+// so updated values take effect on the next cycle automatically.
+func (inst *Instance) UpdateConfig(account *model.Account) {
+	inst.mu.Lock()
+	defer inst.mu.Unlock()
+
+	if inst.config == nil {
+		return
+	}
+
+	inst.config.FarmInterval = account.FarmInterval
+	if inst.config.FarmInterval < 1 {
+		inst.config.FarmInterval = 10
+	}
+	inst.config.FriendInterval = account.FriendInterval
+	if inst.config.FriendInterval < 1 {
+		inst.config.FriendInterval = 10
+	}
+
+	inst.config.EnableSteal = account.EnableSteal
+	inst.config.ForceLowest = account.ForceLowest
+	inst.config.AutoUseFertilizer = account.AutoUseFertilizer
+	inst.config.AutoBuyFertilizer = account.AutoBuyFertilizer
+	inst.config.FertilizerTargetCount = account.FertilizerTargetCount
+	inst.config.FertilizerBuyDailyLimit = account.FertilizerBuyDailyLimit
+
+	inst.config.EnableHarvest = account.EnableHarvest
+	inst.config.EnablePlant = account.EnablePlant
+	inst.config.EnableSell = account.EnableSell
+	inst.config.EnableWeed = account.EnableWeed
+	inst.config.EnableBug = account.EnableBug
+	inst.config.EnableWater = account.EnableWater
+	inst.config.EnableRemoveDead = account.EnableRemoveDead
+	inst.config.EnableUpgradeLand = account.EnableUpgradeLand
+	inst.config.EnableHelpFriend = account.EnableHelpFriend
+	inst.config.EnableClaimTask = account.EnableClaimTask
+
+	inst.config.PlantCropID = account.PlantCropID
+	inst.config.SellCropIDs = account.SellCropIDs
+	inst.config.StealCropIDs = account.StealCropIDs
+
+	inst.config.EnableAntiDetection = account.EnableAntiDetection
 }
