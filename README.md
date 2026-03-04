@@ -20,23 +20,32 @@ v2.0 版本已使用 **Go + Vue 3** 重写，新增：
 ### 自己农场
 - **自动收获** — 检测成熟作物并自动收获
 - **自动铲除** — 自动铲除枯死/收获后的作物残留
-- **自动种植** — 收获后自动购买种子并种植（按经验效率最优选种）
+- **自动种植** — 收获后自动购买种子并种植（按经验效率最优选种，支持指定作物）
 - **自动施肥** — 种植后自动施放普通肥料加速生长
 - **自动除草** — 检测并清除杂草
 - **自动除虫** — 检测并消灭害虫
 - **自动浇水** — 检测缺水作物并浇水
-- **自动出售** — 自动出售仓库中的果实
-- **自动购肥** — 自动购买肥料
+- **自动出售** — 自动出售仓库中的果实（支持指定出售作物）
+- **自动购肥** — 自动购买普通化肥礼包，支持每日购买上限
 - **自动升地** — 自动升级和解锁土地
 
 ### 好友农场
 - **好友巡查** — 自动巡查好友农场
 - **帮忙操作** — 帮好友浇水/除草/除虫
-- **自动偷菜** — 偷取好友成熟作物（可配置禁用）
+- **自动偷菜** — 偷取好友成熟作物（可配置禁用，支持指定偷取作物）
+- **自动接受好友申请** — 自动处理好友申请
 
 ### 系统功能
 - **自动领取任务** — 自动领取完成的任务奖励
 - **心跳保活** — 自动维持 WebSocket 连接
+- **防检测模式** — 随机化操作间隔，降低被检测风险
+- **断线重连** — 自动退避重连，支持多次重试
+- **升级预估** — 基于当前经验速率预估升级时间
+
+### 管理系统
+- **多用户管理** — 支持注册多个管理用户，独立管理各自账号
+- **JWT 认证** — 安全的 Token 认证机制
+- **每功能独立开关** — 每个自动化功能均可单独启用/禁用
 
 ## 安装
 
@@ -92,13 +101,53 @@ make backend   # 仅构建后端
 
 ### 账号配置（每个账号可独立配置）
 
+**基础配置**
+
 | 配置项 | 说明 | 默认值 |
 |--------|------|--------|
 | `farm_interval` | 自己农场巡查间隔（秒） | 2 |
 | `friend_interval` | 好友巡查间隔（秒） | 1 |
-| `enable_steal` | 是否启用偷菜 | true |
-| `force_lowest` | 强制种植最低等级作物 | false |
 | `auto_start` | 服务启动时自动运行 | false |
+
+**功能开关**
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `enable_harvest` | 自动收获 | true |
+| `enable_plant` | 自动种植 | true |
+| `enable_sell` | 自动出售 | true |
+| `enable_weed` | 自动除草 | true |
+| `enable_bug` | 自动除虫 | true |
+| `enable_water` | 自动浇水 | true |
+| `enable_remove_dead` | 自动铲除枯死作物 | true |
+| `enable_upgrade_land` | 自动升级/解锁土地 | true |
+| `enable_steal` | 自动偷菜 | true |
+| `enable_help_friend` | 帮好友浇水/除草/除虫 | true |
+| `enable_claim_task` | 自动领取任务奖励 | true |
+
+**作物选择**
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `plant_crop_id` | 指定种植的作物 ID（0 = 自动选最优） | 0 |
+| `force_lowest` | 强制种植最低等级作物 | false |
+| `sell_crop_ids` | 指定出售的作物 ID（逗号分隔，空 = 全部） | 空 |
+| `steal_crop_ids` | 指定偷取的作物 ID（逗号分隔，空 = 全部） | 空 |
+
+**肥料管理**
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `auto_use_fertilizer` | 自动使用肥料 | false |
+| `auto_buy_fertilizer` | 自动购买肥料 | false |
+| `fertilizer_target_count` | 肥料库存目标数量 | 0 |
+| `fertilizer_buy_daily_limit` | 每日购买肥料上限 | 0 |
+
+**安全**
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| `enable_anti_detection` | 防检测模式（随机化操作间隔） | false |
 
 ### 配置文件
 
@@ -132,48 +181,75 @@ pkill qq-farm-bot
 ## 📋 项目结构
 
 ```
-├── cmd/server/main.go     # 入口文件
+├── cmd/
+│   ├── server/main.go         # 服务入口文件
+│   └── gen-crop-yield/main.go # 作物收益数据生成工具
 ├── internal/
-│   ├── api/               # HTTP API 路由
-│   │   ├── router.go      # 路由配置
-│   │   ├── account.go     # 账号管理 API
-│   │   ├── bot.go         # Bot 控制 API
-│   │   ├── dashboard.go   # Dashboard 统计 API
-│   │   └── log.go         # 日志 API + WebSocket
-│   ├── auth/              # JWT 认证
-│   │   ├── jwt.go         # JWT 生成/验证
-│   │   ├── handler.go     # 登录/注册处理
-│   │   └── middleware.go  # 认证中间件
-│   ├── bot/               # Bot 核心
-│   │   ├── manager.go     # 多账号管理器
-│   │   ├── instance.go    # 单个 Bot 实例
-│   │   ├── network.go     # WebSocket 连接/消息编解码
-│   │   ├── farm.go        # 农场操作: 收获/种植/施肥
-│   │   ├── friend.go      # 好友农场: 偷菜/帮忙
-│   │   ├── task.go        # 任务系统
-│   │   ├── warehouse.go   # 仓库出售
-│   │   └── qqlogin.go     # QQ 扫码登录
-│   ├── config/            # 配置加载
-│   ├── model/             # 数据模型
-│   └── store/             # SQLite 存储
-├── proto/                 # Protobuf 消息定义（Go 生成）
-├── gameConfig/            # 游戏配置数据
-│   ├── RoleLevel.json     # 等级经验表
-│   └── Plant.json         # 植物数据
-├── web/                   # Vue 3 前端
+│   ├── api/                   # HTTP API 路由
+│   │   ├── router.go          # 路由配置 + 前端静态文件服务
+│   │   ├── account.go         # 账号管理 API
+│   │   ├── bot.go             # Bot 控制 API
+│   │   ├── dashboard.go       # Dashboard 统计 API
+│   │   └── log.go             # 日志 API + WebSocket 推送
+│   ├── auth/                  # JWT 认证
+│   │   ├── jwt.go             # JWT 生成/验证
+│   │   ├── handler.go         # 登录/注册处理
+│   │   └── middleware.go      # 认证中间件
+│   ├── bot/                   # Bot 核心逻辑
+│   │   ├── manager.go         # 多账号管理器
+│   │   ├── instance.go        # 单个 Bot 实例（生命周期、重连）
+│   │   ├── network.go         # WebSocket 连接/Protobuf 消息编解码
+│   │   ├── farm.go            # 农场操作: 收获/种植/施肥/除草/除虫/浇水
+│   │   ├── friend.go          # 好友农场: 偷菜/帮忙/好友申请
+│   │   ├── fertilizer.go      # 肥料系统: 自动使用/购买/库存管理
+│   │   ├── warehouse.go       # 仓库出售
+│   │   ├── task.go            # 任务系统
+│   │   ├── qqlogin.go         # QQ 扫码登录
+│   │   ├── gameconfig.go      # 游戏配置加载（作物/等级/物品数据）
+│   │   ├── landcache.go       # 土地状态缓存 + 升级预估计算
+│   │   └── logger.go          # 结构化日志 + WebSocket 广播
+│   ├── config/                # 配置加载
+│   ├── model/                 # 数据模型（账号、用户、日志）
+│   └── store/                 # SQLite 存储层
+├── proto/                     # Protobuf 协议定义
+│   ├── corepb/                # 核心消息
+│   ├── plantpb/               # 种植相关
+│   ├── friendpb/              # 好友相关
+│   ├── itempb/                # 物品/背包
+│   ├── mallpb/                # 商城
+│   ├── shoppb/                # 种子商店
+│   ├── taskpb/                # 任务系统
+│   ├── userpb/                # 用户信息
+│   ├── visitpb/               # 访问/巡查
+│   └── ...                    # 其他协议模块
+├── itempb/                    # 物品 Protobuf Go 生成代码
+├── mallpb/                    # 商城 Protobuf Go 生成代码
+├── gameConfig/                # 游戏配置数据
+│   ├── Plant.json             # 植物数据（生长/产量/经验）
+│   ├── RoleLevel.json         # 等级经验表
+│   ├── ItemInfo.json          # 物品信息
+│   └── seed-shop-merged-export.json # 种子商店合并数据
+├── web/                       # Vue 3 前端
 │   ├── src/
-│   │   ├── views/         # 页面组件
-│   │   │   ├── DashboardView.vue
-│   │   │   ├── AccountsView.vue
-│   │   │   ├── LogsView.vue
-│   │   │   └── CropYieldView.vue
-│   │   ├── api/           # API 调用
-│   │   ├── stores/        # Pinia 状态管理
-│   │   └── router/        # 路由配置
+│   │   ├── views/             # 页面组件
+│   │   │   ├── DashboardView.vue  # 总览面板
+│   │   │   ├── AccountsView.vue   # 账号管理
+│   │   │   ├── LogsView.vue       # 实时日志
+│   │   │   ├── CropYieldView.vue  # 作物收益分析
+│   │   │   ├── LoginView.vue      # 登录页
+│   │   │   └── RegisterView.vue   # 注册页
+│   │   ├── components/        # 通用组件（QRCode 等）
+│   │   ├── layouts/           # 布局组件（主布局）
+│   │   ├── api/               # API 调用封装
+│   │   ├── stores/            # Pinia 状态管理
+│   │   ├── data/              # 静态数据（作物收益）
+│   │   └── router/            # 路由配置
 │   └── package.json
-├── config.json            # 服务配置
-├── Makefile               # 构建脚本
-└── go.mod                 # Go 模块定义
+├── data/                      # 运行时数据（SQLite 数据库）
+├── config.json                # 服务配置
+├── Makefile                   # 构建脚本
+├── go.mod                     # Go 模块定义
+└── LICENSE                    # MIT 许可证
 ```
 
 ## 📋 运行示例
