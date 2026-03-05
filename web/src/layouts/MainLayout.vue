@@ -21,7 +21,8 @@ import {
   SwitchButton,
   Fold,
   Expand,
-  TrendCharts
+  TrendCharts,
+  Timer
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -86,6 +87,11 @@ const handleCommand = (command: string) => {
         <ElMenuItem index="/crop-yield">
           <ElIcon><TrendCharts /></ElIcon>
           <template #title>作物收益</template>
+        </ElMenuItem>
+
+        <ElMenuItem index="/level-up-time">
+          <ElIcon><Timer /></ElIcon>
+          <template #title>升级时间</template>
         </ElMenuItem>
       </ElMenu>
       

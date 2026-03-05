@@ -45,6 +45,11 @@ const router = createRouter({
           name: 'CropYield',
           component: () => import('@/views/CropYieldView.vue')
         },
+        {
+          path: 'level-up-time',
+          name: 'LevelUpTime',
+          component: () => import('@/views/LevelUpTimeView.vue')
+        },
       ]
     },
     {
