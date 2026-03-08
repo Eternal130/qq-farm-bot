@@ -73,7 +73,7 @@ func (fw *FriendWorker) checkFriends() {
 	if fw.cfg.Platform == "qq" {
 		req := &friendpb.SyncAllRequest{OpenIds: []string{}}
 		body, _ := proto.Marshal(req)
-		replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "SyncAll", body)
+		replyBody, err := fw.net.SendRequestWithRetry("gamepb.friendpb.FriendService", "SyncAll", body)
 		if err != nil {
 			fw.logger.Warnf("好友", "获取好友失败: %v", err)
 			return
@@ -84,7 +84,7 @@ func (fw *FriendWorker) checkFriends() {
 	} else {
 		req := &friendpb.GetAllRequest{}
 		body, _ := proto.Marshal(req)
-		replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "GetAll", body)
+		replyBody, err := fw.net.SendRequestWithRetry("gamepb.friendpb.FriendService", "GetAll", body)
 		if err != nil {
 			fw.logger.Warnf("好友", "获取好友失败: %v", err)
 			return

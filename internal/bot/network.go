@@ -114,6 +114,10 @@ const (
 	// game client's approach: time-based health detection rather than counting
 	// consecutive failures.
 	heartbeatResponseDeadline = 60 * time.Second
+	// maxRequestRetries is the maximum number of total attempts (including initial try).
+	maxRequestRetries = 3
+	// retryBaseDelay is the base delay for exponential backoff.
+	retryBaseDelay = 500 * time.Millisecond
 )
 
 // ---------------------------------------------------------------------------
@@ -375,6 +379,53 @@ func (n *Network) SendRequest(service, method string, body []byte) ([]byte, erro
 	return n.sendRequestWithTimeout(service, method, body, defaultRequestTimeout)
 }
 
+// SendRequestWithRetry sends a request with automatic retry on transient failures.
+// Uses exponential backoff (500ms, 1s, 2s...) for up to maxRequestRetries attempts.
+func (n *Network) SendRequestWithRetry(service, method string, body []byte) ([]byte, error) {
+	var lastErr error
+	for attempt := 1; attempt <= maxRequestRetries; attempt++ {
+		if attempt > 1 {
+			// Exponential backoff: 500ms, 1s, 2s...
+			delay := retryBaseDelay * time.Duration(1<<(attempt-1))
+			if n.ctx.Err() != nil {
+				return nil, n.ctx.Err()
+			}
+			n.logger.Warnf("RPC", "重试 %s.%s (attempt %d/%d)", service, method, attempt, maxRequestRetries)
+			time.Sleep(delay)
+		}
+
+		result, err := n.SendRequest(service, method, body)
+		if err == nil {
+			return result, nil
+		}
+		lastErr = err
+
+		// Don't retry on non-timeout errors (business errors, connection closed)
+		if !isRetryableError(err) {
+			return nil, err
+		}
+	}
+	return nil, lastErr
+}
+
+// isRetryableError checks if an error is worth retrying.
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errStr := err.Error()
+	// Retry on timeout errors
+	if strings.Contains(errStr, "timeout") {
+		return true
+	}
+	// Retry on connection errors
+	if strings.Contains(errStr, "connection") || strings.Contains(errStr, "连接") {
+		return true
+	}
+	return false
+}
+
 // ---------------------------------------------------------------------------
 // Read loop & message dispatch
 // ---------------------------------------------------------------------------
@@ -610,10 +661,11 @@ func (n *Network) StartHeartbeat(clientVersion string, interval time.Duration) {
 // doHeartbeat sends a single heartbeat and processes the response.
 // It runs in its own goroutine, launched by StartHeartbeat, so the heartbeat
 // ticker is never blocked by network latency or timeouts.
+// Uses retry mechanism to handle transient network issues.
 func (n *Network) doHeartbeat(clientVersion string, gid int64) {
 	req := &userpb.HeartbeatRequest{Gid: gid, ClientVersion: clientVersion}
 	body, _ := proto.Marshal(req)
-	replyBody, err := n.SendRequest("gamepb.userpb.UserService", "Heartbeat", body)
+	replyBody, err := n.SendRequestWithRetry("gamepb.userpb.UserService", "Heartbeat", body)
 	if err != nil {
 		if n.ctx.Err() == nil {
 			n.logger.Warnf("心跳", "失败: %v", err)
@@ -670,7 +722,7 @@ func (n *Network) syncServerTime(replyBody []byte) {
 func (n *Network) AllLands() (*plantpb.AllLandsReply, error) {
 	req := &plantpb.AllLandsRequest{}
 	body, _ := proto.Marshal(req)
-	replyBody, err := n.SendRequest("gamepb.plantpb.PlantService", "AllLands", body)
+	replyBody, err := n.SendRequestWithRetry("gamepb.plantpb.PlantService", "AllLands", body)
 	if err != nil {
 		return nil, err
 	}
