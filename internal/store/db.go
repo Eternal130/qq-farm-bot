@@ -196,6 +196,11 @@ func (s *Store) GetAccount(id int64) (*model.Account, error) {
 	return scanAccount(row)
 }
 
+func (s *Store) GetAccountByName(name string) (*model.Account, error) {
+	row := s.db.QueryRow(`SELECT `+accountColumns+` FROM accounts WHERE name = ? LIMIT 1`, name)
+	return scanAccount(row)
+}
+
 func (s *Store) CreateAccount(a *model.Account) error {
 	now := time.Now()
 	a.CreatedAt = now

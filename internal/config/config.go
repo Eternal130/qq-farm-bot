@@ -20,6 +20,9 @@ type Config struct {
 	GameServerURL string `json:"game_server_url"`
 	ClientVersion string `json:"client_version"`
 
+	// External API
+	APIKey string `json:"api_key"`
+
 	// Paths
 	DataDir       string `json:"-"`
 	GameConfigDir string `json:"-"`

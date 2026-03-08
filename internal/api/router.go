@@ -23,7 +23,7 @@ func SetupRouter(cfg *config.Config, s *store.Store, mgr *bot.Manager, frontendF
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
@@ -43,6 +43,13 @@ func SetupRouter(cfg *config.Config, s *store.Store, mgr *bot.Manager, frontendF
 		RegisterBotRoutes(protected, s, mgr)
 		RegisterLogRoutes(protected, s, mgr)
 		RegisterDashboardRoutes(protected, s, mgr)
+	}
+
+	// External API routes (API key auth)
+	if cfg.APIKey != "" {
+		external := api.Group("/external")
+		external.Use(APIKeyMiddleware(cfg.APIKey))
+		RegisterExternalRoutes(external, s, mgr)
 	}
 
 	// Serve frontend static files from embedded FS
