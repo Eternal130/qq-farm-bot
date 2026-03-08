@@ -68,17 +68,31 @@ func (fw *FriendWorker) checkFriends() {
 		return
 	}
 
-	req := &friendpb.GetAllRequest{}
-	body, _ := proto.Marshal(req)
-	replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "GetAll", body)
-	if err != nil {
-		fw.logger.Warnf("好友", "获取好友失败: %v", err)
-		return
+	// QQ 平台使用 SyncAll 接口获取好友列表，微信平台使用 GetAll
+	var friends []*friendpb.GameFriend
+	if fw.cfg.Platform == "qq" {
+		req := &friendpb.SyncAllRequest{OpenIds: []string{}}
+		body, _ := proto.Marshal(req)
+		replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "SyncAll", body)
+		if err != nil {
+			fw.logger.Warnf("好友", "获取好友失败: %v", err)
+			return
+		}
+		reply := &friendpb.SyncAllReply{}
+		proto.Unmarshal(replyBody, reply)
+		friends = reply.GameFriends
+	} else {
+		req := &friendpb.GetAllRequest{}
+		body, _ := proto.Marshal(req)
+		replyBody, err := fw.net.SendRequest("gamepb.friendpb.FriendService", "GetAll", body)
+		if err != nil {
+			fw.logger.Warnf("好友", "获取好友失败: %v", err)
+			return
+		}
+		reply := &friendpb.GetAllReply{}
+		proto.Unmarshal(replyBody, reply)
+		friends = reply.GameFriends
 	}
-	reply := &friendpb.GetAllReply{}
-	proto.Unmarshal(replyBody, reply)
-
-	friends := reply.GameFriends
 	if len(friends) == 0 {
 		return
 	}
