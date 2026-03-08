@@ -45,12 +45,10 @@ func SetupRouter(cfg *config.Config, s *store.Store, mgr *bot.Manager, frontendF
 		RegisterDashboardRoutes(protected, s, mgr)
 	}
 
-	// External API routes (API key auth)
-	if cfg.APIKey != "" {
-		external := api.Group("/external")
-		external.Use(APIKeyMiddleware(cfg.APIKey))
-		RegisterExternalRoutes(external, s, mgr)
-	}
+	// External API routes (API key auth: global key or per-account key)
+	external := api.Group("/external")
+	external.Use(APIKeyMiddleware(cfg.APIKey, s))
+	RegisterExternalRoutes(external, s, mgr)
 
 	// Serve frontend static files from embedded FS
 	if frontendFS != nil {

@@ -21,7 +21,7 @@ import {
   ElRadioButton,
   ElCard
 } from 'element-plus'
-import { Plus, Edit, Delete, VideoPlay, VideoPause, Grid } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, VideoPlay, VideoPause, Grid, CopyDocument, Key } from '@element-plus/icons-vue'
 import QRCode from '@/components/QRCode.vue'
 import type { QRStylePreset } from '@/components/QRCode.vue'
 
@@ -54,7 +54,8 @@ const formData = ref<CreateAccountRequest>({
   plant_crop_id: 0,
   sell_crop_ids: '',
   steal_crop_ids: '',
-  enable_anti_detection: false
+  enable_anti_detection: false,
+  api_key: ''
 })
 
 const qrCodeData = ref<QRCodeResponse | null>(null)
@@ -85,6 +86,33 @@ const stealCropIdsArray = computed({
     formData.value.steal_crop_ids = val.join(',')
   }
 })
+
+const generateAPIKey = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const segments = []
+  for (let s = 0; s < 4; s++) {
+    let segment = ''
+    for (let i = 0; i < 8; i++) {
+      segment += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    segments.push(segment)
+  }
+  formData.value.api_key = 'fk_' + segments.join('-')
+}
+
+const copyAPIKey = async () => {
+  if (!formData.value.api_key) return
+  try {
+    await navigator.clipboard.writeText(formData.value.api_key)
+    ElMessage.success('API Key 已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败')
+  }
+}
+
+const clearAPIKey = () => {
+  formData.value.api_key = ''
+}
 
 const fetchAccounts = async () => {
   loading.value = true
@@ -129,7 +157,8 @@ const openAddDialog = () => {
     plant_crop_id: 0,
     sell_crop_ids: '',
     steal_crop_ids: '',
-    enable_anti_detection: false
+    enable_anti_detection: false,
+    api_key: ''
   }
   dialogVisible.value = true
 }
@@ -158,7 +187,8 @@ const openEditDialog = (row: Account) => {
     plant_crop_id: row.plant_crop_id,
     sell_crop_ids: row.sell_crop_ids,
     steal_crop_ids: row.steal_crop_ids,
-    enable_anti_detection: row.enable_anti_detection
+    enable_anti_detection: row.enable_anti_detection,
+    api_key: row.api_key || ''
   }
   dialogVisible.value = true
 }
@@ -557,6 +587,47 @@ onUnmounted(() => {
             </div>
           </ElFormItem>
         </div>
+
+        <div class="form-section">
+          <div class="form-section-title">外部 API</div>
+          <ElFormItem label="API Key">
+            <div class="api-key-input">
+              <ElInput
+                v-model="formData.api_key"
+                placeholder="点击生成按钮创建 API Key"
+                readonly
+                class="api-key-field"
+              />
+              <ElButton
+                v-if="formData.api_key"
+                :icon="CopyDocument"
+                @click="copyAPIKey"
+                class="api-key-btn"
+                title="复制"
+              />
+              <ElButton
+                v-if="formData.api_key"
+                type="danger"
+                text
+                :icon="Delete"
+                @click="clearAPIKey"
+                class="api-key-btn"
+                title="清除"
+              />
+              <ElButton
+                type="primary"
+                :icon="Key"
+                @click="generateAPIKey"
+                class="api-key-btn"
+              >
+                {{ formData.api_key ? '重新生成' : '生成' }}
+              </ElButton>
+            </div>
+            <div class="form-hint" style="margin-top: 6px;">
+              设置后可通过此 Key 调用外部 API，仅能操作当前账号
+            </div>
+          </ElFormItem>
+        </div>
       </ElForm>
       
       <template #footer>
@@ -825,6 +896,28 @@ onUnmounted(() => {
 .form-hint {
   font-size: 13px;
   color: #6B7280;
+}
+
+.api-key-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.api-key-field {
+  flex: 1;
+}
+
+.api-key-field :deep(.el-input__wrapper) {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  background: #F9FAFB;
+}
+
+.api-key-btn {
+  flex-shrink: 0;
 }
 
 .form-section {

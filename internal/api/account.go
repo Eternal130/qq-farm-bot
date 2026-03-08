@@ -94,7 +94,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount   int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
 			// Anti-detection
-			EnableAntiDetection bool `json:"enable_anti_detection"`
+			EnableAntiDetection bool   `json:"enable_anti_detection"`
+			// External API
+			APIKey              string `json:"api_key"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -139,6 +141,7 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount:   req.FertilizerTargetCount,
 			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
 			EnableAntiDetection:     req.EnableAntiDetection,
+			APIKey:                  req.APIKey,
 		}
 		if err := s.CreateAccount(account); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -193,7 +196,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount   *int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
 			// Anti-detection
-			EnableAntiDetection *bool `json:"enable_anti_detection"`
+			EnableAntiDetection *bool   `json:"enable_anti_detection"`
+			// External API
+			APIKey              *string `json:"api_key"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -277,6 +282,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.EnableAntiDetection != nil {
 			account.EnableAntiDetection = *req.EnableAntiDetection
+		}
+		if req.APIKey != nil {
+			account.APIKey = *req.APIKey
 		}
 
 		if err := s.UpdateAccount(account); err != nil {

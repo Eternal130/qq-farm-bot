@@ -91,6 +91,8 @@ export interface Account {
   fertilizer_buy_daily_limit: number
   // Anti-detection
   enable_anti_detection: boolean
+  // External API
+  api_key: string
   // Runtime status
   status: 'running' | 'stopped' | 'error'
   level: number
@@ -125,6 +127,8 @@ export interface CreateAccountRequest {
   steal_crop_ids: string
   // Anti-detection
   enable_anti_detection: boolean
+  // External API
+  api_key?: string
 }
 
 export interface CropInfo {

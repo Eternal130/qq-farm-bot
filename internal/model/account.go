@@ -42,6 +42,9 @@ type Account struct {
 
 	// Anti-detection
 	EnableAntiDetection bool `json:"enable_anti_detection"`
+
+	// External API
+	APIKey string `json:"api_key"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
