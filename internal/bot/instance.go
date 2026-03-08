@@ -70,6 +70,7 @@ type Instance struct {
 	net     *Network
 	logger  *Logger
 	store   *store.Store
+	crypto  *Crypto
 	stats   *BotStats
 	lands   *LandCache
 	running bool
@@ -79,7 +80,7 @@ type Instance struct {
 	stopCh chan struct{} // signals watchdog to stop
 }
 
-func NewInstance(account *model.Account, serverURL, clientVersion string, s *store.Store) *Instance {
+func NewInstance(account *model.Account, serverURL, clientVersion string, s *store.Store, crypto *Crypto) *Instance {
 	cfg := &BotConfig{
 		Platform:                account.Platform,
 		Code:                    account.Code,
@@ -127,6 +128,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		store:   s,
 		stats:   &BotStats{},
 		lands:   NewLandCache(),
+		crypto:  crypto,
 	}
 }
 
@@ -151,7 +153,7 @@ func (inst *Instance) Start() error {
 
 // connectAndRun creates a new Network, connects, logs in, and starts all workers.
 func (inst *Instance) connectAndRun() error {
-	net := NewNetwork(inst.logger)
+	net := NewNetwork(inst.logger, inst.crypto)
 
 	// Connect
 	inst.logger.Infof("启动", "正在连接 %s 平台...", inst.config.Platform)

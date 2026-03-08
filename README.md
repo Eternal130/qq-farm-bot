@@ -161,7 +161,7 @@ make backend   # 仅构建后端
   "admin_user": "admin",
   "admin_pass": "请修改默认密码",
   "game_server_url": "wss://gate-obt.nqf.qq.com/prod/ws",
-  "client_version": "1.6.0.14_20251224"
+  "client_version": "1.6.2.18_20260227"
 }
 ```
 

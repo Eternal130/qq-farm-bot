@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -25,7 +26,12 @@ type ServerError struct {
 	Message string
 }
 
-func (e *ServerError) Error() string { return e.Message }
+func (e *ServerError) Error() string {
+	if e.Code != 0 {
+		return fmt.Sprintf("[%d] %s", e.Code, e.Message)
+	}
+	return e.Message
+}
 
 // ---------------------------------------------------------------------------
 // Disconnect reason taxonomy
@@ -141,6 +147,7 @@ type Network struct {
 
 	state    *UserState
 	logger   *Logger
+	crypto   *Crypto
 	onNotify func(msgType string, body []byte)
 
 	// Disconnect reason — written at most once via disconnectOnce.
@@ -184,12 +191,13 @@ func (s *UserState) SetFromLogin(gid, level, exp, gold int64, name string) {
 	s.Gold = gold
 }
 
-func NewNetwork(logger *Logger) *Network {
+func NewNetwork(logger *Logger, crypto *Crypto) *Network {
 	ctx, cancel := context.WithCancel(context.Background())
 	n := &Network{
 		pending: make(map[int64]*pendingCall),
 		state:   &UserState{},
 		logger:  logger,
+		crypto:  crypto,
 		ctx:     ctx,
 		cancel:  cancel,
 		done:    make(chan struct{}),
@@ -314,7 +322,16 @@ func (n *Network) sendRequestWithTimeout(service, method string, body []byte, ti
 			ClientSeq:   seq,
 			ServerSeq:   atomic.LoadInt64(&n.serverSeq),
 		},
-		Body: body,
+	}
+	// Encrypt outgoing body via WASM crypto (new login protocol)
+	if len(body) > 0 && n.crypto != nil {
+		encrypted, encErr := n.crypto.EncryptBody(body)
+		if encErr != nil {
+			return nil, fmt.Errorf("encrypt body: %w", encErr)
+		}
+		msg.Body = encrypted
+	} else {
+		msg.Body = body
 	}
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -516,6 +533,10 @@ func (n *Network) Login(clientVersion string) error {
 	replyBody, err := n.sendRequestWithTimeout("gamepb.userpb.UserService", "Login", body, loginTimeout)
 	if err != nil {
 		// Tag disconnect reason so the watchdog can differentiate.
+		var se *ServerError
+		if errors.As(err, &se) {
+			n.logger.Warnf("登录", "服务器拒绝: code=%d msg=%s", se.Code, se.Message)
+		}
 		if strings.Contains(err.Error(), "timeout") {
 			n.disconnectWithReason(DisconnectLoginTimeout)
 		} else {

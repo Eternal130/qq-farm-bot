@@ -15,13 +15,19 @@ type Manager struct {
 	instances map[int64]*Instance // accountID -> instance
 	store     *store.Store
 	cfg       *config.Config
+	crypto    *Crypto
 }
 
 func NewManager(s *store.Store, cfg *config.Config) *Manager {
+	crypto, err := NewCrypto()
+	if err != nil {
+		fmt.Printf("[Manager] WASM crypto 初始化失败: %v (消息体将不加密)\n", err)
+	}
 	return &Manager{
 		instances: make(map[int64]*Instance),
 		store:     s,
 		cfg:       cfg,
+		crypto:    crypto,
 	}
 }
 
@@ -50,7 +56,7 @@ func (m *Manager) StartBot(account *model.Account) error {
 		return fmt.Errorf("bot #%d already running", account.ID)
 	}
 
-	inst := NewInstance(account, m.cfg.GameServerURL, m.cfg.ClientVersion, m.store)
+	inst := NewInstance(account, m.cfg.GameServerURL, m.cfg.ClientVersion, m.store, m.crypto)
 	if err := inst.Start(); err != nil {
 		return err
 	}
@@ -103,6 +109,9 @@ func (m *Manager) StopAll() {
 	defer m.mu.Unlock()
 	for _, inst := range m.instances {
 		inst.Stop()
+	}
+	if m.crypto != nil {
+		m.crypto.Close()
 	}
 }
 
