@@ -167,26 +167,29 @@ func (f *FarmWorker) checkFarm() {
 	}
 
 	// Harvest (respect config toggle)
-	var harvestedLands []int64
 	if f.cfg.EnableHarvest && len(status.harvestable) > 0 {
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
 			f.sc.RecordSimple(model.OpHarvest, int64(len(status.harvestable)))
-			harvestedLands = status.harvestable
-			for _, id := range harvestedLands {
+			for _, id := range status.harvestable {
 				delete(f.fertilized, id)
+			}
+			// Re-fetch lands after harvest: multi-season crops enter the next
+			// growth cycle and must not be removed; single-season crops become
+			// empty or dead. Re-analyzing gives accurate state for both cases.
+			if freshReply, err := f.net.AllLands(); err == nil {
+				freshStatus := f.analyzeLands(freshReply.Lands)
+				status.dead = freshStatus.dead
+				status.empty = freshStatus.empty
 			}
 		}
 	}
 
-	// Remove dead + plant + fertilize (respect config toggles)
+	// Remove only dead/withered plants + plant on empty lands (respect config toggles)
 	allDead := []int64{}
 	allEmpty := status.empty
 	if f.cfg.EnableRemoveDead {
 		allDead = append(allDead, status.dead...)
-		allDead = append(allDead, harvestedLands...)
-	} else {
-		allDead = append(allDead, harvestedLands...)
 	}
 	if f.cfg.EnablePlant && (len(allDead) > 0 || len(allEmpty) > 0) {
 		f.autoPlant(allDead, allEmpty, unlockedCount)
