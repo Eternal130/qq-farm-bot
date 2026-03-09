@@ -91,6 +91,8 @@ export interface Account {
   fertilizer_buy_daily_limit: number
   // Anti-detection
   enable_anti_detection: boolean
+  // Planting preference
+  prefer_bag_seeds: boolean
   // External API
   api_key: string
   // Runtime status
@@ -127,6 +129,8 @@ export interface CreateAccountRequest {
   steal_crop_ids: string
   // Anti-detection
   enable_anti_detection: boolean
+  // Planting preference
+  prefer_bag_seeds: boolean
   // External API
   api_key?: string
 }

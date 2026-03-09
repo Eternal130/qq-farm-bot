@@ -221,6 +221,16 @@ func (gc *GameConfig) IsFruitID(id int) bool {
 	return ok
 }
 
+func (gc *GameConfig) IsSeedID(id int) bool {
+	if gc == nil {
+		return false
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	_, ok := gc.seedToPlant[id]
+	return ok
+}
+
 func (gc *GameConfig) GetPlantGrowTime(plantID int) int {
 	if gc == nil {
 		return 0

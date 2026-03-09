@@ -42,6 +42,8 @@ type BotConfig struct {
 	PlantCropID  int    // specific crop to plant (0 = auto)
 	SellCropIDs  string // comma-separated crop IDs to sell (empty = all)
 	StealCropIDs string // comma-separated crop IDs to steal (empty = all)
+	// Planting preference
+	PreferBagSeeds bool // prioritize planting seeds from bag
 	// Anti-detection
 	EnableAntiDetection bool
 }
@@ -112,6 +114,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		PlantCropID:  account.PlantCropID,
 		SellCropIDs:  account.SellCropIDs,
 		StealCropIDs: account.StealCropIDs,
+		PreferBagSeeds: account.PreferBagSeeds,
 
 		EnableAntiDetection: account.EnableAntiDetection,
 	}
@@ -561,6 +564,7 @@ func (inst *Instance) UpdateConfig(account *model.Account) {
 	inst.config.PlantCropID = account.PlantCropID
 	inst.config.SellCropIDs = account.SellCropIDs
 	inst.config.StealCropIDs = account.StealCropIDs
+	inst.config.PreferBagSeeds = account.PreferBagSeeds
 
 	inst.config.EnableAntiDetection = account.EnableAntiDetection
 }

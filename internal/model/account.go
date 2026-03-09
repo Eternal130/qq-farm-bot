@@ -42,6 +42,8 @@ type Account struct {
 
 	// Anti-detection
 	EnableAntiDetection bool `json:"enable_anti_detection"`
+	// Planting preference
+	PreferBagSeeds bool `json:"prefer_bag_seeds"` // prioritize planting seeds from bag
 
 	// External API
 	APIKey string `json:"api_key"`

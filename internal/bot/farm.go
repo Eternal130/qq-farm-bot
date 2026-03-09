@@ -10,6 +10,7 @@ import (
 
 	"qq-farm-bot/internal/model"
 
+	"qq-farm-bot/proto/itempb"
 	"qq-farm-bot/proto/plantpb"
 	"qq-farm-bot/proto/shoppb"
 )
@@ -527,6 +528,90 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 		return
 	}
 
+	// Phase 1: plant from bag seeds if PreferBagSeeds is enabled
+	if f.cfg.PreferBagSeeds {
+		plantedFromBag := f.plantFromBag(toLant)
+		if plantedFromBag >= len(toLant) {
+			return
+		}
+		toLant = toLant[plantedFromBag:]
+	}
+
+	// Phase 2: buy seeds from shop and plant remaining lands
+	f.buyAndPlant(toLant, unlockedCount)
+}
+
+// plantFromBag checks the bag for seeds and plants them on the given lands.
+// Returns the number of lands successfully planted.
+func (f *FarmWorker) plantFromBag(lands []int64) int {
+	req := &itempb.BagRequest{}
+	body, _ := proto.Marshal(req)
+	replyBody, err := f.net.SendRequest("gamepb.itempb.ItemService", "Bag", body)
+	if err != nil {
+		return 0
+	}
+	reply := &itempb.BagReply{}
+	proto.Unmarshal(replyBody, reply)
+
+	if reply.ItemBag == nil || len(reply.ItemBag.Items) == 0 {
+		return 0
+	}
+
+	// Collect available seeds from bag
+	type bagSeed struct {
+		itemID int64
+		count  int64
+	}
+	var seeds []bagSeed
+	for _, item := range reply.ItemBag.Items {
+		if item.Count > 0 && f.gc.IsSeedID(int(item.Id)) {
+			seeds = append(seeds, bagSeed{itemID: item.Id, count: item.Count})
+		}
+	}
+
+	if len(seeds) == 0 {
+		return 0
+	}
+
+	planted := 0
+	landIdx := 0
+	for _, seed := range seeds {
+		if landIdx >= len(lands) {
+			break
+		}
+		seedName := f.gc.GetPlantNameBySeedID(int(seed.itemID))
+		count := int(seed.count)
+		if count > len(lands)-landIdx {
+			count = len(lands) - landIdx
+		}
+		for i := 0; i < count && landIdx < len(lands); i++ {
+			landID := lands[landIdx]
+			plantReq := &plantpb.PlantRequest{
+				Items: []*plantpb.PlantItem{{SeedId: seed.itemID, LandIds: []int64{landID}}},
+			}
+			plantBody, _ := proto.Marshal(plantReq)
+			if _, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", plantBody); err == nil {
+				planted++
+				landIdx++
+				delete(f.fertilized, landID)
+			} else {
+				break
+			}
+			time.Sleep(50 * time.Millisecond)
+		}
+		if planted > 0 {
+			f.logger.Infof("背包", "使用背包种子 %s x%d", seedName, min(count, planted))
+		}
+	}
+
+	if planted > 0 {
+		f.logger.Infof("种植", "从背包种植 %d 块", planted)
+		f.sc.RecordSimple(model.OpPlant, int64(planted))
+	}
+	return planted
+}
+
+func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 	// Find best seed from shop (respects PlantCropID config)
 	bestSeed, err := f.findBestSeed(unlockedCount)
 	if err != nil || bestSeed == nil {

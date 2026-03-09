@@ -55,6 +55,7 @@ const formData = ref<CreateAccountRequest>({
   sell_crop_ids: '',
   steal_crop_ids: '',
   enable_anti_detection: false,
+  prefer_bag_seeds: false,
   api_key: ''
 })
 
@@ -158,6 +159,7 @@ const openAddDialog = () => {
     sell_crop_ids: '',
     steal_crop_ids: '',
     enable_anti_detection: false,
+    prefer_bag_seeds: false,
     api_key: ''
   }
   dialogVisible.value = true
@@ -188,6 +190,7 @@ const openEditDialog = (row: Account) => {
     sell_crop_ids: row.sell_crop_ids,
     steal_crop_ids: row.steal_crop_ids,
     enable_anti_detection: row.enable_anti_detection,
+    prefer_bag_seeds: row.prefer_bag_seeds,
     api_key: row.api_key || ''
   }
   dialogVisible.value = true
@@ -514,6 +517,12 @@ onUnmounted(() => {
                 :label="crop.required_level ? `${crop.name} (Lv.${crop.required_level})` : crop.name"
               />
             </ElSelect>
+          </ElFormItem>
+          <ElFormItem label="背包优先">
+            <div class="switch-row">
+              <ElSwitch v-model="formData.prefer_bag_seeds" />
+              <span class="form-hint">优先使用背包内已有的种子进行种植</span>
+            </div>
           </ElFormItem>
           <ElFormItem label="出售作物">
             <ElSelect 

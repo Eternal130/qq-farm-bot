@@ -94,7 +94,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount   int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit int  `json:"fertilizer_buy_daily_limit"`
 			// Anti-detection
-			EnableAntiDetection bool   `json:"enable_anti_detection"`
+			EnableAntiDetection bool `json:"enable_anti_detection"`
+			// Planting preference
+			PreferBagSeeds      bool `json:"prefer_bag_seeds"`
 			// External API
 			APIKey              string `json:"api_key"`
 		}
@@ -141,6 +143,7 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount:   req.FertilizerTargetCount,
 			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
 			EnableAntiDetection:     req.EnableAntiDetection,
+			PreferBagSeeds:          req.PreferBagSeeds,
 			APIKey:                  req.APIKey,
 		}
 		if err := s.CreateAccount(account); err != nil {
@@ -197,6 +200,8 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
 			// Anti-detection
 			EnableAntiDetection *bool   `json:"enable_anti_detection"`
+			// Planting preference
+			PreferBagSeeds      *bool   `json:"prefer_bag_seeds"`
 			// External API
 			APIKey              *string `json:"api_key"`
 		}
@@ -282,6 +287,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.EnableAntiDetection != nil {
 			account.EnableAntiDetection = *req.EnableAntiDetection
+		}
+		if req.PreferBagSeeds != nil {
+			account.PreferBagSeeds = *req.PreferBagSeeds
 		}
 		if req.APIKey != nil {
 			account.APIKey = *req.APIKey
