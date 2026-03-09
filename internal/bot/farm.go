@@ -26,6 +26,7 @@ type FarmWorker struct {
 	lands      *LandCache
 	sc         *StatsCollector
 	fertilized map[int64]bool // tracks lands we've already fertilized this grow cycle
+	reservedForBigSeed map[int64]bool // lands reserved for 2×2 seed planting
 }
 
 func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache, sc *StatsCollector) *FarmWorker {
@@ -37,6 +38,7 @@ func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCach
 		lands:      lands,
 		sc:         sc,
 		fertilized: make(map[int64]bool),
+		reservedForBigSeed: make(map[int64]bool),
 	}
 }
 
@@ -128,7 +130,17 @@ func (f *FarmWorker) checkFarm() {
 		parts = append(parts, fmt.Sprintf("枯:%d", len(status.dead)))
 	}
 	if len(status.empty) > 0 {
-		parts = append(parts, fmt.Sprintf("空:%d", len(status.empty)))
+		reservedCount := 0
+		for _, id := range status.empty {
+			if f.reservedForBigSeed[id] {
+				reservedCount++
+			}
+		}
+		if reservedCount > 0 {
+			parts = append(parts, fmt.Sprintf("空:%d(留:%d)", len(status.empty), reservedCount))
+		} else {
+			parts = append(parts, fmt.Sprintf("空:%d", len(status.empty)))
+		}
 	}
 	parts = append(parts, fmt.Sprintf("长:%d", len(status.growing)))
 
@@ -193,7 +205,7 @@ func (f *FarmWorker) checkFarm() {
 		allDead = append(allDead, status.dead...)
 	}
 	if f.cfg.EnablePlant && (len(allDead) > 0 || len(allEmpty) > 0) {
-		f.autoPlant(allDead, allEmpty, unlockedCount)
+		f.autoPlant(allDead, allEmpty, unlockedCount, lands)
 		actions = append(actions, fmt.Sprintf("种植%d", len(allDead)+len(allEmpty)))
 	}
 
@@ -548,7 +560,7 @@ func (f *FarmWorker) fertilize(landIDs []int64) int {
 	return success
 }
 
-func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int) {
+func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int, allLands []*plantpb.LandInfo) {
 	toLant := append([]int64{}, emptyLands...)
 	for _, id := range deadLands {
 		delete(f.fertilized, id)
@@ -562,6 +574,12 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 		toLant = append(toLant, deadLands...)
 	}
 
+	if len(toLant) == 0 {
+		return
+	}
+
+	// Phase 0: Handle size>=2 (big) seeds from bag — prioritize 2×2 planting
+	toLant = f.handleBigSeedPlanting(toLant, allLands)
 	if len(toLant) == 0 {
 		return
 	}
@@ -603,6 +621,9 @@ func (f *FarmWorker) plantFromBag(lands []int64) int {
 	var seeds []bagSeed
 	for _, item := range reply.ItemBag.Items {
 		if item.Count > 0 && f.gc.IsSeedID(int(item.Id)) {
+			if f.gc.GetPlantSizeBySeedID(int(item.Id)) >= 2 {
+				continue
+			}
 			seeds = append(seeds, bagSeed{itemID: item.Id, count: item.Count})
 		}
 	}
