@@ -155,14 +155,15 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 
 /* Table Card */
 .table-card {
-  border-radius: 16px;
-  border: none;
-  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
 }
 
 .table-card :deep(.el-card__header) {
   padding: 20px 24px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border);
 }
 
 .table-card :deep(.el-card__body) {
@@ -180,7 +181,7 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 .title {
   font-size: 17px;
   font-weight: 600;
-  color: #14532D;
+  color: var(--text-heading);
 }
 
 .header-right {
@@ -191,7 +192,7 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 
 .crop-count {
   font-size: 13px;
-  color: #6B7280;
+  color: var(--text-muted);
   white-space: nowrap;
   font-weight: 500;
 }
@@ -202,48 +203,59 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 }
 
 .search-input :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #D1D5DB;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 1px var(--border) inset !important;
+  background-color: var(--bg-input) !important;
   transition: all 0.2s ease;
 }
 
 .search-input :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #9CA3AF;
+  box-shadow: 0 0 0 1px var(--border-focus) inset !important;
 }
 
 .search-input :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.2), 0 0 0 1px #15803D !important;
+  box-shadow: 0 0 0 2px var(--primary) inset !important;
+}
+
+.search-input :deep(.el-input__inner) {
+  color: var(--text-primary) !important;
+}
+
+.search-input :deep(.el-input__inner::placeholder) {
+  color: var(--text-muted) !important;
 }
 
 .search-input :deep(.el-input__prefix) {
-  color: #9CA3AF;
+  color: var(--text-muted);
 }
 
 /* Table Tip */
 .table-tip {
   font-size: 13px;
-  color: #166534;
+  color: var(--text-secondary);
   margin: 0 -24px;
   margin-bottom: 16px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #DCFCE7 0%, #F0FDF4 100%);
-  border-bottom: 1px solid #BBF7D0;
+  background: var(--primary-bg);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* Table Styles */
 .crop-table {
-  --el-table-border-color: #E5E7EB;
-  --el-table-header-bg-color: #F9FAFB;
-  --el-table-header-text-color: #374151;
-  --el-table-text-color: #14532D;
-  --el-table-row-hover-bg-color: #F0FDF4;
+  --el-table-bg-color: var(--bg-card);
+  --el-table-tr-bg-color: var(--bg-card);
+  --el-table-header-bg-color: var(--bg-elevated);
+  --el-table-row-hover-bg-color: var(--bg-elevated);
+  --el-table-border-color: var(--border);
+  --el-table-text-color: var(--text-primary);
+  --el-table-header-text-color: var(--text-secondary);
 }
 
 .crop-table :deep(.el-table__header th) {
   font-weight: 600;
   font-size: 13px;
   padding: 14px 0;
-  background: #F9FAFB;
+  background: var(--bg-elevated);
 }
 
 .crop-table :deep(.el-table__body td) {
@@ -251,44 +263,44 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 }
 
 .crop-table :deep(.el-table__row--striped) {
-  background: #FAFFF7;
+  background: var(--bg-hover);
 }
 
 /* Top 10 Rows - Gold Tint */
 .crop-table :deep(.top-row) {
-  background-color: #FFFBEB !important;
+  background-color: rgba(234, 179, 8, 0.08) !important;
 }
 
 .crop-table :deep(.top-row:hover > td) {
-  background-color: #FEF3C7 !important;
+  background-color: rgba(234, 179, 8, 0.15) !important;
 }
 
 /* Top 20 Rows - Green Tint */
 .crop-table :deep(.good-row) {
-  background-color: #F0FDF4 !important;
+  background-color: rgba(34, 197, 94, 0.05) !important;
 }
 
 .crop-table :deep(.good-row:hover > td) {
-  background-color: #DCFCE7 !important;
+  background-color: rgba(34, 197, 94, 0.1) !important;
 }
 
 /* Sort Icons */
 .crop-table :deep(.el-table__column-filter-trigger),
 .crop-table :deep(.caret-wrapper) {
-  color: #9CA3AF;
+  color: var(--text-muted);
 }
 
 .crop-table :deep(.el-table__column-filter-trigger:hover),
 .crop-table :deep(.caret-wrapper:hover) {
-  color: #15803D;
+  color: var(--primary);
 }
 
 .crop-table :deep(.sort-caret.ascending) {
-  border-bottom-color: #15803D;
+  border-bottom-color: var(--primary);
 }
 
 .crop-table :deep(.sort-caret.descending) {
-  border-top-color: #15803D;
+  border-top-color: var(--primary);
 }
 
 /* Rank Values */
@@ -298,27 +310,29 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
   justify-content: center;
   min-width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 700;
   font-size: 13px;
-  background: #F3F4F6;
-  color: #6B7280;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
 }
 
 .rank-top {
-  background: linear-gradient(135deg, #FEF08A 0%, #FDE047 100%);
-  color: #854D0E;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  color: var(--gold);
+  border: 1px solid rgba(234, 179, 8, 0.3);
 }
 
 .rank-good {
-  background: linear-gradient(135deg, #BBF7D0 0%, #86EFAC 100%);
-  color: #166534;
+  background: linear-gradient(135deg, var(--success) 0%, var(--success-bg) 100%);
+  color: var(--success);
+  border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 /* Crop Name */
 .crop-name {
   font-weight: 600;
-  color: #14532D;
+  color: var(--text-primary);
 }
 
 .level-tag {
@@ -331,38 +345,38 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 
 /* Time Tags */
 .time-tag {
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
 }
 
 .season-tag {
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
 }
 
 /* Value Colors */
 .value-normal {
-  color: #14532D;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .value-exp {
-  color: #15803D;
+  color: var(--success);
   font-weight: 600;
 }
 
 .value-gold {
-  color: #CA8A04;
+  color: var(--gold);
   font-weight: 600;
 }
 
 .value-highlight {
-  color: #15803D;
+  color: var(--success);
   font-weight: 700;
 }
 
 .value-gold-rate {
-  color: #CA8A04;
+  color: var(--gold);
   font-weight: 700;
 }
 
@@ -374,7 +388,7 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
 }
 
 .header-multi small {
-  color: #9CA3AF;
+  color: var(--text-muted);
   font-weight: normal;
   font-size: 11px;
 }
@@ -384,27 +398,27 @@ const tableRowClassName = ({ row }: { row: CropYield }) => {
   .table-card :deep(.el-card__header) {
     padding: 16px;
   }
-  
+
   .table-card :deep(.el-card__body) {
     padding: 0 16px 16px;
   }
-  
+
   .table-tip {
     margin: 0 -16px;
     margin-bottom: 12px;
     padding: 10px 16px;
   }
-  
+
   .card-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .header-right {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .search-input {
     width: 160px;
   }

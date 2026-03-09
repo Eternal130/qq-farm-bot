@@ -43,6 +43,8 @@ func SetupRouter(cfg *config.Config, s *store.Store, mgr *bot.Manager, frontendF
 		RegisterBotRoutes(protected, s, mgr)
 		RegisterLogRoutes(protected, s, mgr)
 		RegisterDashboardRoutes(protected, s, mgr)
+		RegisterStatsRoutes(protected, s, mgr)
+		RegisterDataSummaryRoutes(protected, s, mgr)
 	}
 
 	// External API routes (API key auth: global key or per-account key)

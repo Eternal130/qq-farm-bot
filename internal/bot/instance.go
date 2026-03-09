@@ -73,6 +73,7 @@ type Instance struct {
 	crypto  *Crypto
 	stats   *BotStats
 	lands   *LandCache
+	sc      *StatsCollector
 	running bool
 	startAt time.Time
 	err     string
@@ -129,6 +130,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		stats:   &BotStats{},
 		lands:   NewLandCache(),
 		crypto:  crypto,
+		sc:      NewStatsCollector(account.ID, s),
 	}
 }
 
@@ -198,19 +200,19 @@ func (inst *Instance) connectAndRun() error {
 	net.StartHeartbeat(inst.config.ClientVersion, 25*time.Second)
 
 	// Start workers
-	farm := NewFarmWorker(net, inst.logger, inst.config, inst.lands)
+	farm := NewFarmWorker(net, inst.logger, inst.config, inst.lands, inst.sc)
 	go farm.RunLoop()
 
-	friend := NewFriendWorker(net, inst.logger, inst.config, inst.stats)
+	friend := NewFriendWorker(net, inst.logger, inst.config, inst.stats, inst.sc)
 	go friend.RunLoop()
 
-	task := NewTaskWorker(net, inst.logger, inst.config)
+	task := NewTaskWorker(net, inst.logger, inst.config, inst.sc)
 	go task.RunLoop()
 
-	warehouse := NewWarehouseWorker(net, inst.logger, inst.config)
+	warehouse := NewWarehouseWorker(net, inst.logger, inst.config, inst.sc)
 	go warehouse.RunLoop()
 
-	fertilizer := NewFertilizerWorker(net, inst.logger, inst.config)
+	fertilizer := NewFertilizerWorker(net, inst.logger, inst.config, inst.sc)
 	go fertilizer.RunLoop()
 
 	return nil

@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 
+const pinia = createPinia()
 const app = createApp(App)
 
 // Register Element Plus icons
@@ -16,8 +17,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(ElementPlus, { locale: zhCn })
+
+// Initialize theme before mount
+import { useThemeStore } from './stores/theme'
+const themeStore = useThemeStore()
+themeStore.setTheme(themeStore.theme)
 
 app.mount('#app')

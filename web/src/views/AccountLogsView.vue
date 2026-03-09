@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
-import { accountApi, logsApi, createLogWebSocket, type Account, type LogEntry } from '@/api'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+import { logsApi, createLogWebSocket, type LogEntry } from '@/api'
 import { 
   ElCard, 
   ElSelect, 
   ElOption, 
-  ElSwitch,
   ElButton,
-  ElEmpty,
-  ElIcon,
-  ElTag
+  ElEmpty
 } from 'element-plus'
-import { Refresh, Connection, Delete } from '@element-plus/icons-vue'
+import { Delete } from '@element-plus/icons-vue'
 
-const accounts = ref<Account[]>([])
-const selectedAccountId = ref<number | null>(null)
+const route = useRoute()
 const logs = ref<LogEntry[]>([])
-const realtimeMode = ref(true)
 const loading = ref(false)
-const connected = ref(false)
 const autoScroll = ref(true)
 const categoryFilter = ref<string>('')
 const levelFilter = ref<string>('')
 
 let websocket: WebSocket | null = null
 const logContainerRef = ref<HTMLElement | null>(null)
+
+// Account ID from route
+const accountId = computed(() => {
+  const id = route.params.id
+  return Array.isArray(id) ? parseInt(id[0]) : parseInt(id)
+})
 
 // Category mapping for filtering
 const categoryMap: Record<string, string[]> = {
@@ -35,17 +36,6 @@ const categoryMap: Record<string, string[]> = {
   '任务': ['任务'],
   '系统': ['系统', '登录', '连接']
 }
-
-// Reverse mapping for tag to category
-const tagToCategory = computed(() => {
-  const map: Record<string, string> = {}
-  Object.entries(categoryMap).forEach(([category, tags]) => {
-    tags.forEach(tag => {
-      map[tag] = category
-    })
-  })
-  return map
-})
 
 // Filtered logs
 const filteredLogs = computed(() => {
@@ -73,6 +63,17 @@ const filteredLogs = computed(() => {
 
 // Log count display
 const logCount = computed(() => filteredLogs.value.length)
+
+// Reverse mapping for tag to category
+const tagToCategory = computed(() => {
+  const map: Record<string, string> = {}
+  Object.entries(categoryMap).forEach(([category, tags]) => {
+    tags.forEach(tag => {
+      map[tag] = category
+    })
+  })
+  return map
+})
 
 // Get category tag color
 const getCategoryColor = (tag: string): string => {
@@ -105,28 +106,15 @@ const formatTime = (timestamp: string): string => {
   const hours = date.getHours().toString().padStart(2, '0')
   const minutes = date.getMinutes().toString().padStart(2, '0')
   const seconds = date.getSeconds().toString().padStart(2, '0')
-  const ms = date.getMilliseconds().toString().padStart(3, '0')
-  return `${hours}:${minutes}:${seconds}.${ms}`
-}
-
-const fetchAccounts = async () => {
-  try {
-    const response = await accountApi.getAll()
-    accounts.value = response.data
-    if (accounts.value.length > 0 && !selectedAccountId.value) {
-      selectedAccountId.value = accounts.value[0].id
-    }
-  } catch {
-    // silently fail
-  }
+  return `${hours}:${minutes}:${seconds}`
 }
 
 const fetchHistoricalLogs = async () => {
-  if (!selectedAccountId.value) return
+  if (!accountId.value) return
   
   loading.value = true
   try {
-    const response = await logsApi.getHistorical(selectedAccountId.value, 500)
+    const response = await logsApi.getHistorical(accountId.value, 500)
     logs.value = response.data.reverse()
     if (autoScroll.value) {
       await nextTick()
@@ -140,20 +128,18 @@ const fetchHistoricalLogs = async () => {
 }
 
 const connectWebSocket = () => {
-  if (!selectedAccountId.value) return
+  if (!accountId.value) return
   
   disconnectWebSocket()
   
-  logs.value = []
-  websocket = createLogWebSocket(selectedAccountId.value)
-  
-  websocket.onopen = () => {
-    connected.value = true
-  }
+  websocket = createLogWebSocket(accountId.value)
   
   websocket.onmessage = (event) => {
     try {
       const log: LogEntry = JSON.parse(event.data)
+      // Filter: only show logs for this account
+      if (log.account_id !== accountId.value) return
+      
       logs.value.push(log)
       
       // Limit log count
@@ -168,14 +154,6 @@ const connectWebSocket = () => {
       // malformed message, skip
     }
   }
-  
-  websocket.onerror = () => {
-    connected.value = false
-  }
-  
-  websocket.onclose = () => {
-    connected.value = false
-  }
 }
 
 const disconnectWebSocket = () => {
@@ -183,7 +161,6 @@ const disconnectWebSocket = () => {
     websocket.close()
     websocket = null
   }
-  connected.value = false
 }
 
 const scrollToBottom = () => {
@@ -196,47 +173,9 @@ const clearLogs = () => {
   logs.value = []
 }
 
-const handleAccountChange = () => {
-  logs.value = []
-  if (realtimeMode.value) {
-    connectWebSocket()
-  } else {
-    fetchHistoricalLogs()
-  }
-}
-
-const handleModeChange = () => {
-  if (realtimeMode.value) {
-    connectWebSocket()
-  } else {
-    disconnectWebSocket()
-    fetchHistoricalLogs()
-  }
-}
-
-const handleRefresh = () => {
-  if (realtimeMode.value) {
-    logs.value = []
-    connectWebSocket()
-  } else {
-    fetchHistoricalLogs()
-  }
-}
-
-watch(selectedAccountId, () => {
-  handleAccountChange()
-})
-
-watch(realtimeMode, () => {
-  handleModeChange()
-})
-
 onMounted(() => {
-  fetchAccounts().then(() => {
-    if (realtimeMode.value && selectedAccountId.value) {
-      connectWebSocket()
-    }
-  })
+  fetchHistoricalLogs()
+  connectWebSocket()
 })
 
 onUnmounted(() => {
@@ -245,37 +184,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="logs-view">
+  <div class="account-logs">
     <ElCard shadow="never" class="logs-card">
       <template #header>
         <div class="card-header">
           <div class="header-left">
             <span class="header-title">运行日志</span>
             
-            <!-- Account Selector -->
-            <ElSelect 
-              v-model="selectedAccountId" 
-              placeholder="选择账号"
-              class="account-select"
-              clearable
-            >
-              <ElOption
-                v-for="account in accounts"
-                :key="account.id"
-                :label="account.name"
-                :value="account.id"
-              >
-                <span class="account-option-name">{{ account.name }}</span>
-                <ElTag 
-                  size="small" 
-                  :type="account.status === 'running' ? 'success' : 'info'"
-                  class="account-status-tag"
-                >
-                  {{ account.status === 'running' ? '运行中' : '已停止' }}
-                </ElTag>
-              </ElOption>
-            </ElSelect>
-
             <!-- Category Filter -->
             <ElSelect 
               v-model="categoryFilter"
@@ -307,22 +222,6 @@ onUnmounted(() => {
           </div>
           
           <div class="header-right">
-            <!-- Realtime Mode Toggle -->
-            <div class="mode-switch">
-              <span class="switch-label">实时模式</span>
-              <ElSwitch v-model="realtimeMode" />
-            </div>
-            
-            <!-- Connection Status -->
-            <div class="connection-status" v-if="realtimeMode">
-              <ElIcon :color="connected ? '#22C55E' : '#6B7280'" class="connection-icon">
-                <Connection />
-              </ElIcon>
-              <span class="connection-text" :class="connected ? 'connected' : 'disconnected'">
-                {{ connected ? '已连接' : '未连接' }}
-              </span>
-            </div>
-            
             <!-- Auto Scroll Toggle -->
             <ElButton 
               size="small"
@@ -332,15 +231,6 @@ onUnmounted(() => {
             >
               自动滚动
             </ElButton>
-            
-            <!-- Refresh Button -->
-            <ElButton 
-              :icon="Refresh" 
-              circle 
-              size="small"
-              class="control-btn refresh-btn"
-              @click="handleRefresh"
-            />
             
             <!-- Clear Button -->
             <ElButton 
@@ -361,11 +251,8 @@ onUnmounted(() => {
         </div>
       </template>
 
-      <!-- Empty State -->
-      <ElEmpty v-if="!selectedAccountId" description="请先选择一个账号" class="empty-state" />
-      
       <!-- Log Container -->
-      <div v-else class="log-container" ref="logContainerRef">
+      <div class="log-container" ref="logContainerRef">
         <ElEmpty v-if="filteredLogs.length === 0 && !loading" description="暂无日志" class="empty-state" />
         
         <div v-else class="log-list">
@@ -405,7 +292,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.logs-view {
+.account-logs {
   padding: 0;
   height: 100%;
 }
@@ -462,62 +349,8 @@ onUnmounted(() => {
 }
 
 /* Select Styles */
-.account-select {
-  width: 180px;
-}
-
 .filter-select {
   width: 120px;
-}
-
-.account-option-name {
-  flex: 1;
-}
-
-.account-status-tag {
-  margin-left: 8px;
-}
-
-/* Mode Switch */
-.mode-switch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-sm);
-}
-
-.switch-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-/* Connection Status */
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-sm);
-}
-
-.connection-icon {
-  font-size: 14px;
-}
-
-.connection-text {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.connection-text.connected {
-  color: var(--success);
-}
-
-.connection-text.disconnected {
-  color: var(--text-muted);
 }
 
 /* Control Buttons */
@@ -544,12 +377,6 @@ onUnmounted(() => {
 .control-btn.is-active:hover {
   background: var(--primary-hover);
   border-color: var(--primary-hover);
-}
-
-.refresh-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
 }
 
 .clear-btn:hover {
@@ -642,7 +469,7 @@ onUnmounted(() => {
   color: var(--success);
   font-weight: 500;
   flex-shrink: 0;
-  min-width: 100px;
+  min-width: 75px;
 }
 
 /* Level Badges */
@@ -707,7 +534,7 @@ onUnmounted(() => {
 }
 
 /* Mobile Responsive */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .card-header {
     flex-direction: column;
     align-items: flex-start;
@@ -722,16 +549,10 @@ onUnmounted(() => {
     justify-content: flex-end;
   }
   
-  .account-select {
-    width: 100%;
-  }
-  
   .filter-select {
     width: 50%;
   }
-}
-
-@media (max-width: 600px) {
+  
   .logs-card :deep(.el-card__header) {
     padding: 12px 16px;
   }
@@ -745,14 +566,8 @@ onUnmounted(() => {
     flex-wrap: wrap;
   }
   
-  .mode-switch,
-  .connection-status,
   .log-count {
     padding: 4px 8px;
-  }
-  
-  .filter-select {
-    width: 100%;
   }
   
   .control-btn {
@@ -766,7 +581,7 @@ onUnmounted(() => {
   }
   
   .log-time {
-    min-width: 80px;
+    min-width: 65px;
     font-size: 11px;
   }
   

@@ -7,6 +7,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"qq-farm-bot/internal/model"
+
 	"qq-farm-bot/proto/corepb"
 	"qq-farm-bot/proto/itempb"
 )
@@ -16,10 +18,11 @@ type WarehouseWorker struct {
 	logger *Logger
 	cfg    *BotConfig
 	gc     *GameConfig
+	sc     *StatsCollector
 }
 
-func NewWarehouseWorker(net *Network, logger *Logger, cfg *BotConfig) *WarehouseWorker {
-	return &WarehouseWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig()}
+func NewWarehouseWorker(net *Network, logger *Logger, cfg *BotConfig, sc *StatsCollector) *WarehouseWorker {
+	return &WarehouseWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig(), sc: sc}
 }
 
 func (ww *WarehouseWorker) RunLoop() {
@@ -103,4 +106,5 @@ func (ww *WarehouseWorker) sellAllFruits() {
 	}
 
 	ww.logger.Infof("仓库", "出售 %s，获得 %d 金币", strings.Join(names, ", "), totalGold)
+	ww.sc.RecordWithDetail(model.OpSell, int64(len(toSell)), totalGold, 0, strings.Join(names, ", "))
 }

@@ -8,6 +8,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"qq-farm-bot/internal/model"
+
 	"qq-farm-bot/proto/friendpb"
 	"qq-farm-bot/proto/plantpb"
 	"qq-farm-bot/proto/visitpb"
@@ -19,6 +21,7 @@ type FriendWorker struct {
 	cfg    *BotConfig
 	gc     *GameConfig
 	stats  *BotStats
+	sc     *StatsCollector
 }
 
 type BotStats struct {
@@ -27,8 +30,8 @@ type BotStats struct {
 	FriendsCount int
 }
 
-func NewFriendWorker(net *Network, logger *Logger, cfg *BotConfig, stats *BotStats) *FriendWorker {
-	return &FriendWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig(), stats: stats}
+func NewFriendWorker(net *Network, logger *Logger, cfg *BotConfig, stats *BotStats, sc *StatsCollector) *FriendWorker {
+	return &FriendWorker{net: net, logger: logger, cfg: cfg, gc: GetGameConfig(), stats: stats, sc: sc}
 }
 
 func (fw *FriendWorker) RunLoop() {
@@ -148,6 +151,10 @@ func (fw *FriendWorker) checkFriends() {
 		totalActions.water += actions.water
 		totalActions.weed += actions.weed
 		totalActions.bug += actions.bug
+		// Record per-friend steal for data summary (friend ranking)
+		if actions.steal > 0 {
+			fw.sc.RecordWithDetail(model.OpSteal, int64(actions.steal), 0, 0, t.name)
+		}
 		if fw.cfg.EnableAntiDetection {
 			// Random delay between friend visits: 1~3 seconds
 			time.Sleep(time.Duration(1000+rand.Intn(2000)) * time.Millisecond)
@@ -163,12 +170,15 @@ func (fw *FriendWorker) checkFriends() {
 	}
 	if totalActions.weed > 0 {
 		summary = append(summary, fmt.Sprintf("除草%d", totalActions.weed))
+		fw.sc.RecordSimple(model.OpHelpWeed, int64(totalActions.weed))
 	}
 	if totalActions.bug > 0 {
 		summary = append(summary, fmt.Sprintf("除虫%d", totalActions.bug))
+		fw.sc.RecordSimple(model.OpHelpBug, int64(totalActions.bug))
 	}
 	if totalActions.water > 0 {
 		summary = append(summary, fmt.Sprintf("浇水%d", totalActions.water))
+		fw.sc.RecordSimple(model.OpHelpWater, int64(totalActions.water))
 	}
 	if totalActions.weed+totalActions.bug+totalActions.water > 0 {
 		fw.stats.TotalHelp += int64(totalActions.weed + totalActions.bug + totalActions.water)

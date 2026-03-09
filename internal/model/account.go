@@ -98,3 +98,46 @@ type LogEntry struct {
 	Level     string    `json:"level"` // "info", "warn", "error"
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// OpRecord represents a single operation statistics record.
+type OpRecord struct {
+	ID        int64     `json:"id"`
+	AccountID int64     `json:"account_id"`
+	OpType    string    `json:"op_type"`    // harvest, plant, sell, steal, weed, bug, water, fertilize, task_claim, fert_buy, fert_open, fert_use, unlock_land, upgrade_land
+	Count     int64     `json:"count"`      // number of items/lands in this operation
+	GoldDelta int64     `json:"gold_delta"` // gold change: positive=earned, negative=spent
+	ExpDelta  int64     `json:"exp_delta"`  // exp earned
+	Detail    string    `json:"detail"`     // optional: crop name (sell), friend name (steal), etc.
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// OpType constants for statistics tracking.
+const (
+	OpHarvest     = "harvest"
+	OpPlant       = "plant"
+	OpSell        = "sell"
+	OpSteal       = "steal"
+	OpWeed        = "weed"
+	OpBug         = "bug"
+	OpWater       = "water"
+	OpFertilize   = "fertilize"
+	OpTaskClaim   = "task_claim"
+	OpFertBuy     = "fert_buy"
+	OpFertOpen    = "fert_open"
+	OpFertUse     = "fert_use"
+	OpUnlockLand  = "unlock_land"
+	OpUpgradeLand = "upgrade_land"
+	OpHelpWeed    = "help_weed"
+	OpHelpBug     = "help_bug"
+	OpHelpWater   = "help_water"
+	OpBuySeed     = "buy_seed"
+)
+
+// AggregatedStats represents aggregated operation statistics for a time bucket.
+type AggregatedStats struct {
+	Period    string         `json:"period"`    // time bucket label, e.g. "2026-03-09 10:00"
+	OpCounts  map[string]int64 `json:"op_counts"` // op_type -> total count
+	GoldIn    int64          `json:"gold_in"`    // total gold earned
+	GoldOut   int64          `json:"gold_out"`   // total gold spent (absolute)
+	ExpGained int64          `json:"exp_gained"` // total exp earned
+}

@@ -23,16 +23,18 @@ type FarmWorker struct {
 	cfg        *BotConfig
 	gc         *GameConfig
 	lands      *LandCache
+	sc         *StatsCollector
 	fertilized map[int64]bool // tracks lands we've already fertilized this grow cycle
 }
 
-func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache) *FarmWorker {
+func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache, sc *StatsCollector) *FarmWorker {
 	return &FarmWorker{
 		net:        net,
 		logger:     logger,
 		cfg:        cfg,
 		gc:         GetGameConfig(),
 		lands:      lands,
+		sc:         sc,
 		fertilized: make(map[int64]bool),
 	}
 }
@@ -148,16 +150,19 @@ func (f *FarmWorker) checkFarm() {
 	if f.cfg.EnableWeed && len(status.needWeed) > 0 {
 		if err := f.weedOut(status.needWeed); err == nil {
 			actions = append(actions, fmt.Sprintf("除草%d", len(status.needWeed)))
+			f.sc.RecordSimple(model.OpWeed, int64(len(status.needWeed)))
 		}
 	}
 	if f.cfg.EnableBug && len(status.needBug) > 0 {
 		if err := f.insecticide(status.needBug); err == nil {
 			actions = append(actions, fmt.Sprintf("除虫%d", len(status.needBug)))
+			f.sc.RecordSimple(model.OpBug, int64(len(status.needBug)))
 		}
 	}
 	if f.cfg.EnableWater && len(status.needWater) > 0 {
 		if err := f.waterLand(status.needWater); err == nil {
 			actions = append(actions, fmt.Sprintf("浇水%d", len(status.needWater)))
+			f.sc.RecordSimple(model.OpWater, int64(len(status.needWater)))
 		}
 	}
 
@@ -166,6 +171,7 @@ func (f *FarmWorker) checkFarm() {
 	if f.cfg.EnableHarvest && len(status.harvestable) > 0 {
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
+			f.sc.RecordSimple(model.OpHarvest, int64(len(status.harvestable)))
 			harvestedLands = status.harvestable
 			for _, id := range harvestedLands {
 				delete(f.fertilized, id)
@@ -394,6 +400,7 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 
 	if fertilizeCount > 0 {
 		f.logger.Infof("施肥", "最优阶段施肥 %d 块地", fertilizeCount)
+		f.sc.RecordSimple(model.OpFertilize, int64(fertilizeCount))
 	}
 }
 
@@ -554,6 +561,8 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 		actualSeedID = buyReply.GetItems[0].Id
 	}
 	f.logger.Infof("购买", "已购买 %s种子 x%d", f.gc.GetPlantNameBySeedID(int(actualSeedID)), len(toLant))
+	seedCost := bestSeed.Price * int64(len(toLant))
+	f.sc.Record(model.OpBuySeed, int64(len(toLant)), -seedCost, 0)
 
 	// Plant seeds one by one
 	planted := 0
@@ -568,8 +577,8 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int)
 		time.Sleep(50 * time.Millisecond)
 	}
 	f.logger.Infof("种植", "已种植 %d 块", planted)
-
 	if planted > 0 {
+		f.sc.RecordSimple(model.OpPlant, int64(planted))
 		for _, id := range toLant[:planted] {
 			delete(f.fertilized, id)
 		}
@@ -691,7 +700,8 @@ func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, 
 				if _, err := f.net.UnlockLand(land.Id); err != nil {
 					f.logger.Warnf("\u89e3\u9501", "\u571f\u5730#%d \u5931\u8d25: %v", land.Id, err)
 				} else {
-					f.logger.Infof("\u89e3\u9501", "\u571f\u5730#%d \u6210\u529f (\u82b1\u8d39%d\u91d1\u5e01)", land.Id, cond.NeedGold)
+					f.logger.Infof("解锁", "土地#%d 成功 (花费%d金币)", land.Id, cond.NeedGold)
+					f.sc.Record(model.OpUnlockLand, 1, -cond.NeedGold, 0)
 					unlocked++
 					gold -= cond.NeedGold
 				}
@@ -705,7 +715,8 @@ func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, 
 				if _, err := f.net.UpgradeLand(land.Id); err != nil {
 					f.logger.Warnf("\u5347\u7ea7", "\u571f\u5730#%d Lv%d\u2192Lv%d \u5931\u8d25: %v", land.Id, land.Level, land.Level+1, err)
 				} else {
-					f.logger.Infof("\u5347\u7ea7", "\u571f\u5730#%d Lv%d\u2192Lv%d (\u82b1\u8d39%d\u91d1\u5e01)", land.Id, land.Level, land.Level+1, cond.NeedGold)
+					f.logger.Infof("升级", "土地#%d Lv%d→Lv%d (花费%d金币)", land.Id, land.Level, land.Level+1, cond.NeedGold)
+					f.sc.Record(model.OpUpgradeLand, 1, -cond.NeedGold, 0)
 					upgraded++
 					gold -= cond.NeedGold
 				}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -53,6 +54,9 @@ func RegisterDashboardRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manage
 			NextLevelExp     int64   `json:"next_level_exp"`
 			ExpToNextLevel   int64   `json:"exp_to_next_level"`
 			HoursToNextLevel float64 `json:"hours_to_next_level"`
+			// Uptime
+			UptimeSeconds    int64      `json:"uptime_seconds"`
+			StartedAt        *time.Time `json:"started_at,omitempty"`
 		}
 		var cards []accountCard
 		for _, a := range accounts {
@@ -86,6 +90,10 @@ func RegisterDashboardRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manage
 				card.NextLevelExp = bs.NextLevelExp
 				card.ExpToNextLevel = bs.ExpToNextLevel
 				card.HoursToNextLevel = bs.HoursToNextLevel
+				if bs.StartedAt != nil {
+					card.StartedAt = bs.StartedAt
+					card.UptimeSeconds = int64(time.Since(*bs.StartedAt).Seconds())
+				}
 			} else if bs.Error != "" {
 				card.Status = "error"
 			}

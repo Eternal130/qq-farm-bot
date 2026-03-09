@@ -6,6 +6,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"qq-farm-bot/internal/model"
+
 	"qq-farm-bot/proto/corepb"
 	"qq-farm-bot/proto/itempb"
 	"qq-farm-bot/proto/mallpb"
@@ -40,6 +42,7 @@ type FertilizerWorker struct {
 	net    *Network
 	logger *Logger
 	cfg    *BotConfig
+	sc     *StatsCollector
 
 	mu             sync.Mutex
 	dailyBuyCount  int
@@ -48,8 +51,8 @@ type FertilizerWorker struct {
 	lastBuyTime    time.Time
 }
 
-func NewFertilizerWorker(net *Network, logger *Logger, cfg *BotConfig) *FertilizerWorker {
-	return &FertilizerWorker{net: net, logger: logger, cfg: cfg}
+func NewFertilizerWorker(net *Network, logger *Logger, cfg *BotConfig, sc *StatsCollector) *FertilizerWorker {
+	return &FertilizerWorker{net: net, logger: logger, cfg: cfg, sc: sc}
 }
 
 func (fw *FertilizerWorker) RunLoop() {
@@ -267,6 +270,7 @@ func (fw *FertilizerWorker) buyFertilizerPacks(items []*corepb.Item) {
 
 	if bought > 0 {
 		fw.logger.Infof("化肥", "购买化肥礼包 x%d (今日累计:%d)", bought, fw.dailyBuyCount)
+		fw.sc.RecordSimple(model.OpFertBuy, int64(bought))
 	}
 }
 
@@ -378,6 +382,7 @@ func (fw *FertilizerWorker) openFertilizerPacks(items []*corepb.Item) {
 	fw.mu.Unlock()
 
 	fw.logger.Infof("化肥", "开启化肥礼包 x%d", totalPacks)
+	fw.sc.RecordSimple(model.OpFertOpen, int64(totalPacks))
 }
 
 // useSurplusFertilizer uses excess fertilizer items to fill containers when above target threshold.
@@ -495,6 +500,7 @@ func (fw *FertilizerWorker) useSurplusFertilizer(items []*corepb.Item) {
 	}
 
 	fw.logger.Infof("化肥", "使用化肥: 普通容器%d小时 有机容器%d小时", normalHours, organicHours)
+	fw.sc.RecordSimple(model.OpFertUse, int64(len(toUse)))
 }
 
 // itemName returns a display string for a fertilizer item.

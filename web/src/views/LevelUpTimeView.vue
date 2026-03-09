@@ -7,7 +7,7 @@ import {
   DEFAULT_LANDS,
   DEFAULT_LAND_GRADE,
   getLandGradeBuff,
-  type LevelUpInfo,
+  type LevelUpInfo
 } from '@/data/levelUpCalc'
 import {
   ElCard,
@@ -15,7 +15,7 @@ import {
   ElTableColumn,
   ElSwitch,
   ElTag,
-  ElSlider,
+  ElSlider
 } from 'element-plus'
 
 const showFertComparison = ref(false)
@@ -37,7 +37,6 @@ const cumulativeNoFert = computed(() => {
     return acc
   })
 })
-
 const cumulativeWithFert = computed(() => {
   let acc = 0
   return levelUpData.value.map(row => {
@@ -45,7 +44,6 @@ const cumulativeWithFert = computed(() => {
     return acc
   })
 })
-
 const getTimeType = (sec: number): 'success' | 'warning' | 'danger' | 'info' => {
   if (sec <= 3600) return 'success'       // ≤ 1h
   if (sec <= 43200) return 'warning'      // ≤ 12h
@@ -113,7 +111,7 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
                 v-model="showFertComparison"
                 active-text="开"
                 inactive-text="关"
-                active-color="#15803D"
+                active-color="var(--primary)"
               />
             </div>
           </div>
@@ -122,7 +120,7 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 
       <div class="table-tip">
         基于 {{ numLands }} 块地计算，作物择优选择（最短时间升级而非最高经验效率），忽略操作时间。
-        施肥采用最优阶段施肥策略（跳过最长生长阶段）。
+        施肥采用最优阶段施肥策略（跳过最长生长阶段)。
       </div>
 
       <div class="level-range-filter">
@@ -233,16 +231,17 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
   padding: 0;
 }
 
-/* ── Card ── */
+ /* ── Card ── */
 .table-card {
-  border-radius: 16px;
-  border: none;
-  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.06), 0 4px 16px rgba(21, 128, 61, 0.04);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
 }
 
 .table-card :deep(.el-card__header) {
   padding: 20px 24px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid var(--border);
 }
 
 .table-card :deep(.el-card__body) {
@@ -261,7 +260,7 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 .title {
   font-size: 17px;
   font-weight: 600;
-  color: #14532D;
+  color: var(--text-heading);
 }
 
 .header-controls {
@@ -280,7 +279,7 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 .control-label {
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -290,15 +289,16 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 
 .land-slider :deep(.el-slider__runway) {
   height: 4px;
+  background-color: var(--border);
 }
 
 .land-slider :deep(.el-slider__bar) {
-  background-color: #15803D;
+  background-color: var(--primary);
   height: 4px;
 }
 
 .land-slider :deep(.el-slider__button) {
-  border-color: #15803D;
+  border-color: var(--primary);
   width: 14px;
   height: 14px;
 }
@@ -306,24 +306,24 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 .land-value {
   font-size: 13px;
   font-weight: 600;
-  color: #15803D;
+  color: var(--primary);
   min-width: 36px;
 }
 
 .fert-toggle {
   padding-left: 8px;
-  border-left: 1px solid #E5E7EB;
+  border-left: 1px solid var(--border);
 }
 
 /* ── Tip ── */
 .table-tip {
   font-size: 13px;
-  color: #166534;
+  color: var(--text-secondary);
   margin: 0 -24px;
   margin-bottom: 0;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #DCFCE7 0%, #F0FDF4 100%);
-  border-bottom: 1px solid #BBF7D0;
+  background: var(--primary-bg);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* ── Level range filter ── */
@@ -337,7 +337,7 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 .range-label {
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -348,15 +348,16 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 
 .range-slider :deep(.el-slider__runway) {
   height: 4px;
+  background-color: var(--border);
 }
 
 .range-slider :deep(.el-slider__bar) {
-  background-color: #15803D;
+  background-color: var(--primary);
   height: 4px;
 }
 
 .range-slider :deep(.el-slider__button) {
-  border-color: #15803D;
+  border-color: var(--primary);
   width: 14px;
   height: 14px;
 }
@@ -364,24 +365,26 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 .range-value {
   font-size: 13px;
   font-weight: 600;
-  color: #15803D;
+  color: var(--primary);
   white-space: nowrap;
 }
 
 /* ── Table ── */
 .level-table {
-  --el-table-border-color: #E5E7EB;
-  --el-table-header-bg-color: #F9FAFB;
-  --el-table-header-text-color: #374151;
-  --el-table-text-color: #14532D;
-  --el-table-row-hover-bg-color: #F0FDF4;
+  --el-table-border-color: var(--border);
+  --el-table-bg-color: var(--bg-card);
+  --el-table-tr-bg-color: var(--bg-card);
+  --el-table-header-bg-color: var(--bg-elevated);
+  --el-table-header-text-color: var(--text-secondary);
+  --el-table-text-color: var(--text-primary);
+  --el-table-row-hover-bg-color: var(--bg-elevated);
 }
 
 .level-table :deep(.el-table__header th) {
   font-weight: 600;
   font-size: 13px;
   padding: 12px 0;
-  background: #F9FAFB;
+  background: var(--bg-elevated);
 }
 
 .level-table :deep(.el-table__body td) {
@@ -389,25 +392,27 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 }
 
 .level-table :deep(.el-table__row--striped) {
-  background: #FAFFF7;
+  background: var(--bg-hover);
 }
 
 /* Milestone rows (every 10 levels) */
 .level-table :deep(.milestone-row) {
-  background-color: #FFFBEB !important;
+  background-color: var(--gold-bg) !important;
 }
 
 .level-table :deep(.milestone-row:hover > td) {
-  background-color: #FEF3C7 !important;
+  background-color: rgba(234, 179, 8, 0.15) !important;
 }
 
 /* Section header styling */
 .level-table :deep(.section-no-fert) {
-  border-left: 2px solid #BBF7D0;
+  border-left: 2px solid var(--primary);
+  opacity: 0.7;
 }
 
 .level-table :deep(.section-fert) {
-  border-left: 2px solid #FDE68A;
+  border-left: 2px solid var(--gold);
+  opacity: 0.7;
 }
 
 /* ── Values ── */
@@ -417,46 +422,65 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
   justify-content: center;
   min-width: 36px;
   height: 26px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 13px;
-  background: #F3F4F6;
-  color: #6B7280;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
 }
 
 .level-milestone {
-  background: linear-gradient(135deg, #FEF08A 0%, #FDE047 100%);
-  color: #854D0E;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  color: var(--gold);
+  border: 1px solid rgba(234, 179, 8, 0.3);
 }
 
 .value-exp {
-  color: #15803D;
+  color: var(--success);
   font-weight: 600;
   font-size: 13px;
 }
 
 .crop-name {
   font-weight: 600;
-  color: #14532D;
+  color: var(--text-primary);
   font-size: 13px;
 }
 
 .crop-name-fert {
-  color: #854D0E;
+  color: var(--gold);
 }
 
 .value-normal {
-  color: #14532D;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .time-tag {
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
 }
 
+.time-tag:deep(.el-tag--success) {
+  background: var(--success-bg);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: var(--success);
+}
+
+.time-tag:deep(.el-tag--warning) {
+  background: var(--gold-bg);
+  border-color: rgba(234, 179, 8, 0.3);
+  color: var(--gold);
+}
+
+.time-tag:deep(.el-tag--danger) {
+  background: var(--danger-bg);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+}
+
 .value-cumulative {
-  color: #6B7280;
+  color: var(--text-muted);
   font-size: 12px;
   font-weight: 500;
 }
@@ -469,32 +493,32 @@ const tableRowClassName = ({ row }: { row: LevelUpInfo; rowIndex: number }) => {
 }
 
 .value-saved {
-  color: #15803D;
+  color: var(--success);
   font-weight: 600;
   font-size: 12px;
 }
 
 .value-saved-pct {
-  color: #22C55E;
+  color: var(--success);
   font-size: 11px;
   font-weight: 500;
 }
 
 /* ── Sort icons ── */
 .level-table :deep(.caret-wrapper) {
-  color: #9CA3AF;
+  color: var(--text-muted);
 }
 
 .level-table :deep(.caret-wrapper:hover) {
-  color: #15803D;
+  color: var(--primary);
 }
 
 .level-table :deep(.sort-caret.ascending) {
-  border-bottom-color: #15803D;
+  border-bottom-color: var(--primary);
 }
 
 .level-table :deep(.sort-caret.descending) {
-  border-top-color: #15803D;
+  border-top-color: var(--primary);
 }
 
 /* ── Responsive ── */

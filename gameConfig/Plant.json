@@ -1,41 +1,8 @@
 [
     {
-        "id": 2020002,
-        "name": "白萝卜",
-        "mutant": "",
-        "fruit": {
-            "id": 40002,
-            "count": 5
-        },
-        "seed_id": 29999,
-        "land_level_need": 1,
-        "seasons": 1,
-        "grow_phases": "种子:1;发芽:1;成熟:0;",
-        "exp": 1,
-        "size": 0,
-        "offsetPosition": {
-            "x": 0,
-            "y": 0
-        },
-        "mutantEffectScale": {
-            "x": 1,
-            "y": 1
-        },
-        "harvestOffsetPosition": {
-            "x": -35,
-            "y": 40
-        },
-        "harvestRandom": false,
-        "harvestAllSpineRes": "",
-        "harvestAllOffsetPosition": "",
-        "all_state_spine": "",
-        "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
-    },
-    {
         "id": 1020002,
         "name": "白萝卜",
-        "mutant": "1:102003;2:1020059",
+        "mutant": "",
         "fruit": {
             "id": 40002,
             "count": 5
@@ -63,7 +30,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020003,
@@ -74,7 +49,7 @@
             "count": 10
         },
         "seed_id": 20003,
-        "land_level_need": 1,
+        "land_level_need": 2,
         "seasons": 1,
         "grow_phases": "种子:30;发芽:30;小叶子:30;大叶子:30;成熟:0;",
         "exp": 2,
@@ -96,7 +71,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020059,
@@ -107,7 +90,7 @@
             "count": 20
         },
         "seed_id": 20059,
-        "land_level_need": 1,
+        "land_level_need": 3,
         "seasons": 1,
         "grow_phases": "种子:60;发芽:60;幼苗:60;成株:60;卷心:60;成熟:0;",
         "exp": 5,
@@ -129,7 +112,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020065,
@@ -140,7 +131,7 @@
             "count": 20
         },
         "seed_id": 20065,
-        "land_level_need": 1,
+        "land_level_need": 4,
         "seasons": 1,
         "grow_phases": "种子:120;发芽:120;幼苗:120;伸长:120;初熟:120;成熟:0;",
         "exp": 10,
@@ -162,7 +153,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020064,
@@ -173,7 +172,7 @@
             "count": 30
         },
         "seed_id": 20064,
-        "land_level_need": 1,
+        "land_level_need": 5,
         "seasons": 1,
         "grow_phases": "种子:300;发芽:300;小叶子:300;大叶子:300;成熟:0;",
         "exp": 20,
@@ -195,7 +194,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020060,
@@ -206,7 +213,7 @@
             "count": 30
         },
         "seed_id": 20060,
-        "land_level_need": 1,
+        "land_level_need": 6,
         "seasons": 1,
         "grow_phases": "种子:480;幼苗:480;秧苗:480;幼穗:480;开花:480;成熟:0;",
         "exp": 41,
@@ -228,7 +235,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020061,
@@ -239,7 +254,7 @@
             "count": 40
         },
         "seed_id": 20061,
-        "land_level_need": 1,
+        "land_level_need": 7,
         "seasons": 1,
         "grow_phases": "种子:720;发芽:720;小叶子:720;大叶子:720;幼穗:720;成熟:0;",
         "exp": 62,
@@ -261,7 +276,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020004,
@@ -272,7 +295,7 @@
             "count": 40
         },
         "seed_id": 20004,
-        "land_level_need": 1,
+        "land_level_need": 8,
         "seasons": 1,
         "grow_phases": "种子:960;发芽:960;小叶子:960;大叶子:960;开花:960;成熟:0;",
         "exp": 82,
@@ -294,7 +317,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020066,
@@ -305,7 +336,7 @@
             "count": 60
         },
         "seed_id": 20066,
-        "land_level_need": 1,
+        "land_level_need": 9,
         "seasons": 1,
         "grow_phases": "种子:1500;发芽:1500;小叶子:1500;大叶子:1500;成熟:0;",
         "exp": 106,
@@ -327,7 +358,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020005,
@@ -338,7 +377,7 @@
             "count": 60
         },
         "seed_id": 20005,
-        "land_level_need": 1,
+        "land_level_need": 10,
         "seasons": 1,
         "grow_phases": "种子:1440;发芽:1440;小叶子:1440;大叶子:1440;初熟:1440;成熟:0;",
         "exp": 128,
@@ -360,7 +399,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020071,
@@ -371,7 +418,7 @@
             "count": 80
         },
         "seed_id": 20071,
-        "land_level_need": 1,
+        "land_level_need": 11,
         "seasons": 1,
         "grow_phases": "种子:2250;发芽:2250;小叶子:2250;大叶子:2250;成熟:0;",
         "exp": 160,
@@ -393,7 +440,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020096,
@@ -404,7 +459,7 @@
             "count": 80
         },
         "seed_id": 20096,
-        "land_level_need": 1,
+        "land_level_need": 12,
         "seasons": 1,
         "grow_phases": "种子:2160;发芽:2160;小叶子:2160;大叶子:2160;初熟:2160;成熟:0;",
         "exp": 192,
@@ -426,7 +481,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020099,
@@ -437,7 +500,7 @@
             "count": 200
         },
         "seed_id": 20099,
-        "land_level_need": 1,
+        "land_level_need": 13,
         "seasons": 1,
         "grow_phases": "种子:3600;发芽:3600;小叶子:3600;大叶子:3600;成熟:0;",
         "exp": 272,
@@ -459,7 +522,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020006,
@@ -470,7 +541,7 @@
             "count": 200
         },
         "seed_id": 20006,
-        "land_level_need": 1,
+        "land_level_need": 14,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 544,
@@ -492,7 +563,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020051,
@@ -503,7 +582,7 @@
             "count": 200
         },
         "seed_id": 20051,
-        "land_level_need": 1,
+        "land_level_need": 15,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;开花:8640;成熟:0;",
         "exp": 816,
@@ -525,7 +604,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020120,
@@ -536,7 +623,7 @@
             "count": 200
         },
         "seed_id": 20120,
-        "land_level_need": 1,
+        "land_level_need": 16,
         "seasons": 1,
         "grow_phases": "种子:17280;小叶子:17280;大叶子:17280;花蕾:17280;盛开:17280;成熟:0;",
         "exp": 1632,
@@ -558,7 +645,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020259,
@@ -569,7 +664,7 @@
             "count": 200
         },
         "seed_id": 20259,
-        "land_level_need": 1,
+        "land_level_need": 17,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶:2880;大叶:2880;花蕾:2880;开花:0;",
         "exp": 288,
@@ -591,7 +686,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020007,
@@ -602,7 +705,7 @@
             "count": 200
         },
         "seed_id": 20007,
-        "land_level_need": 1,
+        "land_level_need": 18,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 576,
@@ -624,7 +727,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020098,
@@ -635,7 +746,7 @@
             "count": 200
         },
         "seed_id": 20098,
-        "land_level_need": 1,
+        "land_level_need": 19,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;幼苗:8640;卷心:8640;初熟:8640;成熟:0;",
         "exp": 864,
@@ -657,7 +768,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020305,
@@ -668,7 +787,7 @@
             "count": 200
         },
         "seed_id": 20305,
-        "land_level_need": 1,
+        "land_level_need": 20,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;初熟:17280;成熟:0;",
         "exp": 1728,
@@ -690,7 +809,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020105,
@@ -701,7 +828,7 @@
             "count": 200
         },
         "seed_id": 20105,
-        "land_level_need": 1,
+        "land_level_need": 21,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;初熟:2880;成熟:0;",
         "exp": 304,
@@ -723,7 +850,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020008,
@@ -734,7 +869,7 @@
             "count": 200
         },
         "seed_id": 20008,
-        "land_level_need": 1,
+        "land_level_need": 22,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;初熟:5760;成熟:0;",
         "exp": 608,
@@ -756,7 +891,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020037,
@@ -767,7 +910,7 @@
             "count": 200
         },
         "seed_id": 20037,
-        "land_level_need": 1,
+        "land_level_need": 23,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;开花:8640;成熟:0;",
         "exp": 912,
@@ -789,7 +932,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020041,
@@ -800,7 +951,7 @@
             "count": 200
         },
         "seed_id": 20041,
-        "land_level_need": 1,
+        "land_level_need": 24,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;初熟:17280;成熟:0;",
         "exp": 1824,
@@ -822,7 +973,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020161,
@@ -833,7 +992,7 @@
             "count": 200
         },
         "seed_id": 20161,
-        "land_level_need": 1,
+        "land_level_need": 25,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;花蕾:2880;盛开:0;",
         "exp": 324,
@@ -855,7 +1014,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020110,
@@ -866,7 +1033,7 @@
             "count": 200
         },
         "seed_id": 20110,
-        "land_level_need": 1,
+        "land_level_need": 26,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;花蕾:5760;盛开:0;",
         "exp": 648,
@@ -888,7 +1055,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020143,
@@ -899,7 +1074,7 @@
             "count": 200
         },
         "seed_id": 20143,
-        "land_level_need": 1,
+        "land_level_need": 27,
         "seasons": 1,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:7200;花蕾:7200;盛开:7200;成熟:0;",
         "exp": 972,
@@ -921,7 +1096,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020147,
@@ -932,7 +1115,7 @@
             "count": 200
         },
         "seed_id": 20147,
-        "land_level_need": 1,
+        "land_level_need": 28,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;花蕾:17280;盛开:0;",
         "exp": 1944,
@@ -954,7 +1137,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020162,
@@ -965,7 +1156,7 @@
             "count": 200
         },
         "seed_id": 20162,
-        "land_level_need": 1,
+        "land_level_need": 29,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;花蕾:2880;盛开:0;",
         "exp": 344,
@@ -987,7 +1178,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020009,
@@ -998,7 +1197,7 @@
             "count": 200
         },
         "seed_id": 20009,
-        "land_level_need": 1,
+        "land_level_need": 30,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;初熟:5760;成熟:0;",
         "exp": 688,
@@ -1020,7 +1219,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020097,
@@ -1031,7 +1238,7 @@
             "count": 200
         },
         "seed_id": 20097,
-        "land_level_need": 1,
+        "land_level_need": 31,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;开花:8640;成熟:0;",
         "exp": 1032,
@@ -1053,7 +1260,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020306,
@@ -1064,7 +1279,7 @@
             "count": 200
         },
         "seed_id": 20306,
-        "land_level_need": 1,
+        "land_level_need": 32,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;初熟:17280;成熟:0;",
         "exp": 2064,
@@ -1086,7 +1301,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020103,
@@ -1097,7 +1320,7 @@
             "count": 200
         },
         "seed_id": 20103,
-        "land_level_need": 1,
+        "land_level_need": 33,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;初熟:2880;成熟:0;",
         "exp": 368,
@@ -1119,7 +1342,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020010,
@@ -1130,7 +1361,7 @@
             "count": 200
         },
         "seed_id": 20010,
-        "land_level_need": 1,
+        "land_level_need": 34,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;初熟:5760;成熟:0;",
         "exp": 736,
@@ -1152,7 +1383,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020308,
@@ -1163,7 +1402,7 @@
             "count": 200
         },
         "seed_id": 20308,
-        "land_level_need": 1,
+        "land_level_need": 35,
         "seasons": 1,
         "grow_phases": "种子:10800;发芽:10800;小叶子:10800;大叶子:10800;成熟:0;",
         "exp": 1104,
@@ -1185,7 +1424,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020091,
@@ -1196,7 +1443,7 @@
             "count": 200
         },
         "seed_id": 20091,
-        "land_level_need": 1,
+        "land_level_need": 36,
         "seasons": 1,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:14400;开花:14400;初熟:14400;成熟:0;",
         "exp": 2208,
@@ -1218,7 +1465,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020073,
@@ -1229,7 +1484,7 @@
             "count": 200
         },
         "seed_id": 20073,
-        "land_level_need": 1,
+        "land_level_need": 37,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;初熟:2880;成熟:0;",
         "exp": 392,
@@ -1251,7 +1506,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020001,
@@ -1262,7 +1525,7 @@
             "count": 200
         },
         "seed_id": 20001,
-        "land_level_need": 1,
+        "land_level_need": 38,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 784,
@@ -1284,7 +1547,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020011,
@@ -1295,7 +1566,7 @@
             "count": 200
         },
         "seed_id": 20011,
-        "land_level_need": 1,
+        "land_level_need": 39,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;开花:8640;成熟:0;",
         "exp": 1176,
@@ -1317,7 +1588,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020062,
@@ -1328,7 +1607,7 @@
             "count": 200
         },
         "seed_id": 20062,
-        "land_level_need": 1,
+        "land_level_need": 40,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;初熟:17280;成熟:0;",
         "exp": 2352,
@@ -1350,7 +1629,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020104,
@@ -1361,7 +1648,7 @@
             "count": 200
         },
         "seed_id": 20104,
-        "land_level_need": 1,
+        "land_level_need": 41,
         "seasons": 1,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:2400;花蕾:2400;盛开:2400;成熟:0;",
         "exp": 420,
@@ -1383,7 +1670,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020135,
@@ -1394,7 +1689,7 @@
             "count": 200
         },
         "seed_id": 20135,
-        "land_level_need": 1,
+        "land_level_need": 42,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;花蕾:5760;盛开:0;",
         "exp": 840,
@@ -1416,7 +1711,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020141,
@@ -1427,7 +1730,7 @@
             "count": 200
         },
         "seed_id": 20141,
-        "land_level_need": 1,
+        "land_level_need": 43,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;花蕾:8640;盛开:0;",
         "exp": 1260,
@@ -1449,7 +1752,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020142,
@@ -1460,7 +1771,7 @@
             "count": 200
         },
         "seed_id": 20142,
-        "land_level_need": 1,
+        "land_level_need": 44,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;花蕾:17280;盛开:0;",
         "exp": 2520,
@@ -1482,7 +1793,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020145,
@@ -1493,7 +1812,7 @@
             "count": 200
         },
         "seed_id": 20145,
-        "land_level_need": 1,
+        "land_level_need": 45,
         "seasons": 1,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:2400;开花:2400;初熟:2400;成熟:0;",
         "exp": 448,
@@ -1515,7 +1834,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020014,
@@ -1526,7 +1853,7 @@
             "count": 200
         },
         "seed_id": 20014,
-        "land_level_need": 1,
+        "land_level_need": 46,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 896,
@@ -1548,7 +1875,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020070,
@@ -1559,7 +1894,7 @@
             "count": 200
         },
         "seed_id": 20070,
-        "land_level_need": 1,
+        "land_level_need": 47,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;初熟:8640;成熟:0;",
         "exp": 1344,
@@ -1581,7 +1916,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020015,
@@ -1592,7 +1935,7 @@
             "count": 200
         },
         "seed_id": 20015,
-        "land_level_need": 1,
+        "land_level_need": 48,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;开花:17280;成熟:0;",
         "exp": 2688,
@@ -1614,7 +1957,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020100,
@@ -1625,7 +1976,7 @@
             "count": 200
         },
         "seed_id": 20100,
-        "land_level_need": 1,
+        "land_level_need": 49,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;幼苗:2880;伸长:2880;初熟:2880;成熟:0;",
         "exp": 476,
@@ -1647,7 +1998,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020018,
@@ -1658,7 +2017,7 @@
             "count": 200
         },
         "seed_id": 20018,
-        "land_level_need": 1,
+        "land_level_need": 50,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;开花:5760;小叶子:5760;大叶子:5760;成熟:0;",
         "exp": 952,
@@ -1680,7 +2039,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020047,
@@ -1691,7 +2058,7 @@
             "count": 200
         },
         "seed_id": 20047,
-        "land_level_need": 1,
+        "land_level_need": 51,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;幼苗:8640;分叶:8640;伸长:8640;成熟:0;",
         "exp": 1428,
@@ -1713,7 +2080,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020019,
@@ -1724,7 +2099,7 @@
             "count": 200
         },
         "seed_id": 20019,
-        "land_level_need": 1,
+        "land_level_need": 52,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;开花:17280;成熟:0;",
         "exp": 2856,
@@ -1746,7 +2121,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020128,
@@ -1757,7 +2140,7 @@
             "count": 200
         },
         "seed_id": 20128,
-        "land_level_need": 1,
+        "land_level_need": 53,
         "seasons": 1,
         "grow_phases": "种子:2880;发芽:2880;小叶子:2880;大叶子:2880;花蕾:2880;盛开:0;",
         "exp": 508,
@@ -1779,7 +2162,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020013,
@@ -1790,7 +2181,7 @@
             "count": 200
         },
         "seed_id": 20013,
-        "land_level_need": 1,
+        "land_level_need": 54,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 1016,
@@ -1812,7 +2203,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020044,
@@ -1823,7 +2222,7 @@
             "count": 200
         },
         "seed_id": 20044,
-        "land_level_need": 1,
+        "land_level_need": 55,
         "seasons": 1,
         "grow_phases": "种子:8640;长枝:8640;开花:8640;小叶子:8640;大叶子:8640;结果:0;",
         "exp": 1524,
@@ -1845,7 +2244,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020072,
@@ -1856,7 +2263,7 @@
             "count": 200
         },
         "seed_id": 20072,
-        "land_level_need": 1,
+        "land_level_need": 56,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;开花:17280;小叶子:17280;大叶子:17280;成熟:0;",
         "exp": 3048,
@@ -1878,7 +2285,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020396,
@@ -1889,7 +2304,7 @@
             "count": 200
         },
         "seed_id": 20396,
-        "land_level_need": 1,
+        "land_level_need": 57,
         "seasons": 1,
         "grow_phases": "种子:2880;幼芽:2880;小叶:2880;大叶:2880;花蕾:2880;开花:0;",
         "exp": 540,
@@ -1911,7 +2326,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020023,
@@ -1922,7 +2345,7 @@
             "count": 200
         },
         "seed_id": 20023,
-        "land_level_need": 1,
+        "land_level_need": 58,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;开花:5760;成熟:0;",
         "exp": 1080,
@@ -1944,7 +2367,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020095,
@@ -1955,7 +2386,7 @@
             "count": 200
         },
         "seed_id": 20095,
-        "land_level_need": 1,
+        "land_level_need": 59,
         "seasons": 1,
         "grow_phases": "种子:8640;发芽:8640;小叶子:8640;大叶子:8640;开花:8640;成熟:0;",
         "exp": 1620,
@@ -1977,7 +2408,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020026,
@@ -1988,7 +2427,7 @@
             "count": 200
         },
         "seed_id": 20026,
-        "land_level_need": 1,
+        "land_level_need": 60,
         "seasons": 1,
         "grow_phases": "种子:17280;发芽:17280;小叶子:17280;大叶子:17280;开花:17280;成熟:0;",
         "exp": 3240,
@@ -2010,7 +2449,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020050,
@@ -2021,7 +2468,7 @@
             "count": 200
         },
         "seed_id": 20050,
-        "land_level_need": 1,
+        "land_level_need": 61,
         "seasons": 2,
         "grow_phases": "种子:3600;发芽:3600;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 429,
@@ -2043,7 +2490,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020027,
@@ -2054,7 +2509,7 @@
             "count": 200
         },
         "seed_id": 20027,
-        "land_level_need": 1,
+        "land_level_need": 62,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;开花:7200;成熟:0;",
         "exp": 858,
@@ -2076,7 +2531,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020036,
@@ -2087,7 +2550,7 @@
             "count": 200
         },
         "seed_id": 20036,
-        "land_level_need": 1,
+        "land_level_need": 63,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;初熟:10800;成熟:0;",
         "exp": 1287,
@@ -2109,7 +2572,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020043,
@@ -2120,7 +2591,7 @@
             "count": 200
         },
         "seed_id": 20043,
-        "land_level_need": 1,
+        "land_level_need": 64,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 2574,
@@ -2142,7 +2613,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020029,
@@ -2153,7 +2632,7 @@
             "count": 200
         },
         "seed_id": 20029,
-        "land_level_need": 1,
+        "land_level_need": 65,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 456,
@@ -2175,7 +2654,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020049,
@@ -2186,7 +2673,7 @@
             "count": 200
         },
         "seed_id": 20049,
-        "land_level_need": 1,
+        "land_level_need": 66,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
         "exp": 912,
@@ -2208,7 +2695,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020052,
@@ -2219,7 +2714,7 @@
             "count": 200
         },
         "seed_id": 20052,
-        "land_level_need": 1,
+        "land_level_need": 67,
         "seasons": 2,
         "grow_phases": "种子:7200;发菌:7200;出菇:7200;幼菇:10800;初熟:10800;成熟:0;",
         "exp": 1368,
@@ -2241,7 +2736,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020031,
@@ -2252,7 +2755,7 @@
             "count": 200
         },
         "seed_id": 20031,
-        "land_level_need": 1,
+        "land_level_need": 68,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 2736,
@@ -2274,7 +2777,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020045,
@@ -2285,7 +2796,7 @@
             "count": 200
         },
         "seed_id": 20045,
-        "land_level_need": 1,
+        "land_level_need": 69,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;成熟:0;",
         "exp": 480,
@@ -2307,7 +2818,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020054,
@@ -2318,7 +2837,7 @@
             "count": 200
         },
         "seed_id": 20054,
-        "land_level_need": 1,
+        "land_level_need": 70,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
         "exp": 960,
@@ -2340,7 +2859,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020442,
@@ -2351,7 +2878,7 @@
             "count": 200
         },
         "seed_id": 20442,
-        "land_level_need": 1,
+        "land_level_need": 71,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;幼株:10800;成熟:0;",
         "exp": 1440,
@@ -2373,7 +2900,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020033,
@@ -2384,7 +2919,7 @@
             "count": 200
         },
         "seed_id": 20033,
-        "land_level_need": 1,
+        "land_level_need": 72,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 2880,
@@ -2406,7 +2941,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020055,
@@ -2417,7 +2960,7 @@
             "count": 200
         },
         "seed_id": 20055,
-        "land_level_need": 1,
+        "land_level_need": 73,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 510,
@@ -2439,7 +2982,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020034,
@@ -2450,7 +3001,7 @@
             "count": 200
         },
         "seed_id": 20034,
-        "land_level_need": 1,
+        "land_level_need": 74,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;开花:7200;成熟:0;",
         "exp": 1020,
@@ -2472,7 +3023,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020413,
@@ -2483,7 +3042,7 @@
             "count": 200
         },
         "seed_id": 20413,
-        "land_level_need": 1,
+        "land_level_need": 75,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 1530,
@@ -2505,7 +3064,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020035,
@@ -2516,7 +3083,7 @@
             "count": 200
         },
         "seed_id": 20035,
-        "land_level_need": 1,
+        "land_level_need": 76,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 3060,
@@ -2538,7 +3105,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020067,
@@ -2549,7 +3124,7 @@
             "count": 200
         },
         "seed_id": 20067,
-        "land_level_need": 1,
+        "land_level_need": 77,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;成熟:0;",
         "exp": 537,
@@ -2571,7 +3146,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020038,
@@ -2582,7 +3165,7 @@
             "count": 200
         },
         "seed_id": 20038,
-        "land_level_need": 1,
+        "land_level_need": 78,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;开花:7200;成熟:0;",
         "exp": 1074,
@@ -2604,7 +3187,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020053,
@@ -2615,7 +3206,7 @@
             "count": 200
         },
         "seed_id": 20053,
-        "land_level_need": 1,
+        "land_level_need": 79,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 1611,
@@ -2637,7 +3228,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020080,
@@ -2648,7 +3247,7 @@
             "count": 200
         },
         "seed_id": 20080,
-        "land_level_need": 1,
+        "land_level_need": 80,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 3222,
@@ -2670,7 +3269,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020039,
@@ -2681,7 +3288,7 @@
             "count": 200
         },
         "seed_id": 20039,
-        "land_level_need": 1,
+        "land_level_need": 81,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;成熟:0;",
         "exp": 567,
@@ -2703,7 +3310,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020056,
@@ -2714,7 +3329,7 @@
             "count": 200
         },
         "seed_id": 20056,
-        "land_level_need": 1,
+        "land_level_need": 82,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;开花:7200;成熟:0;",
         "exp": 1134,
@@ -2736,7 +3351,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020075,
@@ -2747,7 +3370,7 @@
             "count": 200
         },
         "seed_id": 20075,
-        "land_level_need": 1,
+        "land_level_need": 83,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 1701,
@@ -2769,7 +3392,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020042,
@@ -2780,7 +3411,7 @@
             "count": 200
         },
         "seed_id": 20042,
-        "land_level_need": 1,
+        "land_level_need": 84,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 3402,
@@ -2802,7 +3433,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020057,
@@ -2813,7 +3452,7 @@
             "count": 200
         },
         "seed_id": 20057,
-        "land_level_need": 1,
+        "land_level_need": 85,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 597,
@@ -2835,7 +3474,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020048,
@@ -2846,7 +3493,7 @@
             "count": 200
         },
         "seed_id": 20048,
-        "land_level_need": 1,
+        "land_level_need": 86,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;开花:7200;成熟:0;",
         "exp": 1194,
@@ -2868,7 +3515,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020058,
@@ -2879,7 +3534,7 @@
             "count": 200
         },
         "seed_id": 20058,
-        "land_level_need": 1,
+        "land_level_need": 87,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 1791,
@@ -2901,7 +3556,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020079,
@@ -2912,7 +3575,7 @@
             "count": 200
         },
         "seed_id": 20079,
-        "land_level_need": 1,
+        "land_level_need": 88,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 3582,
@@ -2934,7 +3597,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020218,
@@ -2945,7 +3616,7 @@
             "count": 200
         },
         "seed_id": 20218,
-        "land_level_need": 1,
+        "land_level_need": 89,
         "seasons": 2,
         "grow_phases": "种子:2400;长枝:2400;小叶子:2400;大叶子:3600;初熟:3600;成树:0;",
         "exp": 627,
@@ -2967,7 +3638,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020077,
@@ -2978,7 +3657,7 @@
             "count": 200
         },
         "seed_id": 20077,
-        "land_level_need": 1,
+        "land_level_need": 90,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
         "exp": 1254,
@@ -3000,7 +3679,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020220,
@@ -3011,7 +3698,7 @@
             "count": 200
         },
         "seed_id": 20220,
-        "land_level_need": 1,
+        "land_level_need": 91,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;初熟:10800;成熟:0;",
         "exp": 1881,
@@ -3033,7 +3720,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020076,
@@ -3044,7 +3739,7 @@
             "count": 200
         },
         "seed_id": 20076,
-        "land_level_need": 1,
+        "land_level_need": 92,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 3762,
@@ -3066,7 +3761,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020116,
@@ -3077,7 +3780,7 @@
             "count": 200
         },
         "seed_id": 20116,
-        "land_level_need": 1,
+        "land_level_need": 93,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;花蕾:3600;盛开:0;",
         "exp": 660,
@@ -3099,7 +3802,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020126,
@@ -3110,7 +3821,7 @@
             "count": 200
         },
         "seed_id": 20126,
-        "land_level_need": 1,
+        "land_level_need": 94,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
         "exp": 1320,
@@ -3132,7 +3843,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020063,
@@ -3143,7 +3862,7 @@
             "count": 200
         },
         "seed_id": 20063,
-        "land_level_need": 1,
+        "land_level_need": 95,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 1980,
@@ -3165,7 +3884,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020221,
@@ -3176,7 +3903,7 @@
             "count": 200
         },
         "seed_id": 20221,
-        "land_level_need": 1,
+        "land_level_need": 96,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;花蕾:21600;盛开:0;",
         "exp": 3960,
@@ -3198,7 +3925,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020068,
@@ -3209,7 +3944,7 @@
             "count": 200
         },
         "seed_id": 20068,
-        "land_level_need": 1,
+        "land_level_need": 97,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;成熟:0;",
         "exp": 693,
@@ -3231,7 +3966,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020222,
@@ -3242,7 +3985,7 @@
             "count": 200
         },
         "seed_id": 20222,
-        "land_level_need": 1,
+        "land_level_need": 98,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;花蕾:7200;盛开:0;",
         "exp": 1386,
@@ -3264,7 +4007,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020078,
@@ -3275,7 +4026,7 @@
             "count": 200
         },
         "seed_id": 20078,
-        "land_level_need": 1,
+        "land_level_need": 99,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;初熟:10800;成熟:0;",
         "exp": 2079,
@@ -3297,7 +4048,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020074,
@@ -3308,7 +4067,7 @@
             "count": 200
         },
         "seed_id": 20074,
-        "land_level_need": 1,
+        "land_level_need": 100,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 4158,
@@ -3330,7 +4089,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020083,
@@ -3341,7 +4108,7 @@
             "count": 200
         },
         "seed_id": 20083,
-        "land_level_need": 1,
+        "land_level_need": 102,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 726,
@@ -3363,7 +4130,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020225,
@@ -3374,7 +4149,7 @@
             "count": 200
         },
         "seed_id": 20225,
-        "land_level_need": 1,
+        "land_level_need": 104,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;花蕾:7200;盛开:0;",
         "exp": 1452,
@@ -3396,7 +4171,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020084,
@@ -3407,7 +4190,7 @@
             "count": 200
         },
         "seed_id": 20084,
-        "land_level_need": 1,
+        "land_level_need": 106,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;结果:0;",
         "exp": 2178,
@@ -3429,7 +4212,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020226,
@@ -3440,7 +4231,7 @@
             "count": 200
         },
         "seed_id": 20226,
-        "land_level_need": 1,
+        "land_level_need": 108,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;花蕾:21600;盛开:0;",
         "exp": 4356,
@@ -3462,7 +4253,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020085,
@@ -3473,7 +4272,7 @@
             "count": 200
         },
         "seed_id": 20085,
-        "land_level_need": 1,
+        "land_level_need": 110,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;结果:0;",
         "exp": 762,
@@ -3495,7 +4294,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020227,
@@ -3506,7 +4313,7 @@
             "count": 200
         },
         "seed_id": 20227,
-        "land_level_need": 1,
+        "land_level_need": 112,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;幼蕾:4800;含苞:7200;初放:7200;盛开:0;",
         "exp": 1524,
@@ -3528,7 +4335,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020086,
@@ -3539,7 +4354,7 @@
             "count": 200
         },
         "seed_id": 20086,
-        "land_level_need": 1,
+        "land_level_need": 114,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 2286,
@@ -3561,7 +4376,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020228,
@@ -3572,7 +4395,7 @@
             "count": 200
         },
         "seed_id": 20228,
-        "land_level_need": 1,
+        "land_level_need": 116,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;开花:21600;成熟:0;",
         "exp": 4572,
@@ -3594,7 +4417,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020087,
@@ -3605,7 +4436,7 @@
             "count": 200
         },
         "seed_id": 20087,
-        "land_level_need": 1,
+        "land_level_need": 118,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;结果:0;",
         "exp": 795,
@@ -3627,7 +4458,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020235,
@@ -3638,7 +4477,7 @@
             "count": 200
         },
         "seed_id": 20235,
-        "land_level_need": 1,
+        "land_level_need": 120,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;花蕾:7200;盛开:0;",
         "exp": 1590,
@@ -3660,7 +4499,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020088,
@@ -3671,7 +4518,7 @@
             "count": 200
         },
         "seed_id": 20088,
-        "land_level_need": 1,
+        "land_level_need": 122,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;结果:0;",
         "exp": 2385,
@@ -3693,7 +4540,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020201,
@@ -3704,7 +4559,7 @@
             "count": 200
         },
         "seed_id": 20201,
-        "land_level_need": 1,
+        "land_level_need": 124,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;幼株:21600;成熟:0;",
         "exp": 4770,
@@ -3726,7 +4581,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020089,
@@ -3737,7 +4600,7 @@
             "count": 200
         },
         "seed_id": 20089,
-        "land_level_need": 1,
+        "land_level_need": 126,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;开花:3600;成熟:0;",
         "exp": 831,
@@ -3759,7 +4622,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020202,
@@ -3770,7 +4641,7 @@
             "count": 200
         },
         "seed_id": 20202,
-        "land_level_need": 1,
+        "land_level_need": 128,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;芝蕾:4800;幼芝:7200;初熟:7200;成熟:0;",
         "exp": 1662,
@@ -3792,7 +4663,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020090,
@@ -3803,7 +4682,7 @@
             "count": 200
         },
         "seed_id": 20090,
-        "land_level_need": 1,
+        "land_level_need": 130,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 2493,
@@ -3825,7 +4704,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020229,
@@ -3836,7 +4723,7 @@
             "count": 200
         },
         "seed_id": 20229,
-        "land_level_need": 1,
+        "land_level_need": 132,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 4986,
@@ -3858,7 +4745,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020016,
@@ -3869,7 +4764,7 @@
             "count": 200
         },
         "seed_id": 20016,
-        "land_level_need": 1,
+        "land_level_need": 134,
         "seasons": 2,
         "grow_phases": "种子:2400;发芽:2400;小叶子:2400;大叶子:3600;初熟:3600;成熟:0;",
         "exp": 867,
@@ -3891,7 +4786,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020204,
@@ -3902,7 +4805,7 @@
             "count": 200
         },
         "seed_id": 20204,
-        "land_level_need": 1,
+        "land_level_need": 136,
         "seasons": 2,
         "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
         "exp": 1734,
@@ -3924,7 +4827,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020022,
@@ -3935,7 +4846,7 @@
             "count": 200
         },
         "seed_id": 20022,
-        "land_level_need": 1,
+        "land_level_need": 138,
         "seasons": 2,
         "grow_phases": "种子:7200;发芽:7200;小叶子:7200;大叶子:10800;开花:10800;成熟:0;",
         "exp": 2601,
@@ -3957,7 +4868,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1020242,
@@ -3968,7 +4887,7 @@
             "count": 200
         },
         "seed_id": 20242,
-        "land_level_need": 1,
+        "land_level_need": 140,
         "seasons": 2,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;花蕾:21600;盛开:0;",
         "exp": 5202,
@@ -3990,7 +4909,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 1021542,
@@ -4001,7 +4928,7 @@
             "count": 20
         },
         "seed_id": 21542,
-        "land_level_need": 1,
+        "land_level_need": 30,
         "seasons": 1,
         "grow_phases": "种子:5760;发芽:5760;小叶子:5760;大叶子:5760;初熟:5760;成熟:0;",
         "exp": 688,
@@ -4023,7 +4950,15 @@
         "harvestAllOffsetPosition": "",
         "all_state_spine": "spine/v2/xiyouzhongzi/red packet_tree",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": ""
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
     },
     {
         "id": 2029998,
@@ -4034,7 +4969,7 @@
             "count": 50
         },
         "seed_id": 29998,
-        "land_level_need": 1,
+        "land_level_need": 31,
         "seasons": 1,
         "grow_phases": "种子:14400;发芽:14400;小叶子:14400;大叶子:21600;初熟:21600;成熟:0;",
         "exp": 1,
@@ -4054,8 +4989,303 @@
         "harvestRandom": true,
         "harvestAllSpineRes": "spine/v2/shouge/Crop_sg_final",
         "harvestAllOffsetPosition": "5:30;50:-30;150:-75;200:-25;150:-30",
-        "all_state_spine": "spine/v2/xiyouzhongzi/xiyouzhongzi",
+        "all_state_spine": "spine/v2/xiyouzhongzi/2029998",
         "mature_effect": "effect/prefab/effect_plant_maturation",
-        "rare_plant_light_pos": "{\"x\":113,\"y\":125,\"rotation\":0,\"scale\":{\"x\":1,\"y\":1}}"
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 60
+        },
+        "rare_plant_light_pos": "{\"x\":113,\"y\":125,\"rotation\":0,\"scale\":{\"x\":1,\"y\":1}}",
+        "exp_root": 0,
+        "exp_alter": 0,
+        "fruit_root": 0,
+        "fruit_alter": 0
+    },
+    {
+        "id": 1020112,
+        "name": "风信子",
+        "mutant": "6:1040112:10",
+        "fruit": {
+            "id": 40112,
+            "count": 24
+        },
+        "seed_id": 20112,
+        "land_level_need": 200,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
+        "exp": 720,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 425,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020025,
+        "name": "银杏树苗",
+        "mutant": "6:1040025:10",
+        "fruit": {
+            "id": 40025,
+            "count": 24
+        },
+        "seed_id": 20025,
+        "land_level_need": 200,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;长枝:7200;成苗:0;",
+        "exp": 720,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 425,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020121,
+        "name": "蔷薇",
+        "mutant": "6:1040121:10",
+        "fruit": {
+            "id": 40121,
+            "count": 24
+        },
+        "seed_id": 20121,
+        "land_level_need": 200,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
+        "exp": 720,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 425,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020109,
+        "name": "蝴蝶兰",
+        "mutant": "6:1040109:10",
+        "fruit": {
+            "id": 40109,
+            "count": 24
+        },
+        "seed_id": 20109,
+        "land_level_need": 200,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;花蕾:7200;盛开:0;",
+        "exp": 720,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 425,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020224,
+        "name": "昙花",
+        "mutant": "6:1040224:10",
+        "fruit": {
+            "id": 40224,
+            "count": 24
+        },
+        "seed_id": 20224,
+        "land_level_need": 201,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
+        "exp": 840,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 496,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020249,
+        "name": "荷包牡丹",
+        "mutant": "6:1040249:10",
+        "fruit": {
+            "id": 40249,
+            "count": 24
+        },
+        "seed_id": 20249,
+        "land_level_need": 201,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;花蕾:7200;盛开:0;",
+        "exp": 840,
+        "size": 0,
+        "offsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1,
+            "y": 1
+        },
+        "harvestOffsetPosition": {
+            "x": -35,
+            "y": 40
+        },
+        "harvestRandom": false,
+        "harvestAllSpineRes": "",
+        "harvestAllOffsetPosition": "",
+        "all_state_spine": "",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 0
+        },
+        "rare_plant_light_pos": "",
+        "exp_root": 1.6,
+        "exp_alter": 496,
+        "fruit_root": 2,
+        "fruit_alter": 18
+    },
+    {
+        "id": 1020046,
+        "name": "爱心果",
+        "mutant": "6:1040046:10",
+        "fruit": {
+            "id": 40046,
+            "count": 96
+        },
+        "seed_id": 20046,
+        "land_level_need": 202,
+        "seasons": 2,
+        "grow_phases": "种子:4800;发芽:4800;小叶子:4800;大叶子:7200;初熟:7200;成熟:0;",
+        "exp": 3840,
+        "size": 2,
+        "offsetPosition": {
+            "x": 85,
+            "y": 0
+        },
+        "mutantEffectScale": {
+            "x": 1.75,
+            "y": 1.5
+        },
+        "harvestOffsetPosition": {
+            "x": 0,
+            "y": 0
+        },
+        "harvestRandom": true,
+        "harvestAllSpineRes": "spine/v2/shouge/Crop_sg_final",
+        "harvestAllOffsetPosition": "5:30;50:-30;150:-75;200:-25;150:-30",
+        "all_state_spine": "spine/v2/xiyouzhongzi/1020046",
+        "mature_effect": "effect/prefab/effect_plant_maturation",
+        "mature_effect_offset": {
+            "x": 0,
+            "y": 60
+        },
+        "rare_plant_light_pos": "{\"x\":113,\"y\":125,\"rotation\":0,\"scale\":{\"x\":1,\"y\":1}}",
+        "exp_root": 1.6,
+        "exp_alter": 2266,
+        "fruit_root": 2,
+        "fruit_alter": 72
     }
 ]

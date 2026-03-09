@@ -185,6 +185,8 @@ export interface DashboardStats {
     next_level_exp: number
     exp_to_next_level: number
     hours_to_next_level: number
+    uptime_seconds: number
+    started_at: string | null
   }>
 }
 
@@ -207,6 +209,27 @@ export interface QRCodePollResponse {
   status: 'wait' | 'ok' | 'expired' | 'error'
   code?: string
   message?: string
+}
+
+export interface StatsResponse {
+  summary: {
+    op_counts: Record<string, number>
+    total_gold_in: number
+    total_gold_out: number
+    total_exp: number
+    avg_gold_in_per_hour: number
+    avg_gold_out_per_hour: number
+    avg_exp_per_hour: number
+  }
+  timeline: Array<{
+    period: string
+    op_counts: Record<string, number>
+    gold_in: number
+    gold_out: number
+    exp_gained: number
+  }>
+  uptime_seconds: number
+  started_at: string | null
 }
 
 export const authApi = {
@@ -265,6 +288,54 @@ export const dashboardApi = {
 export const logsApi = {
   getHistorical: (accountId: number, limit: number = 100): Promise<AxiosResponse<LogEntry[]>> => 
     instance.get(`/accounts/${accountId}/logs`, { params: { limit } })
+}
+
+export const statsApi = {
+  getStats: (accountId: number, granularity: string = 'day', from?: string, to?: string): Promise<AxiosResponse<StatsResponse>> => {
+    const params: Record<string, string> = { granularity }
+    if (from) params.from = from
+    if (to) params.to = to
+    return instance.get(`/accounts/${accountId}/stats`, { params })
+  }
+}
+
+export interface DataSummaryResponse {
+  summary: {
+    total_harvest_count: number
+    total_harvest_gold: number
+    total_steal_count: number
+    total_steal_gold: number
+  }
+  hourly_trend: Array<{
+    hour: string
+    harvest_count: number
+    harvest_gold: number
+    steal_count: number
+    steal_gold: number
+  }>
+  crop_breakdown: Array<{
+    name: string
+    count: number
+    gold: number
+  }>
+  steal_ranking: Array<{
+    friend_name: string
+    steal_count: number
+    steal_gold: number
+  }>
+  daily_summary: Array<{
+    date: string
+    harvest_count: number
+    harvest_gold: number
+    steal_count: number
+    steal_gold: number
+    total_gold: number
+  }>
+}
+
+export const dataSummaryApi = {
+  get: (accountId: number, hours: number = 24, days: number = 7): Promise<AxiosResponse<DataSummaryResponse>> =>
+    instance.get(`/accounts/${accountId}/data-summary`, { params: { hours, days } })
 }
 
 export function createLogWebSocket(accountId: number): WebSocket {

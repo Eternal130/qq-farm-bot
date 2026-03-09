@@ -7,6 +7,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"qq-farm-bot/internal/model"
+
 	"qq-farm-bot/proto/corepb"
 	"qq-farm-bot/proto/taskpb"
 )
@@ -15,10 +17,11 @@ type TaskWorker struct {
 	net    *Network
 	logger *Logger
 	cfg    *BotConfig
+	sc     *StatsCollector
 }
 
-func NewTaskWorker(net *Network, logger *Logger, cfg *BotConfig) *TaskWorker {
-	return &TaskWorker{net: net, logger: logger, cfg: cfg}
+func NewTaskWorker(net *Network, logger *Logger, cfg *BotConfig, sc *StatsCollector) *TaskWorker {
+	return &TaskWorker{net: net, logger: logger, cfg: cfg, sc: sc}
 }
 
 func (tw *TaskWorker) RunLoop() {
@@ -95,6 +98,18 @@ func (tw *TaskWorker) checkAndClaim() {
 			multiStr = fmt.Sprintf(" (%d倍)", task.ShareMultiple)
 		}
 		tw.logger.Infof("任务", "领取: %s%s → %s", task.Desc, multiStr, rewardStr)
+
+		// Record task claim stats
+		var goldReward, expReward int64
+		for _, item := range claimReply.Items {
+			switch item.Id {
+			case 1:
+				goldReward += item.Count
+			case 2:
+				expReward += item.Count
+			}
+		}
+		tw.sc.Record(model.OpTaskClaim, 1, goldReward, expReward)
 		time.Sleep(300 * time.Millisecond)
 	}
 }

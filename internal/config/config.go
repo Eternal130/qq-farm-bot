@@ -36,7 +36,7 @@ func DefaultConfig() *Config {
 		AdminUser:     "admin",
 		AdminPass:     "admin123",
 		GameServerURL: "wss://gate-obt.nqf.qq.com/prod/ws",
-		ClientVersion: "1.6.2.18_20260227",
+		ClientVersion: "1.7.0.5_20260306",
 	}
 }
 

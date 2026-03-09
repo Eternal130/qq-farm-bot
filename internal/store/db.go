@@ -110,6 +110,20 @@ func (s *Store) migrate() error {
 	// Migration: add per-account API key column
 _, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN api_key TEXT NOT NULL DEFAULT ''
 `)
+	// Migration: op_stats table for operation statistics tracking
+	_, _ = s.db.Exec(`CREATE TABLE IF NOT EXISTS op_stats (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		account_id INTEGER NOT NULL,
+		op_type TEXT NOT NULL,
+		count INTEGER NOT NULL DEFAULT 0,
+		gold_delta INTEGER NOT NULL DEFAULT 0,
+		exp_delta INTEGER NOT NULL DEFAULT 0,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	)`)
+	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_op_stats_account_time ON op_stats(account_id, created_at)`)
+	_, _ = s.db.Exec(`CREATE INDEX IF NOT EXISTS idx_op_stats_type ON op_stats(account_id, op_type, created_at)`)
+	// Migration: add detail column to op_stats
+	_, _ = s.db.Exec(`ALTER TABLE op_stats ADD COLUMN detail TEXT NOT NULL DEFAULT ''`)
 
 	return err
 }
@@ -399,4 +413,293 @@ func (s *Store) HasAnyUser() (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+// ============ Operation Stats ============
+
+// AddOpStat inserts a single operation statistics record.
+func (s *Store) AddOpStat(r *model.OpRecord) error {
+	r.CreatedAt = time.Now()
+	_, err := s.db.Exec(
+		`INSERT INTO op_stats (account_id, op_type, count, gold_delta, exp_delta, detail, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		r.AccountID, r.OpType, r.Count, r.GoldDelta, r.ExpDelta, r.Detail, r.CreatedAt)
+	return err
+}
+
+// GetOpStats returns aggregated operation statistics for an account.
+// granularity: "hour", "day", "week", "all"
+// from/to: optional time range filters (zero time means no filter)
+func (s *Store) GetOpStats(accountID int64, granularity string, from, to time.Time) ([]model.AggregatedStats, error) {
+	var periodExpr string
+	switch granularity {
+	case "hour":
+		periodExpr = `strftime('%Y-%m-%d %H:00', created_at)`
+	case "day":
+		periodExpr = `strftime('%Y-%m-%d', created_at)`
+	case "week":
+		periodExpr = `strftime('%Y-W%W', created_at)`
+	default:
+		periodExpr = `'all'`
+	}
+
+	query := `SELECT ` + periodExpr + ` as period, op_type, SUM(count) as total_count,
+		SUM(CASE WHEN gold_delta > 0 THEN gold_delta ELSE 0 END) as gold_in,
+		SUM(CASE WHEN gold_delta < 0 THEN -gold_delta ELSE 0 END) as gold_out,
+		SUM(CASE WHEN exp_delta > 0 THEN exp_delta ELSE 0 END) as exp_gained
+		FROM op_stats WHERE account_id = ?`
+	args := []interface{}{accountID}
+
+	if !from.IsZero() {
+		query += ` AND created_at >= ?`
+		args = append(args, from)
+	}
+	if !to.IsZero() {
+		query += ` AND created_at <= ?`
+		args = append(args, to)
+	}
+
+	query += ` GROUP BY period, op_type ORDER BY period ASC`
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Aggregate rows into per-period buckets
+	bucketMap := make(map[string]*model.AggregatedStats)
+	var orderedPeriods []string
+
+	for rows.Next() {
+		var period, opType string
+		var totalCount, goldIn, goldOut, expGained int64
+		if err := rows.Scan(&period, &opType, &totalCount, &goldIn, &goldOut, &expGained); err != nil {
+			return nil, err
+		}
+		bucket, ok := bucketMap[period]
+		if !ok {
+			bucket = &model.AggregatedStats{
+				Period:   period,
+				OpCounts: make(map[string]int64),
+			}
+			bucketMap[period] = bucket
+			orderedPeriods = append(orderedPeriods, period)
+		}
+		bucket.OpCounts[opType] = totalCount
+		bucket.GoldIn += goldIn
+		bucket.GoldOut += goldOut
+		bucket.ExpGained += expGained
+	}
+
+	result := make([]model.AggregatedStats, 0, len(orderedPeriods))
+	for _, p := range orderedPeriods {
+		result = append(result, *bucketMap[p])
+	}
+	return result, nil
+}
+
+// GetOpStatsSummary returns overall totals for an account (no time grouping).
+func (s *Store) GetOpStatsSummary(accountID int64) (map[string]int64, int64, int64, int64, error) {
+	rows, err := s.db.Query(
+		`SELECT op_type, SUM(count), SUM(CASE WHEN gold_delta > 0 THEN gold_delta ELSE 0 END),
+		SUM(CASE WHEN gold_delta < 0 THEN -gold_delta ELSE 0 END),
+		SUM(CASE WHEN exp_delta > 0 THEN exp_delta ELSE 0 END)
+		FROM op_stats WHERE account_id = ? GROUP BY op_type`, accountID)
+	if err != nil {
+		return nil, 0, 0, 0, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int64)
+	var totalGoldIn, totalGoldOut, totalExp int64
+	for rows.Next() {
+		var opType string
+		var count, goldIn, goldOut, expGained int64
+		if err := rows.Scan(&opType, &count, &goldIn, &goldOut, &expGained); err != nil {
+			return nil, 0, 0, 0, err
+		}
+		counts[opType] = count
+		totalGoldIn += goldIn
+		totalGoldOut += goldOut
+		totalExp += expGained
+	}
+	return counts, totalGoldIn, totalGoldOut, totalExp, nil
+}
+
+// CleanOldOpStats removes operation stats older than the given number of days.
+func (s *Store) CleanOldOpStats(days int) error {
+	cutoff := time.Now().AddDate(0, 0, -days)
+	_, err := s.db.Exec(`DELETE FROM op_stats WHERE created_at < ?`, cutoff)
+	return err
+}
+
+// ============ Data Summary Queries ============
+
+// DataSummaryTotals holds the top-level summary numbers for the data summary page.
+type DataSummaryTotals struct {
+	TotalHarvestCount int64 `json:"total_harvest_count"`
+	TotalHarvestGold  int64 `json:"total_harvest_gold"`
+	TotalStealCount   int64 `json:"total_steal_count"`
+	TotalStealGold    int64 `json:"total_steal_gold"`
+}
+
+// GetDataSummaryTotals returns aggregated harvest/steal totals for an account within a time range.
+func (s *Store) GetDataSummaryTotals(accountID int64, since time.Time) (*DataSummaryTotals, error) {
+	var t DataSummaryTotals
+	err := s.db.QueryRow(`
+		SELECT
+			COALESCE(SUM(CASE WHEN op_type='harvest' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='sell' THEN gold_delta ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN gold_delta ELSE 0 END), 0)
+		FROM op_stats WHERE account_id = ? AND created_at >= ?`,
+		accountID, since).Scan(&t.TotalHarvestCount, &t.TotalHarvestGold, &t.TotalStealCount, &t.TotalStealGold)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+// HourlyTrendRow represents one hour's harvest/steal data.
+type HourlyTrendRow struct {
+	Hour         string `json:"hour"`
+	HarvestCount int64  `json:"harvest_count"`
+	HarvestGold  int64  `json:"harvest_gold"`
+	StealCount   int64  `json:"steal_count"`
+	StealGold    int64  `json:"steal_gold"`
+}
+
+// GetHourlyTrend returns per-hour harvest/steal data for the last N hours.
+func (s *Store) GetHourlyTrend(accountID int64, since time.Time) ([]HourlyTrendRow, error) {
+	rows, err := s.db.Query(`
+		SELECT
+			strftime('%Y-%m-%d %H:00', created_at) AS hour,
+			COALESCE(SUM(CASE WHEN op_type='harvest' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='sell' THEN gold_delta ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN gold_delta ELSE 0 END), 0)
+		FROM op_stats
+		WHERE account_id = ? AND created_at >= ?
+		  AND op_type IN ('harvest','sell','steal')
+		GROUP BY hour ORDER BY hour ASC`,
+		accountID, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []HourlyTrendRow
+	for rows.Next() {
+		var r HourlyTrendRow
+		if err := rows.Scan(&r.Hour, &r.HarvestCount, &r.HarvestGold, &r.StealCount, &r.StealGold); err != nil {
+			return nil, err
+		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+// CropBreakdownRow represents one crop's contribution to revenue.
+type CropBreakdownRow struct {
+	Name  string `json:"name"`
+	Count int64  `json:"count"`
+	Gold  int64  `json:"gold"`
+}
+
+// GetCropBreakdown returns crop-level sell breakdown by parsing the detail field.
+// detail format: "白萝卜x10, 核桃x5"
+func (s *Store) GetCropBreakdown(accountID int64, since time.Time) ([]CropBreakdownRow, error) {
+	rows, err := s.db.Query(`
+		SELECT detail, SUM(count) AS total_count, SUM(gold_delta) AS total_gold
+		FROM op_stats
+		WHERE account_id = ? AND created_at >= ? AND op_type = 'sell' AND detail != ''
+		GROUP BY detail ORDER BY total_gold DESC`,
+		accountID, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []CropBreakdownRow
+	for rows.Next() {
+		var detail string
+		var count, gold int64
+		if err := rows.Scan(&detail, &count, &gold); err != nil {
+			return nil, err
+		}
+		result = append(result, CropBreakdownRow{Name: detail, Count: count, Gold: gold})
+	}
+	return result, nil
+}
+
+// StealRankingRow represents one friend's steal stats.
+type StealRankingRow struct {
+	FriendName string `json:"friend_name"`
+	StealCount int64  `json:"steal_count"`
+	StealGold  int64  `json:"steal_gold"`
+}
+
+// GetStealRanking returns friends ranked by steal count.
+func (s *Store) GetStealRanking(accountID int64, since time.Time) ([]StealRankingRow, error) {
+	rows, err := s.db.Query(`
+		SELECT detail, SUM(count) AS total_count, SUM(gold_delta) AS total_gold
+		FROM op_stats
+		WHERE account_id = ? AND created_at >= ? AND op_type = 'steal' AND detail != ''
+		GROUP BY detail ORDER BY total_count DESC
+		LIMIT 20`,
+		accountID, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []StealRankingRow
+	for rows.Next() {
+		var r StealRankingRow
+		if err := rows.Scan(&r.FriendName, &r.StealCount, &r.StealGold); err != nil {
+			return nil, err
+		}
+		result = append(result, r)
+	}
+	return result, nil
+}
+
+// DailySummaryRow represents one day's aggregated stats.
+type DailySummaryRow struct {
+	Date         string `json:"date"`
+	HarvestCount int64  `json:"harvest_count"`
+	HarvestGold  int64  `json:"harvest_gold"`
+	StealCount   int64  `json:"steal_count"`
+	StealGold    int64  `json:"steal_gold"`
+	TotalGold    int64  `json:"total_gold"`
+}
+
+// GetDailySummary returns per-day summary for the last N days.
+func (s *Store) GetDailySummary(accountID int64, since time.Time) ([]DailySummaryRow, error) {
+	rows, err := s.db.Query(`
+		SELECT
+			strftime('%Y-%m-%d', created_at) AS day,
+			COALESCE(SUM(CASE WHEN op_type='harvest' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='sell' THEN gold_delta ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN count ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN op_type='steal' THEN gold_delta ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN gold_delta > 0 THEN gold_delta ELSE 0 END), 0)
+		FROM op_stats
+		WHERE account_id = ? AND created_at >= ?
+		GROUP BY day ORDER BY day DESC`,
+		accountID, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []DailySummaryRow
+	for rows.Next() {
+		var r DailySummaryRow
+		if err := rows.Scan(&r.Date, &r.HarvestCount, &r.HarvestGold, &r.StealCount, &r.StealGold, &r.TotalGold); err != nil {
+			return nil, err
+		}
+		result = append(result, r)
+	}
+	return result, nil
 }
