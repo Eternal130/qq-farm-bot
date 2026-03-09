@@ -304,10 +304,15 @@ type friendLandStatus struct {
 func (fw *FriendWorker) analyzeFriendLands(lands []*plantpb.LandInfo, myGid int64) *friendLandStatus {
 	s := &friendLandStatus{}
 	nowSec := time.Now().Unix()
+	landMap := buildLandMap(lands)
 
 	for _, land := range lands {
 		plant := land.Plant
 		if plant == nil || len(plant.Phases) == 0 {
+			continue
+		}
+		// Skip slave lands occupied by multi-tile crops
+		if isOccupiedSlaveLand(land, landMap) {
 			continue
 		}
 		phase := getCurrentPhase(plant.Phases, nowSec)

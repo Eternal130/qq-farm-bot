@@ -17,6 +17,7 @@ type PlantConfig struct {
 	Exp        int    `json:"exp"`
 	GrowPhases string `json:"grow_phases"`
 	Seasons    int    `json:"seasons"`
+	Size       int    `json:"size"`
 	Fruit      struct {
 		ID    int `json:"id"`
 		Count int `json:"count"`
@@ -229,6 +230,32 @@ func (gc *GameConfig) IsSeedID(id int) bool {
 	defer gc.mu.RUnlock()
 	_, ok := gc.seedToPlant[id]
 	return ok
+}
+
+// GetPlantSize returns the tile size for a plant (1 = normal 1x1, 2 = large 2x2).
+func (gc *GameConfig) GetPlantSize(plantID int) int {
+	if gc == nil {
+		return 1
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	if p, ok := gc.plantMap[plantID]; ok && p.Size >= 2 {
+		return p.Size
+	}
+	return 1
+}
+
+// GetPlantSizeBySeedID returns the tile size for a plant looked up by seed ID.
+func (gc *GameConfig) GetPlantSizeBySeedID(seedID int) int {
+	if gc == nil {
+		return 1
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	if p, ok := gc.seedToPlant[seedID]; ok && p.Size >= 2 {
+		return p.Size
+	}
+	return 1
 }
 
 func (gc *GameConfig) GetPlantGrowTime(plantID int) int {

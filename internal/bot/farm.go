@@ -226,6 +226,7 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 	unlockedCount := 0
 	var statuses []model.LandStatus
 	var harvestInfos []LandHarvestInfo
+	landMap := buildLandMap(lands)
 	for _, land := range lands {
 		ls := model.LandStatus{
 			ID:       land.Id,
@@ -236,7 +237,7 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 		if land.Unlocked {
 			unlockedCount++
 		}
-		if land.Plant != nil && len(land.Plant.Phases) > 0 {
+		if land.Plant != nil && len(land.Plant.Phases) > 0 && !isOccupiedSlaveLand(land, landMap) {
 			ls.CropID = land.Plant.Id
 			ls.CropName = f.gc.GetPlantName(int(land.Plant.Id))
 			currentPhase := getCurrentPhase(land.Plant.Phases, nowSec)
@@ -297,10 +298,15 @@ type landStatus struct {
 func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 	s := &landStatus{}
 	nowSec := time.Now().Unix()
+	landMap := buildLandMap(lands)
 
 	for _, land := range lands {
 		id := land.Id
 		if !land.Unlocked {
+			continue
+		}
+		// Skip slave lands occupied by multi-tile crops
+		if isOccupiedSlaveLand(land, landMap) {
 			continue
 		}
 		plant := land.Plant
@@ -341,9 +347,14 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 	nowSec := time.Now().Unix()
 	fertilizeCount := 0
+	landMap := buildLandMap(lands)
 
 	for _, land := range lands {
 		if !land.Unlocked || land.Plant == nil || len(land.Plant.Phases) == 0 {
+			continue
+		}
+		// Skip slave lands occupied by multi-tile crops
+		if isOccupiedSlaveLand(land, landMap) {
 			continue
 		}
 
@@ -455,6 +466,33 @@ func toTimeSec(val int64) int64 {
 		return val / 1000
 	}
 	return val
+}
+
+// buildLandMap creates a map from land ID to LandInfo for quick lookups.
+func buildLandMap(lands []*plantpb.LandInfo) map[int64]*plantpb.LandInfo {
+	m := make(map[int64]*plantpb.LandInfo, len(lands))
+	for _, land := range lands {
+		m[land.Id] = land
+	}
+	return m
+}
+
+// isOccupiedSlaveLand returns true if a land is a slave tile occupied by a
+// multi-tile crop planted on another (master) land.
+func isOccupiedSlaveLand(land *plantpb.LandInfo, landMap map[int64]*plantpb.LandInfo) bool {
+	masterID := land.MasterLandId
+	if masterID == 0 || masterID == land.Id {
+		return false
+	}
+	master, ok := landMap[masterID]
+	if !ok {
+		return false
+	}
+	// Verify the master land actually has plant data
+	if master.Plant == nil || len(master.Plant.Phases) == 0 {
+		return false
+	}
+	return true
 }
 
 func (f *FarmWorker) harvest(landIDs []int64) error {
@@ -574,33 +612,62 @@ func (f *FarmWorker) plantFromBag(lands []int64) int {
 	}
 
 	planted := 0
-	landIdx := 0
+	pendingLands := make(map[int64]bool, len(lands))
+	for _, id := range lands {
+		pendingLands[id] = true
+	}
 	for _, seed := range seeds {
-		if landIdx >= len(lands) {
+		if len(pendingLands) == 0 {
 			break
 		}
 		seedName := f.gc.GetPlantNameBySeedID(int(seed.itemID))
+		plantSize := f.gc.GetPlantSizeBySeedID(int(seed.itemID))
+		landFootprint := plantSize * plantSize
 		count := int(seed.count)
-		if count > len(lands)-landIdx {
-			count = len(lands) - landIdx
+		// For multi-tile crops, limit count by available land / footprint
+		availableForSeed := len(pendingLands) / landFootprint
+		if availableForSeed <= 0 {
+			continue
 		}
-		for i := 0; i < count && landIdx < len(lands); i++ {
-			landID := lands[landIdx]
+		if count > availableForSeed {
+			count = availableForSeed
+		}
+		seedPlanted := 0
+		for _, landID := range lands {
+			if !pendingLands[landID] {
+				continue
+			}
+			if seedPlanted >= count {
+				break
+			}
 			plantReq := &plantpb.PlantRequest{
 				Items: []*plantpb.PlantItem{{SeedId: seed.itemID, LandIds: []int64{landID}}},
 			}
 			plantBody, _ := proto.Marshal(plantReq)
-			if _, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", plantBody); err == nil {
-				planted++
-				landIdx++
-				delete(f.fertilized, landID)
-			} else {
+			replyBody, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", plantBody)
+			if err != nil {
 				break
+			}
+			seedPlanted++
+			planted++
+			delete(pendingLands, landID)
+			delete(f.fertilized, landID)
+			// For multi-tile crops, parse reply to find occupied slave lands
+			if landFootprint > 1 {
+				plantReply := &plantpb.PlantReply{}
+				proto.Unmarshal(replyBody, plantReply)
+				for _, changedLand := range plantReply.Land {
+					cid := changedLand.Id
+					if cid != landID {
+						delete(pendingLands, cid)
+						delete(f.fertilized, cid)
+					}
+				}
 			}
 			time.Sleep(50 * time.Millisecond)
 		}
-		if planted > 0 {
-			f.logger.Infof("背包", "使用背包种子 %s x%d", seedName, min(count, planted))
+		if seedPlanted > 0 {
+			f.logger.Infof("背包", "使用背包种子 %s x%d", seedName, seedPlanted)
 		}
 	}
 
@@ -621,9 +688,20 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 	seedName := f.gc.GetPlantNameBySeedID(int(bestSeed.ItemId))
 	f.logger.Infof("商店", "最佳种子: %s 价格=%d金币", seedName, bestSeed.Price)
 
+	// Calculate land footprint for multi-tile crops
+	plantSize := f.gc.GetPlantSizeBySeedID(int(bestSeed.ItemId))
+	landFootprint := plantSize * plantSize
+
 	// Buy seeds
 	_, _, _, gold, _ := f.net.state.Get()
 	needCount := int64(len(toLant))
+	if landFootprint > 1 {
+		needCount = int64(len(toLant) / landFootprint)
+		if needCount <= 0 {
+			f.logger.Warnf("种植", "%s 需要至少 %d 块空地才能种植，当前仅 %d 块", seedName, landFootprint, len(toLant))
+			return
+		}
+	}
 	totalCost := bestSeed.Price * needCount
 	if totalCost > gold {
 		canBuy := gold / bestSeed.Price
@@ -631,10 +709,10 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 			f.logger.Warnf("商店", "金币不足")
 			return
 		}
-		toLant = toLant[:canBuy]
+		needCount = canBuy
 	}
 
-	buyReq := &shoppb.BuyGoodsRequest{GoodsId: bestSeed.Id, Num: int64(len(toLant)), Price: bestSeed.Price}
+	buyReq := &shoppb.BuyGoodsRequest{GoodsId: bestSeed.Id, Num: needCount, Price: bestSeed.Price}
 	buyBody, _ := proto.Marshal(buyReq)
 	buyReplyBody, err := f.net.SendRequest("gamepb.shoppb.ShopService", "BuyGoods", buyBody)
 	if err != nil {
@@ -648,28 +726,51 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 	if len(buyReply.GetItems) > 0 && buyReply.GetItems[0].Id > 0 {
 		actualSeedID = buyReply.GetItems[0].Id
 	}
-	f.logger.Infof("购买", "已购买 %s种子 x%d", f.gc.GetPlantNameBySeedID(int(actualSeedID)), len(toLant))
-	seedCost := bestSeed.Price * int64(len(toLant))
-	f.sc.Record(model.OpBuySeed, int64(len(toLant)), -seedCost, 0)
+	f.logger.Infof("购买", "已购买 %s种子 x%d", f.gc.GetPlantNameBySeedID(int(actualSeedID)), needCount)
+	seedCost := bestSeed.Price * needCount
+	f.sc.Record(model.OpBuySeed, needCount, -seedCost, 0)
 
-	// Plant seeds one by one
+	// Plant seeds one by one, tracking occupied lands for multi-tile crops
 	planted := 0
+	pendingLands := make(map[int64]bool, len(toLant))
+	for _, id := range toLant {
+		pendingLands[id] = true
+	}
 	for _, landID := range toLant {
+		if !pendingLands[landID] {
+			continue
+		}
+		if planted >= int(needCount) {
+			break
+		}
 		req := &plantpb.PlantRequest{
 			Items: []*plantpb.PlantItem{{SeedId: actualSeedID, LandIds: []int64{landID}}},
 		}
 		body, _ := proto.Marshal(req)
-		if _, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", body); err == nil {
-			planted++
+		replyBody, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", body)
+		if err != nil {
+			break
+		}
+		planted++
+		delete(pendingLands, landID)
+		delete(f.fertilized, landID)
+		// For multi-tile crops, parse reply to find occupied slave lands
+		if landFootprint > 1 {
+			plantReply := &plantpb.PlantReply{}
+			proto.Unmarshal(replyBody, plantReply)
+			for _, changedLand := range plantReply.Land {
+				cid := changedLand.Id
+				if cid != landID {
+					delete(pendingLands, cid)
+					delete(f.fertilized, cid)
+				}
+			}
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
 	f.logger.Infof("种植", "已种植 %d 块", planted)
 	if planted > 0 {
 		f.sc.RecordSimple(model.OpPlant, int64(planted))
-		for _, id := range toLant[:planted] {
-			delete(f.fertilized, id)
-		}
 	}
 }
 
