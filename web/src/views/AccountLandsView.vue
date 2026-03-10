@@ -102,18 +102,72 @@ const fetchLands = async () => {
   }
 }
 
+// Format unix timestamp to readable time
+const formatUnixTime = (sec: number | undefined): string => {
+  if (!sec || sec <= 0) return ''
+  return new Date(sec * 1000).toLocaleString('zh-CN', {
+    month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  })
+}
+
+// Format seconds to human-readable duration
+const formatDuration = (sec: number | undefined): string => {
+  if (!sec || sec <= 0) return ''
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  const s = sec % 60
+  if (h > 0) return `${h}h${m}m${s}s`
+  if (m > 0) return `${m}m${s}s`
+  return `${s}s`
+}
+
+// Format buff value (server sends pct*100, e.g. 1000 = 10%)
+const formatBuff = (val: number | undefined): string => {
+  if (!val) return ''
+  return `${(val / 100).toFixed(1)}%`
+}
+
 // Export lands data as CSV
 const exportLands = () => {
   if (lands.value.length === 0) return
   
-  const header = ['土地ID', '土地等级', '是否解锁', '作物名称', '作物ID', '生长阶段']
+  const header = [
+    '土地ID', '土地等级', '最大等级', '是否解锁', '可升级', '可解锁',
+    '作物名称', '作物ID', '生长阶段', '季节',
+    '成熟时间', '生长周期', '总生长时间', '基础经验', '作物尺寸',
+    '经验加成', '减时加成', '产量加成',
+    '果实数', '剩余果实', '被偷次数', '可偷', '缺水次数',
+    '有草', '有虫', '剩余施肥次数', '主地块ID'
+  ]
   const rows = lands.value.map(land => [
     land.id,
     getLandLevelName(land.level),
+    land.max_level ?? '',
     land.unlocked ? '是' : '否',
+    land.could_upgrade ? '是' : '',
+    land.could_unlock ? '是' : '',
     land.crop_name || '',
     land.crop_id ?? '',
-    land.phase || ''
+    land.phase || '',
+    land.season ?? '',
+    formatUnixTime(land.mature_time_sec),
+    formatDuration(land.cycle_time_sec),
+    formatDuration(land.grow_sec),
+    land.crop_exp ?? '',
+    land.plant_size ?? '',
+    formatBuff(land.exp_bonus_pct),
+    formatBuff(land.time_reduce_pct),
+    formatBuff(land.yield_bonus_pct),
+    land.fruit_num ?? '',
+    land.left_fruit_num ?? '',
+    land.stole_num ?? '',
+    land.stealable ? '是' : '',
+    land.dry_num ?? '',
+    land.has_weeds ? '是' : '',
+    land.has_insects ? '是' : '',
+    land.fert_times_left ?? '',
+    land.master_land_id ?? ''
   ])
   
   const csvContent = [header, ...rows]

@@ -169,6 +169,30 @@ export interface LandStatus {
   crop_name?: string
   crop_id?: number
   phase?: string
+  // Debug: growth timing
+  season?: number
+  mature_time_sec?: number
+  cycle_time_sec?: number
+  grow_sec?: number
+  crop_exp?: number
+  plant_size?: number
+  // Debug: land buffs
+  exp_bonus_pct?: number
+  time_reduce_pct?: number
+  yield_bonus_pct?: number
+  // Debug: crop state
+  fruit_num?: number
+  left_fruit_num?: number
+  stole_num?: number
+  stealable?: boolean
+  dry_num?: number
+  has_weeds?: boolean
+  has_insects?: boolean
+  fert_times_left?: number
+  // Debug: land meta
+  could_upgrade?: boolean
+  could_unlock?: boolean
+  master_land_id?: number
 }
 
 export interface DashboardStats {

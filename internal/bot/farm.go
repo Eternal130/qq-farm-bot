@@ -248,17 +248,39 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 	landMap := buildLandMap(lands)
 	for _, land := range lands {
 		ls := model.LandStatus{
-			ID:       land.Id,
-			Level:    land.Level,
-			MaxLevel: land.MaxLevel,
-			Unlocked: land.Unlocked,
+			ID:           land.Id,
+			Level:        land.Level,
+			MaxLevel:     land.MaxLevel,
+			Unlocked:     land.Unlocked,
+			CouldUpgrade: land.CouldUpgrade,
+			CouldUnlock:  land.CouldUnlock,
+			MasterLandID: land.MasterLandId,
 		}
 		if land.Unlocked {
 			unlockedCount++
 		}
+		// Populate land buff data
+		if buff := land.GetBuff(); buff != nil {
+			ls.ExpBonusPct = buff.PlantExpBonus
+			ls.TimeReducePct = buff.PlantingTimeReduction
+			ls.YieldBonusPct = buff.PlantYieldBonus
+		}
 		if land.Plant != nil && len(land.Plant.Phases) > 0 && !isOccupiedSlaveLand(land, landMap) {
 			ls.CropID = land.Plant.Id
 			ls.CropName = f.gc.GetPlantName(int(land.Plant.Id))
+			ls.Season = land.Plant.GetSeason()
+			ls.GrowSec = land.Plant.GrowSec
+			ls.CropExp = f.gc.GetPlantExp(int(land.Plant.Id))
+			ls.PlantSize = f.gc.GetPlantSize(int(land.Plant.Id))
+			ls.DryNum = land.Plant.DryNum
+			ls.StoleNum = land.Plant.StoleNum
+			ls.FruitNum = land.Plant.FruitNum
+			ls.LeftFruitNum = land.Plant.LeftFruitNum
+			ls.Stealable = land.Plant.Stealable
+			ls.FertTimesLeft = land.Plant.LeftInorcFertTimes
+			ls.HasWeeds = len(land.Plant.WeedOwners) > 0
+			ls.HasInsects = len(land.Plant.InsectOwners) > 0
+
 			currentPhase := getCurrentPhase(land.Plant.Phases, nowSec)
 			if currentPhase != nil {
 				if name, ok := phaseNames[currentPhase.Phase]; ok {
@@ -266,11 +288,22 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 				} else {
 					ls.Phase = fmt.Sprintf("阶段%d", currentPhase.Phase)
 				}
+				// Check for weeds/insects from phase timing
+				if !ls.HasWeeds && currentPhase.WeedsTime > 0 && toTimeSec(currentPhase.WeedsTime) <= nowSec {
+					ls.HasWeeds = true
+				}
+				if !ls.HasInsects && currentPhase.InsectTime > 0 && toTimeSec(currentPhase.InsectTime) <= nowSec {
+					ls.HasInsects = true
+				}
 			}
 
 			matureTime := getMatureTimeSec(land.Plant.Phases)
 			plantTime := getPlantStartTimeSec(land.Plant.Phases)
+			if matureTime > 0 {
+				ls.MatureTimeSec = matureTime
+			}
 			if matureTime > 0 && plantTime > 0 && matureTime > plantTime {
+				ls.CycleTimeSec = matureTime - plantTime
 				hi := LandHarvestInfo{
 					LandID:        land.Id,
 					CropID:        land.Plant.Id,

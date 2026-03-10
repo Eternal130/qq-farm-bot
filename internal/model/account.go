@@ -92,6 +92,34 @@ type LandStatus struct {
 	CropName string `json:"crop_name,omitempty"`
 	CropID   int64  `json:"crop_id,omitempty"`
 	Phase    string `json:"phase,omitempty"`
+
+	// Debug: growth timing
+	Season        int64 `json:"season,omitempty"`
+	MatureTimeSec int64 `json:"mature_time_sec,omitempty"`
+	CycleTimeSec  int64 `json:"cycle_time_sec,omitempty"`
+	GrowSec       int64 `json:"grow_sec,omitempty"`
+	CropExp       int   `json:"crop_exp,omitempty"`
+	PlantSize     int   `json:"plant_size,omitempty"`
+
+	// Debug: land buffs (raw server values, pct*100 e.g. 1000 = 10%)
+	ExpBonusPct   int64 `json:"exp_bonus_pct,omitempty"`
+	TimeReducePct int64 `json:"time_reduce_pct,omitempty"`
+	YieldBonusPct int64 `json:"yield_bonus_pct,omitempty"`
+
+	// Debug: crop state
+	FruitNum      int64 `json:"fruit_num,omitempty"`
+	LeftFruitNum  int64 `json:"left_fruit_num,omitempty"`
+	StoleNum      int64 `json:"stole_num,omitempty"`
+	Stealable     bool  `json:"stealable,omitempty"`
+	DryNum        int64 `json:"dry_num,omitempty"`
+	HasWeeds      bool  `json:"has_weeds,omitempty"`
+	HasInsects    bool  `json:"has_insects,omitempty"`
+	FertTimesLeft int64 `json:"fert_times_left,omitempty"`
+
+	// Debug: land meta
+	CouldUpgrade bool  `json:"could_upgrade,omitempty"`
+	CouldUnlock  bool  `json:"could_unlock,omitempty"`
+	MasterLandID int64 `json:"master_land_id,omitempty"`
 }
 
 // LogEntry represents a bot log message.
