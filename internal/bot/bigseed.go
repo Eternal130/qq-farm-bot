@@ -246,7 +246,7 @@ func (f *FarmWorker) getBigSeedsFromBag() []bigSeed {
 
 // all2x2BlockPositions returns all possible 2×2 block positions on the farm grid.
 // Each block is [4]int64{topLeft, topRight, bottomLeft, bottomRight}.
-// Grid layout is inferred from land IDs (assumes row-major sequential IDs).
+// The farm grid is fixed at 4 columns (row-major sequential IDs).
 func all2x2BlockPositions(allLands []*plantpb.LandInfo) [][4]int64 {
 	if len(allLands) < 4 {
 		return nil
@@ -264,16 +264,8 @@ func all2x2BlockPositions(allLands []*plantpb.LandInfo) [][4]int64 {
 	maxID := ids[len(ids)-1]
 	totalSlots := int(maxID - minID + 1)
 
-	cols := 0
-	for _, tryRows := range []int{3, 4, 2} {
-		if totalSlots >= tryRows*2 && totalSlots%tryRows == 0 {
-			cols = totalSlots / tryRows
-			if cols >= 2 {
-				break
-			}
-		}
-	}
-	if cols < 2 {
+	const cols = 4 // farm grid is always 4 columns wide
+	if totalSlots < cols {
 		return nil
 	}
 
