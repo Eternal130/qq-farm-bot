@@ -11,14 +11,15 @@ import (
 )
 
 type PlantConfig struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	SeedID     int    `json:"seed_id"`
-	Exp        int    `json:"exp"`
-	GrowPhases string `json:"grow_phases"`
-	Seasons    int    `json:"seasons"`
-	Size       int    `json:"size"`
-	Fruit      struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	SeedID        int    `json:"seed_id"`
+	LandLevelNeed int    `json:"land_level_need"`
+	Exp           int    `json:"exp"`
+	GrowPhases    string `json:"grow_phases"`
+	Seasons       int    `json:"seasons"`
+	Size          int    `json:"size"`
+	Fruit         struct {
 		ID    int `json:"id"`
 		Count int `json:"count"`
 	} `json:"fruit"`
@@ -299,11 +300,6 @@ func (gc *GameConfig) FormatGrowTime(seconds int) string {
 	return fmt.Sprintf("%d小时", hours)
 }
 
-// Constants for yield calculation
-const (
-	normalFertPlantsPer2Sec = 12
-	normalFertPlantSpeed    = normalFertPlantsPer2Sec / 2 // 6 块/秒
-)
 
 // parseGrowPhases extracts all non-zero phase durations from a grow_phases string.
 // Format: "name:seconds;name:seconds;...;mature:0;"
@@ -420,75 +416,49 @@ func (gc *GameConfig) buildPlantPhaseData() {
 
 // calculateSeedYield calculates experience yield for all seeds, accounting for
 // multi-season crops and optimal fertilizer usage (skip longest phase).
+// It processes both seed shop entries and Plant.json-only entries.
 func (gc *GameConfig) calculateSeedYield(lands int) {
-	if gc.seedShopData == nil || len(gc.seedShopData.Rows) == 0 {
-		return
+	var rows []SeedYieldRow
+	processedSeeds := make(map[int]bool)
+
+	// Phase 1: Process seed shop entries
+	if gc.seedShopData != nil {
+		for _, s := range gc.seedShopData.Rows {
+			if s.SeedID <= 0 || s.GrowTimeSec <= 0 {
+				continue
+			}
+
+			pd := gc.plantPhaseData[s.SeedID]
+			plant := gc.seedToPlant[s.SeedID]
+
+			seasons := 1
+			if plant != nil && plant.Seasons >= 2 {
+				seasons = plant.Seasons
+			}
+
+			row := gc.calcSeedYieldRow(s.SeedID, s.Name, s.RequiredLevel, s.Price,
+				s.Exp, seasons, s.GrowTimeSec, pd, lands)
+			rows = append(rows, row)
+			processedSeeds[s.SeedID] = true
+		}
 	}
 
-	plantSecondsNormalFert := float64(lands) / normalFertPlantSpeed
-	var rows []SeedYieldRow
-
-	for _, s := range gc.seedShopData.Rows {
-		if s.SeedID <= 0 || s.GrowTimeSec <= 0 {
+	// Phase 2: Process Plant.json entries not in seed shop
+	for _, p := range gc.plants {
+		if p.SeedID <= 0 || processedSeeds[p.SeedID] {
 			continue
 		}
-
-		pd := gc.plantPhaseData[s.SeedID]
-		plant := gc.seedToPlant[s.SeedID]
-
-		seasons := 1
-		if plant != nil && plant.Seasons >= 2 {
-			seasons = plant.Seasons
+		pd := gc.plantPhaseData[p.SeedID]
+		if pd == nil {
+			continue
 		}
-
-		var s1FertReduce, s2FertReduce, s2GrowTime int
-
-		if pd != nil {
-			// Season 1: skip longest phase
-			s1FertReduce = pd.MaxPhaseDuration
-
-			// Season 2: skip longest of last 3 phases
-			if seasons >= 2 {
-				s2GrowTime = pd.Season2GrowTime
-				s2FertReduce = pd.Season2MaxPhase
-			}
+		seasons := p.Seasons
+		if seasons < 1 {
+			seasons = 1
 		}
-
-		// Season 1 grow time with fertilizer
-		s1GrowFert := s.GrowTimeSec - s1FertReduce
-		if s1GrowFert < 1 {
-			s1GrowFert = 1
-		}
-
-		// Total effective grow time (both seasons with fert)
-		totalGrowFert := s1GrowFert
-		totalExp := s.Exp
-		if seasons >= 2 && s2GrowTime > 0 {
-			s2GrowFert := s2GrowTime - s2FertReduce
-			if s2GrowFert < 1 {
-				s2GrowFert = 1
-			}
-			totalGrowFert += s2GrowFert
-			totalExp += s.Exp // second season gives same exp
-		}
-
-		cycleSecNormalFert := float64(totalGrowFert) + plantSecondsNormalFert
-		farmExpPerHourNormal := float64(lands*totalExp) / cycleSecNormalFert * 3600
-
-		rows = append(rows, SeedYieldRow{
-			SeedID:               s.SeedID,
-			Name:                 s.Name,
-			RequiredLevel:        s.RequiredLevel,
-			Price:                s.Price,
-			ExpHarvest:           s.Exp,
-			Seasons:              seasons,
-			GrowTimeSec:          s.GrowTimeSec,
-			Season2GrowTimeSec:   s2GrowTime,
-			NormalFertReduceSec:  s1FertReduce,
-			Season2FertReduceSec: s2FertReduce,
-			GrowTimeNormalFert:   totalGrowFert,
-			FarmExpPerHourNormal: farmExpPerHourNormal,
-		})
+		row := gc.calcSeedYieldRow(p.SeedID, p.Name, p.LandLevelNeed, 0,
+			p.Exp, seasons, pd.TotalGrowTime, pd, lands)
+		rows = append(rows, row)
 	}
 
 	// Sort by FarmExpPerHourNormal descending
@@ -501,6 +471,53 @@ func (gc *GameConfig) calculateSeedYield(lands int) {
 	}
 
 	gc.seedYieldCache = rows
+}
+
+// calcSeedYieldRow computes yield metrics for a single seed.
+func (gc *GameConfig) calcSeedYieldRow(seedID int, name string, requiredLevel, price, exp, seasons, growTimeSec int, pd *PlantPhaseData, lands int) SeedYieldRow {
+	var s1FertReduce, s2FertReduce, s2GrowTime int
+
+	if pd != nil {
+		s1FertReduce = pd.MaxPhaseDuration
+		if seasons >= 2 {
+			s2GrowTime = pd.Season2GrowTime
+			s2FertReduce = pd.Season2MaxPhase
+		}
+	}
+
+	s1GrowFert := growTimeSec - s1FertReduce
+	if s1GrowFert < 1 {
+		s1GrowFert = 1
+	}
+
+	totalGrowFert := s1GrowFert
+	totalExp := exp
+	if seasons >= 2 && s2GrowTime > 0 {
+		s2GrowFert := s2GrowTime - s2FertReduce
+		if s2GrowFert < 1 {
+			s2GrowFert = 1
+		}
+		totalGrowFert += s2GrowFert
+		totalExp += exp
+	}
+
+	cycleSecNormalFert := float64(totalGrowFert)
+	farmExpPerHourNormal := float64(lands*totalExp) / cycleSecNormalFert * 3600
+
+	return SeedYieldRow{
+		SeedID:               seedID,
+		Name:                 name,
+		RequiredLevel:        requiredLevel,
+		Price:                price,
+		ExpHarvest:           exp,
+		Seasons:              seasons,
+		GrowTimeSec:          growTimeSec,
+		Season2GrowTimeSec:   s2GrowTime,
+		NormalFertReduceSec:  s1FertReduce,
+		Season2FertReduceSec: s2FertReduce,
+		GrowTimeNormalFert:   totalGrowFert,
+		FarmExpPerHourNormal: farmExpPerHourNormal,
+	}
 }
 
 // GetPlantingRecommendation returns seed recommendations based on experience efficiency

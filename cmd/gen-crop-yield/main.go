@@ -14,13 +14,14 @@ import (
 )
 
 type PlantConfig struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	SeedID     int    `json:"seed_id"`
-	Exp        int    `json:"exp"`
-	GrowPhases string `json:"grow_phases"`
-	Seasons    int    `json:"seasons"`
-	Fruit      struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	SeedID        int    `json:"seed_id"`
+	LandLevelNeed int    `json:"land_level_need"`
+	Exp           int    `json:"exp"`
+	GrowPhases    string `json:"grow_phases"`
+	Seasons       int    `json:"seasons"`
+	Fruit         struct {
 		ID    int `json:"id"`
 		Count int `json:"count"`
 	} `json:"fruit"`
@@ -31,14 +32,15 @@ type SeedShopExport struct {
 }
 
 type SeedShopEntry struct {
-	SeedID      int    `json:"seedId"`
-	PlantID     int    `json:"plantId"`
-	Name        string `json:"name"`
-	GrowTimeSec int    `json:"growTimeSec"`
-	Exp         int    `json:"exp"`
-	Price       int    `json:"price"`
-	FruitID     int    `json:"fruitId"`
-	FruitCount  int    `json:"fruitCount"`
+	SeedID        int    `json:"seedId"`
+	PlantID       int    `json:"plantId"`
+	Name          string `json:"name"`
+	RequiredLevel int    `json:"requiredLevel"`
+	GrowTimeSec   int    `json:"growTimeSec"`
+	Exp           int    `json:"exp"`
+	Price         int    `json:"price"`
+	FruitID       int    `json:"fruitId"`
+	FruitCount    int    `json:"fruitCount"`
 }
 
 type ItemInfo struct {
@@ -59,11 +61,6 @@ type phaseData struct {
 	season2AllEqual bool
 }
 
-const (
-	lands                   = 18
-	normalFertPlantsPer2Sec = 12
-	normalFertPlantSpeed    = normalFertPlantsPer2Sec / 2 // 6 lands/sec
-)
 
 func parseGrowPhases(gp string) []int {
 	var durations []int
@@ -178,6 +175,7 @@ type cropRow struct {
 	cropID           int
 	seedID           int
 	name             string
+	requiredLevel    int
 	seasons          int
 	growTime         string // display string
 	growTimeFert     string // display string with fert
@@ -188,6 +186,74 @@ type cropRow struct {
 	expPerMinFert    float64
 	goldPerMinNoFert float64
 	goldPerMinFert   float64
+}
+
+// calcCropRow computes yield metrics for a single crop.
+func calcCropRow(cropID, seedID int, name string, requiredLevel, seasons, growTimeSec, exp, fruitCount, fruitPrice int, pd *phaseData) cropRow {
+	var s1FertReduce, s2FertReduce, s2GrowTime int
+	if pd != nil {
+		s1FertReduce = pd.maxPhaseDur
+		if seasons >= 2 {
+			s2GrowTime = pd.season2Grow
+			s2FertReduce = pd.season2MaxPhase
+		}
+	}
+
+	// Season 1 with fert
+	s1GrowFert := growTimeSec - s1FertReduce
+	if s1GrowFert < 1 {
+		s1GrowFert = 1
+	}
+
+	// Total effective grow time (all seasons with fert)
+	totalGrowFert := s1GrowFert
+	totalExp := exp
+	if seasons >= 2 && s2GrowTime > 0 {
+		s2GrowFert := s2GrowTime - s2FertReduce
+		if s2GrowFert < 1 {
+			s2GrowFert = 1
+		}
+		totalGrowFert += s2GrowFert
+		totalExp += exp
+	}
+
+	// Total without fert
+	totalGrowNoFert := growTimeSec
+	totalExpNoFert := exp
+	if seasons >= 2 && s2GrowTime > 0 {
+		totalGrowNoFert += s2GrowTime
+		totalExpNoFert += exp
+	}
+
+	// Fruit value per cycle
+	totalFruitValue := float64(fruitCount) * float64(fruitPrice) * float64(seasons)
+
+	// Rates: per land per minute (pure growth time, no operation overhead)
+	cycleSecNoFert := float64(totalGrowNoFert)
+	cycleSecFert := float64(totalGrowFert)
+
+	expPerMinNoFert := float64(totalExpNoFert) / (cycleSecNoFert / 60.0)
+	expPerMinFert := float64(totalExp) / (cycleSecFert / 60.0)
+
+	goldPerMinNoFert := totalFruitValue / (cycleSecNoFert / 60.0)
+	goldPerMinFert := totalFruitValue / (cycleSecFert / 60.0)
+
+	return cropRow{
+		cropID:           cropID,
+		seedID:           seedID,
+		name:             name,
+		requiredLevel:    requiredLevel,
+		seasons:          seasons,
+		growTime:         formatTime(totalGrowNoFert),
+		growTimeFert:     formatTime(totalGrowFert),
+		harvestExp:       totalExp,
+		fruitCount:       fruitCount,
+		fruitPrice:       fruitPrice,
+		expPerMinNoFert:  math.Round(expPerMinNoFert*100) / 100,
+		expPerMinFert:    math.Round(expPerMinFert*100) / 100,
+		goldPerMinNoFert: math.Round(goldPerMinNoFert*100) / 100,
+		goldPerMinFert:   math.Round(goldPerMinFert*100) / 100,
+	}
 }
 
 func main() {
@@ -241,10 +307,12 @@ func main() {
 		}
 	}
 
-	plantSecondsNormalFert := float64(lands) / float64(normalFertPlantSpeed)
+	// Track processed plant IDs to avoid duplicates
+	processedPlants := make(map[int]bool)
 
 	var rows []cropRow
 
+	// Phase 1: Process seed shop entries
 	for _, s := range shopExport.Rows {
 		if s.SeedID <= 0 || s.GrowTimeSec <= 0 {
 			continue
@@ -274,72 +342,34 @@ func main() {
 			}
 		}
 
-		var s1FertReduce, s2FertReduce, s2GrowTime int
-		if pd != nil {
-			s1FertReduce = pd.maxPhaseDur
-			if seasons >= 2 {
-				s2GrowTime = pd.season2Grow
-				s2FertReduce = pd.season2MaxPhase
-			}
+		row := calcCropRow(s.PlantID, s.SeedID, s.Name, s.RequiredLevel, seasons,
+			s.GrowTimeSec, s.Exp, s.FruitCount, fruitPriceMap[s.FruitID], pd)
+		rows = append(rows, row)
+		processedPlants[s.PlantID] = true
+	}
+
+	// Phase 2: Process Plant.json entries not in seed shop
+	for i := range plants {
+		p := &plants[i]
+		if p.SeedID <= 0 || processedPlants[p.ID] {
+			continue
 		}
-
-		// Season 1 with fert
-		s1GrowFert := s.GrowTimeSec - s1FertReduce
-		if s1GrowFert < 1 {
-			s1GrowFert = 1
+		durations := parseGrowPhases(p.GrowPhases)
+		if len(durations) == 0 {
+			continue
 		}
-
-		// Total effective grow time (all seasons with fert)
-		totalGrowFert := s1GrowFert
-		totalExp := s.Exp
-		if seasons >= 2 && s2GrowTime > 0 {
-			s2GrowFert := s2GrowTime - s2FertReduce
-			if s2GrowFert < 1 {
-				s2GrowFert = 1
-			}
-			totalGrowFert += s2GrowFert
-			totalExp += s.Exp
+		seasons := p.Seasons
+		if seasons < 1 {
+			seasons = 1
 		}
-
-		// Total without fert
-		totalGrowNoFert := s.GrowTimeSec
-		totalExpNoFert := s.Exp
-		if seasons >= 2 && s2GrowTime > 0 {
-			totalGrowNoFert += s2GrowTime
-			totalExpNoFert += s.Exp
+		pd := buildPhaseData(durations, seasons, p.GrowPhases)
+		// Calculate total grow time from phases
+		growTimeSec := 0
+		for _, d := range durations {
+			growTimeSec += d
 		}
-
-		// Fruit value per cycle
-		fruitCount := s.FruitCount
-		fruitPrice := fruitPriceMap[s.FruitID]
-		totalFruitValue := float64(fruitCount) * float64(fruitPrice) * float64(seasons)
-
-		// Rates: per land per minute, then multiply by lands for farm-wide
-		cycleSecNoFert := float64(totalGrowNoFert) + plantSecondsNormalFert
-		cycleSecFert := float64(totalGrowFert) + plantSecondsNormalFert
-
-		expPerMinNoFert := float64(totalExpNoFert) / (cycleSecNoFert / 60.0)
-		expPerMinFert := float64(totalExp) / (cycleSecFert / 60.0)
-
-		goldPerMinNoFert := totalFruitValue / (cycleSecNoFert / 60.0)
-		goldPerMinFert := totalFruitValue / (cycleSecFert / 60.0)
-
-		row := cropRow{
-			cropID:           s.PlantID,
-			seedID:           s.SeedID,
-			name:             s.Name,
-			seasons:          seasons,
-			growTime:         formatTime(totalGrowNoFert),
-			growTimeFert:     formatTime(totalGrowFert),
-			harvestExp:       totalExp,
-			fruitCount:       fruitCount,
-			fruitPrice:       fruitPrice,
-			expPerMinNoFert:  math.Round(expPerMinNoFert*100) / 100,
-			expPerMinFert:    math.Round(expPerMinFert*100) / 100,
-			goldPerMinNoFert: math.Round(goldPerMinNoFert*100) / 100,
-			goldPerMinFert:   math.Round(goldPerMinFert*100) / 100,
-		}
-
+		row := calcCropRow(p.ID, p.SeedID, p.Name, p.LandLevelNeed, seasons,
+			growTimeSec, p.Exp, p.Fruit.Count, fruitPriceMap[p.Fruit.ID], pd)
 		rows = append(rows, row)
 	}
 
@@ -359,6 +389,7 @@ func main() {
 	fmt.Println("  cropId: number")
 	fmt.Println("  seedId: number")
 	fmt.Println("  name: string")
+	fmt.Println("  requiredLevel: number")
 	fmt.Println("  seasons: number")
 	fmt.Println("  growTime: string")
 	fmt.Println("  growTimeFert: string")
@@ -371,13 +402,13 @@ func main() {
 	fmt.Println("  goldPerMinFert: number")
 	fmt.Println("}")
 	fmt.Println("")
-	fmt.Println("// Auto-generated from gameConfig data (18 lands, normal fertilizer, optimal phase)")
+	fmt.Println("// Auto-generated from gameConfig data (pure growth time, normal fertilizer, optimal phase)")
 	fmt.Println("// Multi-season crops show combined exp/time across all seasons.")
 	fmt.Println("export const cropYieldData: CropYield[] = [")
 
 	for _, r := range rows {
-		fmt.Printf("  { rank: %d, cropId: %d, seedId: %d, name: '%s', seasons: %d, growTime: '%s', growTimeFert: '%s', harvestExp: %d, fruitCount: %d, fruitPrice: %d, expPerMinNoFert: %.2f, expPerMinFert: %.2f, goldPerMinNoFert: %.2f, goldPerMinFert: %.2f },\n",
-			r.rank, r.cropID, r.seedID, r.name, r.seasons, r.growTime, r.growTimeFert, r.harvestExp, r.fruitCount, r.fruitPrice, r.expPerMinNoFert, r.expPerMinFert, r.goldPerMinNoFert, r.goldPerMinFert)
+		fmt.Printf("  { rank: %d, cropId: %d, seedId: %d, name: '%s', requiredLevel: %d, seasons: %d, growTime: '%s', growTimeFert: '%s', harvestExp: %d, fruitCount: %d, fruitPrice: %d, expPerMinNoFert: %.2f, expPerMinFert: %.2f, goldPerMinNoFert: %.2f, goldPerMinFert: %.2f },\n",
+			r.rank, r.cropID, r.seedID, r.name, r.requiredLevel, r.seasons, r.growTime, r.growTimeFert, r.harvestExp, r.fruitCount, r.fruitPrice, r.expPerMinNoFert, r.expPerMinFert, r.goldPerMinNoFert, r.goldPerMinFert)
 	}
 
 	fmt.Println("]")
