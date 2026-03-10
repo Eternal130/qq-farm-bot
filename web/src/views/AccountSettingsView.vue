@@ -426,7 +426,7 @@ onMounted(() => {
                 </div>
                 <ElSwitch v-model="formData.prefer_bag_seeds" />
             </div>
-
+            </div>
             <div class="form-row">
               <div class="form-item">
                 <label class="form-label">出售作物</label>
