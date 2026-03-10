@@ -108,11 +108,18 @@ func (f *FarmWorker) checkFarm() {
 	status := f.analyzeLands(lands)
 
 	// Optimal fertilization: fertilize growing plants when in their longest phase
-	f.checkAndFertilize(lands)
+	fertilized := f.checkAndFertilize(lands)
 	unlockedCount := 0
 	for _, land := range lands {
 		if land.Unlocked {
 			unlockedCount++
+		}
+	}
+
+	// Re-fetch lands after fertilization so the cache reflects post-fertilize phases
+	if fertilized > 0 {
+		if freshReply, err := f.net.AllLands(); err == nil {
+			lands = freshReply.Lands
 		}
 	}
 
@@ -396,7 +403,7 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 
 // checkAndFertilize examines growing plants and fertilizes them when they're in their longest phase.
 // Normal fertilizer skips the current phase, so applying it during the longest phase saves the most time.
-func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
+func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) int {
 	nowSec := time.Now().Unix()
 	fertilizeCount := 0
 	landMap := buildLandMap(lands)
@@ -477,6 +484,7 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 		f.logger.Infof("施肥", "最优阶段施肥 %d 块地", fertilizeCount)
 		f.sc.RecordSimple(model.OpFertilize, int64(fertilizeCount))
 	}
+	return fertilizeCount
 }
 
 func (f *FarmWorker) fertilizeSingle(landID int64) bool {
@@ -497,7 +505,7 @@ func getCurrentPhase(phases []*plantpb.PlantPhaseInfo, nowSec int64) *plantpb.Pl
 	var bestBT int64
 	for _, p := range phases {
 		bt := toTimeSec(p.BeginTime)
-		if bt > bestBT && bt <= nowSec {
+		if bt >= bestBT && bt <= nowSec {
 			bestBT = bt
 			best = p
 		}
