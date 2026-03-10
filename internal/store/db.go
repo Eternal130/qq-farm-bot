@@ -40,6 +40,7 @@ const accountColumns = `id, user_id, name, platform, code, auto_start,
 	auto_use_fertilizer, auto_buy_fertilizer, fertilizer_target_count, fertilizer_buy_daily_limit,
 	enable_anti_detection,
 	prefer_bag_seeds,
+	planting_strategy,
 	api_key,
 	created_at, updated_at`
 
@@ -127,6 +128,8 @@ _, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN api_key TEXT NOT NULL DEFAULT 
 	_, _ = s.db.Exec(`ALTER TABLE op_stats ADD COLUMN detail TEXT NOT NULL DEFAULT ''`)
 	// Migration: add prefer_bag_seeds column
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN prefer_bag_seeds INTEGER NOT NULL DEFAULT 0`)
+	// Migration: add planting_strategy column (JSON-encoded composable rules)
+	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN planting_strategy TEXT NOT NULL DEFAULT ''`)
 
 	return err
 }
@@ -150,6 +153,7 @@ func scanAccount(scanner interface {
 		&autoUseFert, &autoBuyFert, &a.FertilizerTargetCount, &a.FertilizerBuyDailyLimit,
 		&enableAntiDetection,
 		&preferBagSeeds,
+		&a.PlantingStrategy,
 		&a.APIKey,
 		&a.CreatedAt, &a.UpdatedAt,
 	); err != nil {
@@ -243,9 +247,10 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		auto_use_fertilizer, auto_buy_fertilizer, fertilizer_target_count, fertilizer_buy_daily_limit,
 		enable_anti_detection,
 		prefer_bag_seeds,
+		planting_strategy,
 		api_key,
 		created_at, updated_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		a.UserID, a.Name, a.Platform, a.Code, boolToInt(a.AutoStart),
 		a.FarmInterval, a.FriendInterval, boolToInt(a.EnableSteal), boolToInt(a.ForceLowest),
 		boolToInt(a.EnableHarvest), boolToInt(a.EnablePlant), boolToInt(a.EnableSell),
@@ -257,6 +262,7 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		a.FertilizerTargetCount, a.FertilizerBuyDailyLimit,
 		boolToInt(a.EnableAntiDetection),
 		boolToInt(a.PreferBagSeeds),
+		a.PlantingStrategy,
 		a.APIKey,
 		now, now)
 	if err != nil {
@@ -277,6 +283,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		auto_use_fertilizer=?, auto_buy_fertilizer=?, fertilizer_target_count=?, fertilizer_buy_daily_limit=?,
 		enable_anti_detection=?,
 		prefer_bag_seeds=?,
+		planting_strategy=?,
 		api_key=?,
 		updated_at=?
 	WHERE id=?`,
@@ -291,6 +298,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		a.FertilizerTargetCount, a.FertilizerBuyDailyLimit,
 		boolToInt(a.EnableAntiDetection),
 		boolToInt(a.PreferBagSeeds),
+		a.PlantingStrategy,
 		a.APIKey,
 		a.UpdatedAt, a.ID)
 	return err

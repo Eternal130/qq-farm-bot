@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   accountApi,
@@ -22,7 +22,7 @@ import {
   ElEmpty,
   ElIcon
 } from 'element-plus'
-import { Setting } from '@element-plus/icons-vue'
+import { Setting, ArrowUp, ArrowDown, Delete } from '@element-plus/icons-vue'
 
 const route = useRoute()
 
@@ -51,7 +51,8 @@ const formData = ref({
   auto_use_fertilizer: false,
   auto_buy_fertilizer: false,
   fertilizer_target_count: 0,
-  fertilizer_buy_daily_limit: 0
+  fertilizer_buy_daily_limit: 0,
+  planting_strategy: ''
 })
 
 // Parse comma-separated string to number array
@@ -64,6 +65,183 @@ const parseIds = (ids: string): number[] => {
 const joinIds = (ids: number[]): string => {
   return ids.join(',')
 }
+
+// --- Planting Strategy Types ---
+interface StrategyRule {
+  type: 'growth_time' | 'exp_efficiency' | 'gold_efficiency' | 'exp_per_harvest' | 'price' | 'seasons' | 'level'
+  operator?: 'eq' | 'lte' | 'gte' | 'lt' | 'gt'
+  value?: number
+  order?: 'asc' | 'desc'
+}
+
+interface PlantingStrategy {
+  rules: StrategyRule[]
+}
+
+// Strategy rules state
+const strategyRules = ref<StrategyRule[]>([])
+const activePreset = ref<string | null>(null)
+
+// Preset strategies
+const presetStrategies: Record<string, { label: string; strategy: PlantingStrategy }> = {
+  maxExp: {
+    label: '最高经验效率',
+    strategy: { rules: [{ type: 'exp_efficiency', order: 'desc' }] }
+  },
+  fourHour: {
+    label: '4小时作物',
+    strategy: { rules: [{ type: 'growth_time', operator: 'eq', value: 14400 }, { type: 'exp_efficiency', order: 'desc' }] }
+  },
+  eightHour: {
+    label: '8小时作物',
+    strategy: { rules: [{ type: 'growth_time', operator: 'eq', value: 28800 }, { type: 'exp_efficiency', order: 'desc' }] }
+  },
+  minPrice: {
+    label: '最低价格',
+    strategy: { rules: [{ type: 'price', order: 'asc' }] }
+  },
+  highExpShortCycle: {
+    label: '高经验短周期',
+    strategy: { rules: [{ type: 'growth_time', operator: 'lte', value: 14400 }, { type: 'exp_efficiency', order: 'desc' }] }
+  },
+  multiSeason: {
+    label: '多季作物优先',
+    strategy: { rules: [{ type: 'seasons', operator: 'gte', value: 2 }, { type: 'exp_efficiency', order: 'desc' }] }
+  }
+}
+
+// Rule type labels
+const ruleTypeLabels: Record<StrategyRule['type'], string> = {
+  growth_time: '生长时长',
+  exp_efficiency: '经验效率',
+  gold_efficiency: '金币性价比',
+  exp_per_harvest: '单次经验',
+  price: '种子价格',
+  seasons: '季节数',
+  level: '等级需求'
+}
+
+// Operator labels
+const operatorLabels: Record<NonNullable<StrategyRule['operator']>, string> = {
+  eq: '=',
+  lte: '\u2264',
+  gte: '\u2265',
+  lt: '<',
+  gt: '>'
+}
+
+// Order labels
+const orderLabels: Record<NonNullable<StrategyRule['order']>, string> = {
+  asc: '\u5347\u5e8f',
+  desc: '\u964d\u5e8f'
+}
+
+// Growth time helper values
+const growthTimeHelpers = [
+  { label: '1h', value: 3600 },
+  { label: '2h', value: 7200 },
+  { label: '4h', value: 14400 },
+  { label: '8h', value: 28800 },
+  { label: '12h', value: 43200 },
+  { label: '24h', value: 86400 }
+]
+
+// Parse strategy JSON to rules
+const parseStrategy = (strategyJson: string): StrategyRule[] => {
+  if (!strategyJson || strategyJson.trim() === '') return []
+  try {
+    const parsed: PlantingStrategy = JSON.parse(strategyJson)
+    return Array.isArray(parsed.rules) ? parsed.rules : []
+  } catch {
+    return []
+  }
+}
+
+// Serialize rules to strategy JSON
+const serializeStrategy = (rules: StrategyRule[]): string => {
+  if (rules.length === 0) return ''
+  return JSON.stringify({ rules })
+}
+
+// Apply preset strategy
+const applyPreset = (presetKey: string) => {
+  const preset = presetStrategies[presetKey]
+  if (preset) {
+    strategyRules.value = JSON.parse(JSON.stringify(preset.strategy.rules))
+    activePreset.value = presetKey
+    formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+  }
+}
+
+// Add new rule
+const addRule = () => {
+  strategyRules.value.push({
+    type: 'exp_efficiency'
+  })
+  activePreset.value = null
+  formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+}
+
+// Delete rule
+const deleteRule = (index: number) => {
+  strategyRules.value.splice(index, 1)
+  activePreset.value = null
+  formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+}
+
+// Move rule up
+const moveRuleUp = (index: number) => {
+  if (index > 0) {
+    const temp = strategyRules.value[index]
+    strategyRules.value[index] = strategyRules.value[index - 1]
+    strategyRules.value[index - 1] = temp
+    activePreset.value = null
+    formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+  }
+}
+
+// Move rule down
+const moveRuleDown = (index: number) => {
+  if (index < strategyRules.value.length - 1) {
+    const temp = strategyRules.value[index]
+    strategyRules.value[index] = strategyRules.value[index + 1]
+    strategyRules.value[index + 1] = temp
+    activePreset.value = null
+    formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+  }
+}
+
+// Generate strategy description
+const strategyDescription = computed(() => {
+  if (strategyRules.value.length === 0) {
+    return '未配置策略，将使用默认种植逻辑'
+  }
+  const parts: string[] = []
+  for (const rule of strategyRules.value) {
+    const typeLabel = ruleTypeLabels[rule.type]
+    let part = typeLabel
+    if (rule.operator && rule.value !== undefined) {
+      const opLabel = operatorLabels[rule.operator]
+      let valueDisplay = rule.value.toString()
+      if (rule.type === 'growth_time') {
+        const hours = rule.value / 3600
+        valueDisplay = hours >= 1 ? `${hours}小时` : `${rule.value / 60}分钟`
+      }
+      part = `筛选${typeLabel}${opLabel}${valueDisplay}`
+    }
+    if (rule.order) {
+      const orderLabel = orderLabels[rule.order]
+      part = `按${typeLabel}${orderLabel}排序`
+    }
+    parts.push(part)
+  }
+  return parts.join(' \u2192 ')
+})
+
+// Watch strategyRules to update formData
+watch(strategyRules, () => {
+  formData.value.planting_strategy = serializeStrategy(strategyRules.value)
+}, { deep: true })
 
 // Fetch account and crops data
 const fetchData = async () => {
@@ -89,8 +267,11 @@ const fetchData = async () => {
         auto_use_fertilizer: found.auto_use_fertilizer,
         auto_buy_fertilizer: found.auto_buy_fertilizer,
         fertilizer_target_count: found.fertilizer_target_count,
-        fertilizer_buy_daily_limit: found.fertilizer_buy_daily_limit
+        fertilizer_buy_daily_limit: found.fertilizer_buy_daily_limit,
+        planting_strategy: found.planting_strategy || ''
       }
+      // Parse planting strategy into rules
+      strategyRules.value = parseStrategy(found.planting_strategy || '')
     }
 
     // Fetch crops
@@ -122,7 +303,8 @@ const saveConfig = async () => {
       auto_use_fertilizer: formData.value.auto_use_fertilizer,
       auto_buy_fertilizer: formData.value.auto_buy_fertilizer,
       fertilizer_target_count: formData.value.fertilizer_target_count,
-      fertilizer_buy_daily_limit: formData.value.fertilizer_buy_daily_limit
+      fertilizer_buy_daily_limit: formData.value.fertilizer_buy_daily_limit,
+      planting_strategy: formData.value.planting_strategy
     } as Parameters<typeof accountApi.update>[1])
     ElMessage.success('配置已保存')
   } catch (error: unknown) {
@@ -272,6 +454,146 @@ onMounted(() => {
                   />
                 </ElSelect>
               </div>
+            </div>
+
+          </div>
+
+          <!-- Planting Strategy -->
+          <div class="form-section">
+            <div class="section-title">种植策略</div>
+
+            <!-- Preset Strategies -->
+            <div class="preset-buttons">
+              <ElButton
+                v-for="(preset, key) in presetStrategies"
+                :key="key"
+                :type="activePreset === key ? 'primary' : 'default'"
+                size="small"
+                plain
+                @click="applyPreset(key)"
+              >
+                {{ preset.label }}
+              </ElButton>
+            </div>
+
+            <!-- Strategy Description -->
+            <div class="strategy-description">
+              <span class="description-label">当前策略：</span>
+              <span class="description-text">{{ strategyDescription }}</span>
+            </div>
+
+            <!-- Rules List -->
+            <div class="rules-list">
+              <div
+                v-for="(rule, index) in strategyRules"
+                :key="index"
+                class="rule-row"
+              >
+                <!-- Drag Handle & Order Controls -->
+                <div class="rule-order-controls">
+                  <ElButton
+                    :disabled="index === 0"
+                    size="small"
+                    text
+                    @click="moveRuleUp(index)"
+                  >
+                    <ElIcon><ArrowUp /></ElIcon>
+                  </ElButton>
+                  <ElButton
+                    :disabled="index === strategyRules.length - 1"
+                    size="small"
+                    text
+                    @click="moveRuleDown(index)"
+                  >
+                    <ElIcon><ArrowDown /></ElIcon>
+                  </ElButton>
+                </div>
+
+                <!-- Rule Type -->
+                <ElSelect
+                  v-model="rule.type"
+                  placeholder="选择类型"
+                  size="small"
+                  class="rule-type-select"
+                >
+                  <ElOption
+                    v-for="(label, type) in ruleTypeLabels"
+                    :key="type"
+                    :value="type"
+                    :label="label"
+                  />
+                </ElSelect>
+
+                <!-- Operator -->
+                <ElSelect
+                  v-model="rule.operator"
+                  placeholder="筛选"
+                  size="small"
+                  clearable
+                  class="rule-operator-select"
+                >
+                  <ElOption
+                    v-for="(label, op) in operatorLabels"
+                    :key="op"
+                    :value="op"
+                    :label="label"
+                  />
+                </ElSelect>
+
+                <!-- Value Input -->
+                <ElInputNumber
+                  v-if="rule.operator"
+                  v-model="rule.value"
+                  :min="0"
+                  size="small"
+                  :controls="false"
+                  class="rule-value-input"
+                />
+
+                <!-- Growth Time Helper -->
+                <div v-if="rule.operator && rule.type === 'growth_time'" class="growth-time-helpers">
+                  <span
+                    v-for="helper in growthTimeHelpers"
+                    :key="helper.value"
+                    class="helper-tag"
+                    @click="rule.value = helper.value"
+                  >
+                    {{ helper.label }}
+                  </span>
+                </div>
+
+                <!-- Order Direction -->
+                <ElSelect
+                  v-model="rule.order"
+                  placeholder="排序"
+                  size="small"
+                  clearable
+                  class="rule-order-select"
+                >
+                  <ElOption value="asc" label="升序" />
+                  <ElOption value="desc" label="降序" />
+                </ElSelect>
+
+                <!-- Delete Button -->
+                <ElButton
+                  type="danger"
+                  size="small"
+                  text
+                  @click="deleteRule(index)"
+                >
+                  <ElIcon><Delete /></ElIcon>
+                </ElButton>
+              </div>
+
+              <!-- Add Rule Button -->
+              <ElButton
+                size="small"
+                plain
+                class="add-rule-btn"
+                @click="addRule"
+              >
+                添加规则
+              </ElButton>
             </div>
           </div>
 
@@ -624,4 +946,191 @@ onMounted(() => {
 .ranking-table :deep(.el-scrollbar__wrap) {
     overflow-x: hidden;
  }
+
+/* --- Planting Strategy Styles --- */
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.preset-buttons :deep(.el-button) {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.preset-buttons :deep(.el-button:hover) {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.preset-buttons :deep(.el-button.is-plain.el-button--primary) {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.strategy-description {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.description-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.description-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.rule-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+    flex-wrap: wrap;
+}
+
+.rule-order-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.rule-order-controls :deep(.el-button) {
+    padding: 4px;
+    color: var(--text-muted);
+}
+
+.rule-order-controls :deep(.el-button:hover:not(:disabled)) {
+    color: var(--primary);
+}
+
+.rule-order-controls :deep(.el-button:disabled) {
+    color: var(--text-muted);
+    opacity: 0.4;
+}
+
+.rule-type-select {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.rule-operator-select {
+    width: 70px;
+    flex-shrink: 0;
+}
+
+.rule-value-input {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.rule-order-select {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+/* Dark theme for rule selects */
+.rule-row :deep(.el-select .el-input__wrapper) {
+    background-color: var(--bg-card);
+    border-color: var(--border-light);
+    box-shadow: none;
+}
+
+.rule-row :deep(.el-select .el-input__inner) {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+/* Dark theme for rule input number */
+.rule-row :deep(.el-input-number) {
+    width: 100%;
+}
+
+.rule-row :deep(.el-input-number .el-input__wrapper) {
+    background-color: var(--bg-card);
+    border-color: var(--border-light);
+    box-shadow: none;
+}
+
+.rule-row :deep(.el-input-number .el-input__inner) {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.rule-row :deep(.el-input-number .el-input-number__decrease),
+.rule-row :deep(.el-input-number .el-input-number__increase) {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-light);
+    color: var(--text-secondary);
+}
+
+.growth-time-helpers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.helper-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.helper-tag:hover {
+    color: var(--primary);
+    background-color: var(--primary-bg);
+}
+
+.rule-row :deep(.el-button.is-text) {
+    padding: 4px 8px;
+}
+
+.rule-row :deep(.el-button.is-text.el-button--danger) {
+    color: var(--danger);
+}
+
+.rule-row :deep(.el-button.is-text.el-button--danger:hover) {
+    color: var(--danger-hover);
+}
+
+.add-rule-btn {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-light);
+    color: var(--text-secondary);
+    border-style: dashed;
+}
+
+.add-rule-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
 </style>

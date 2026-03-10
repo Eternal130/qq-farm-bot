@@ -56,6 +56,7 @@ const formData = ref<CreateAccountRequest>({
   steal_crop_ids: '',
   enable_anti_detection: false,
   prefer_bag_seeds: false,
+  planting_strategy: '',
   api_key: ''
 })
 
@@ -160,6 +161,7 @@ const openAddDialog = () => {
     steal_crop_ids: '',
     enable_anti_detection: false,
     prefer_bag_seeds: false,
+    planting_strategy: '',
     api_key: ''
   }
   dialogVisible.value = true
@@ -191,6 +193,7 @@ const openEditDialog = (row: Account) => {
     steal_crop_ids: row.steal_crop_ids,
     enable_anti_detection: row.enable_anti_detection,
     prefer_bag_seeds: row.prefer_bag_seeds,
+    planting_strategy: row.planting_strategy || '',
     api_key: row.api_key || ''
   }
   dialogVisible.value = true

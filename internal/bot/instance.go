@@ -46,6 +46,8 @@ type BotConfig struct {
 	PreferBagSeeds bool // prioritize planting seeds from bag
 	// Anti-detection
 	EnableAntiDetection bool
+	// Planting strategy
+	PlantingStrategy string
 }
 
 const (
@@ -115,6 +117,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		SellCropIDs:  account.SellCropIDs,
 		StealCropIDs: account.StealCropIDs,
 		PreferBagSeeds: account.PreferBagSeeds,
+		PlantingStrategy: account.PlantingStrategy,
 
 		EnableAntiDetection: account.EnableAntiDetection,
 	}

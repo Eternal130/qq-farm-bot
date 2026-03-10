@@ -697,3 +697,16 @@ func ParseCropIDs(s string) map[int]bool {
 	}
 	return result
 }
+
+// GetSeedYieldRows returns a copy of the seed yield data for strategy evaluation.
+// Filtered to seeds the player can buy (level check done by caller).
+func (gc *GameConfig) GetSeedYieldRows() []SeedYieldRow {
+	if gc == nil {
+		return nil
+	}
+	gc.mu.RLock()
+	defer gc.mu.RUnlock()
+	result := make([]SeedYieldRow, len(gc.seedYieldCache))
+	copy(result, gc.seedYieldCache)
+	return result
+}

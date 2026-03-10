@@ -93,6 +93,8 @@ export interface Account {
   enable_anti_detection: boolean
   // Planting preference
   prefer_bag_seeds: boolean
+  // Planting strategy (JSON-encoded composable rules)
+  planting_strategy: string
   // External API
   api_key: string
   // Runtime status
@@ -131,6 +133,8 @@ export interface CreateAccountRequest {
   enable_anti_detection: boolean
   // Planting preference
   prefer_bag_seeds: boolean
+  // Planting strategy (JSON-encoded composable rules)
+  planting_strategy: string
   // External API
   api_key?: string
 }

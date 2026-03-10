@@ -29,6 +29,13 @@ type FarmWorker struct {
 	reservedForBigSeed map[int64]bool // lands reserved for 2×2 seed planting
 }
 
+// shopSeedCandidate represents an available seed from the shop with its level requirement.
+type shopSeedCandidate struct {
+	goods         *shoppb.GoodsInfo
+	requiredLevel int64
+}
+
+
 func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache, sc *StatsCollector) *FarmWorker {
 	return &FarmWorker{
 		net:        net,
@@ -859,11 +866,7 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 
 	_, level, _, _, _ := f.net.state.Get()
 
-	type candidate struct {
-		goods         *shoppb.GoodsInfo
-		requiredLevel int64
-	}
-	var available []candidate
+	var available []shopSeedCandidate
 
 	for _, goods := range reply.GoodsList {
 		if !goods.Unlocked {
@@ -886,7 +889,7 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 		if goods.LimitCount > 0 && goods.BoughtNum >= goods.LimitCount {
 			continue
 		}
-		available = append(available, candidate{goods: goods, requiredLevel: reqLevel})
+		available = append(available, shopSeedCandidate{goods: goods, requiredLevel: reqLevel})
 	}
 
 	if len(available) == 0 {
@@ -904,6 +907,15 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 			}
 			f.logger.Warnf("商店", "指定作物(ID:%d)的种子不可购买，使用自动选择", f.cfg.PlantCropID)
 		}
+	}
+	// Strategy-based selection: composable rules pipeline
+	strategy := ParsePlantingStrategy(f.cfg.PlantingStrategy)
+	if strategy != nil {
+		result := f.selectSeedByStrategy(strategy, available, landsCount)
+		if result != nil {
+			return result, nil
+		}
+		f.logger.Warnf("策略", "策略筛选无匹配作物，回退默认选择")
 	}
 
 	if f.cfg.ForceLowest {
@@ -984,4 +996,67 @@ func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, 
 		}
 	}
 	return
+}
+
+// selectSeedByStrategy builds SeedCandidates from shop data + yield cache,
+// applies the composable strategy rules, and returns the best matching shop goods.
+func (f *FarmWorker) selectSeedByStrategy(strategy *PlantingStrategyConfig, available []shopSeedCandidate, landsCount int) *shoppb.GoodsInfo {
+	if f.gc == nil {
+		return nil
+	}
+
+	// Build yield lookup from game config
+	yieldRows := f.gc.GetSeedYieldRows()
+	yieldMap := make(map[int]*SeedYieldRow, len(yieldRows))
+	for i := range yieldRows {
+		yieldMap[yieldRows[i].SeedID] = &yieldRows[i]
+	}
+
+	// Build SeedCandidates from available shop goods enriched with yield data
+	var candidates []SeedCandidate
+	for _, c := range available {
+		seedID := int(c.goods.ItemId)
+		sc := SeedCandidate{
+			SeedID:        seedID,
+			GoodsID:       c.goods.Id,
+			Name:          f.gc.GetPlantNameBySeedID(seedID),
+			RequiredLevel: int(c.requiredLevel),
+			Price:         int(c.goods.Price),
+		}
+
+		// Enrich with yield data if available
+		if yr, ok := yieldMap[seedID]; ok {
+			sc.ExpPerHarvest = yr.ExpHarvest
+			sc.Seasons = yr.Seasons
+			sc.GrowTimeSec = yr.GrowTimeSec
+			sc.ExpEfficiency = yr.FarmExpPerHourNormal
+			sc.GrowTimeNormalFert = yr.GrowTimeNormalFert
+			if yr.Price > 0 {
+				sc.GoldEfficiency = float64(yr.ExpHarvest*yr.Seasons) / float64(yr.Price)
+			}
+		}
+
+		candidates = append(candidates, sc)
+	}
+
+	if len(candidates) == 0 {
+		return nil
+	}
+
+	// Apply strategy pipeline
+	result := ApplyStrategy(strategy, candidates)
+	if len(result) == 0 {
+		return nil
+	}
+
+	// Find the shop goods matching the top candidate
+	topSeedID := result[0].SeedID
+	for _, c := range available {
+		if int(c.goods.ItemId) == topSeedID {
+			desc := FormatStrategyDescription(strategy)
+			f.logger.Infof("策略", "%s → %s", desc, result[0].Name)
+			return c.goods
+		}
+	}
+	return nil
 }

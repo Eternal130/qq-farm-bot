@@ -45,6 +45,9 @@ type Account struct {
 	// Planting preference
 	PreferBagSeeds bool `json:"prefer_bag_seeds"` // prioritize planting seeds from bag
 
+	// Planting strategy (JSON-encoded composable rules)
+	PlantingStrategy string `json:"planting_strategy"`
+
 	// External API
 	APIKey string `json:"api_key"`
 	CreatedAt time.Time `json:"created_at"`
