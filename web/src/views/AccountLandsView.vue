@@ -14,7 +14,8 @@ import {
 } from 'element-plus'
 import { 
   Refresh, 
-  Lock
+  Lock,
+  Download
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -101,6 +102,35 @@ const fetchLands = async () => {
   }
 }
 
+// Export lands data as CSV
+const exportLands = () => {
+  if (lands.value.length === 0) return
+  
+  const header = ['土地ID', '土地等级', '是否解锁', '作物名称', '作物ID', '生长阶段']
+  const rows = lands.value.map(land => [
+    land.id,
+    getLandLevelName(land.level),
+    land.unlocked ? '是' : '否',
+    land.crop_name || '',
+    land.crop_id ?? '',
+    land.phase || ''
+  ])
+  
+  const csvContent = [header, ...rows]
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  
+  // Add BOM for Excel Chinese compatibility
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+  link.href = url
+  link.download = `${accountName.value || '账号'}-土地信息-${timestamp}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 // Lifecycle
 onMounted(() => {
   fetchLands()
@@ -145,16 +175,26 @@ onUnmounted(() => {
         </div>
       </div>
       
-      <ElButton 
-        type="primary" 
-        :icon="Refresh" 
-        :loading="isLoading"
-        @click="fetchLands"
-        class="refresh-btn"
-      >
-        刷新
-      </ElButton>
-    </div>
+      <div class="header-actions">
+        <ElButton
+          :icon="Download"
+          :disabled="lands.length === 0"
+          @click="exportLands"
+          class="export-btn"
+        >
+          导出
+        </ElButton>
+        <ElButton 
+          type="primary" 
+          :icon="Refresh" 
+          :loading="isLoading"
+          @click="fetchLands"
+          class="refresh-btn"
+        >
+          刷新
+        </ElButton>
+      </div>
+      </div>
     
     <!-- Title section -->
     <div class="title-section">
@@ -276,6 +316,16 @@ onUnmounted(() => {
 .stat-badge.empty .badge-count { color: var(--text-muted); }
 .stat-badge.attention .badge-count { color: var(--warning); }
 .stat-badge.locked .badge-count { color: var(--danger); }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.export-btn {
+  flex-shrink: 0;
+}
 
 .refresh-btn {
   flex-shrink: 0;
@@ -433,8 +483,12 @@ onUnmounted(() => {
     justify-content: center;
   }
   
-  .refresh-btn {
+  .header-actions {
     width: 100%;
+  }
+  
+  .header-actions .el-button {
+    flex: 1;
   }
   
   .land-grid {
