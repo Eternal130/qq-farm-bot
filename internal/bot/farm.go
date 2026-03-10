@@ -504,6 +504,20 @@ func isOccupiedSlaveLand(land *plantpb.LandInfo, landMap map[int64]*plantpb.Land
 	if master.Plant == nil || len(master.Plant.Phases) == 0 {
 		return false
 	}
+	// Validate that this land ID is listed in the master's slave land IDs.
+	// This matches the reference implementation's getLinkedMasterLand check.
+	if len(master.SlaveLandIds) > 0 {
+		found := false
+		for _, sid := range master.SlaveLandIds {
+			if sid == land.Id {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
 	return true
 }
 
@@ -539,11 +553,35 @@ func (f *FarmWorker) insecticide(landIDs []int64) error {
 	return err
 }
 
-func (f *FarmWorker) removePlant(landIDs []int64) error {
+// removePlantAndCollectFreed removes dead/withered plants and returns all freed
+// land IDs (including slave lands for multi-tile crops) by parsing the server reply.
+func (f *FarmWorker) removePlantAndCollectFreed(landIDs []int64) ([]int64, error) {
 	req := &plantpb.RemovePlantRequest{LandIds: landIDs}
 	body, _ := proto.Marshal(req)
-	_, err := f.net.SendRequest("gamepb.plantpb.PlantService", "RemovePlant", body)
-	return err
+	replyBody, err := f.net.SendRequest("gamepb.plantpb.PlantService", "RemovePlant", body)
+	if err != nil {
+		return landIDs, err
+	}
+
+	// Parse reply to find all freed land IDs (including slaves of multi-tile crops)
+	reply := &plantpb.RemovePlantReply{}
+	proto.Unmarshal(replyBody, reply)
+
+	seen := make(map[int64]bool, len(landIDs))
+	for _, id := range landIDs {
+		seen[id] = true
+	}
+	for _, land := range reply.Land {
+		if !seen[land.Id] {
+			seen[land.Id] = true
+		}
+	}
+
+	freed := make([]int64, 0, len(seen))
+	for id := range seen {
+		freed = append(freed, id)
+	}
+	return freed, nil
 }
 
 func (f *FarmWorker) fertilize(landIDs []int64) int {
@@ -566,12 +604,23 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int,
 		delete(f.fertilized, id)
 	}
 
-	// Remove dead plants
+	// Remove dead plants and collect all freed land IDs (including slaves of size-2 crops)
 	if len(deadLands) > 0 {
-		if err := f.removePlant(deadLands); err == nil {
-			f.logger.Infof("铲除", "已铲除 %d 块", len(deadLands))
+		freedIDs, err := f.removePlantAndCollectFreed(deadLands)
+		if err == nil {
+			slaveCount := len(freedIDs) - len(deadLands)
+			if slaveCount > 0 {
+				f.logger.Infof("铲除", "已铲除 %d 块 (含大作物附属地 %d 块)", len(deadLands), slaveCount)
+			} else {
+				f.logger.Infof("铲除", "已铲除 %d 块", len(deadLands))
+			}
+			for _, id := range freedIDs {
+				delete(f.fertilized, id)
+			}
+			toLant = append(toLant, freedIDs...)
+		} else {
+			toLant = append(toLant, deadLands...)
 		}
-		toLant = append(toLant, deadLands...)
 	}
 
 	if len(toLant) == 0 {
