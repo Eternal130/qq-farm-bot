@@ -52,7 +52,8 @@ const formData = ref({
   auto_buy_fertilizer: false,
   fertilizer_target_count: 0,
   fertilizer_buy_daily_limit: 0,
-  planting_strategy: ''
+  planting_strategy: '',
+  prefer_bag_seeds: false
 })
 
 // Parse comma-separated string to number array
@@ -268,7 +269,8 @@ const fetchData = async () => {
         auto_buy_fertilizer: found.auto_buy_fertilizer,
         fertilizer_target_count: found.fertilizer_target_count,
         fertilizer_buy_daily_limit: found.fertilizer_buy_daily_limit,
-        planting_strategy: found.planting_strategy || ''
+        planting_strategy: found.planting_strategy || '',
+        prefer_bag_seeds: found.prefer_bag_seeds
       }
       // Parse planting strategy into rules
       strategyRules.value = parseStrategy(found.planting_strategy || '')
@@ -304,7 +306,8 @@ const saveConfig = async () => {
       auto_buy_fertilizer: formData.value.auto_buy_fertilizer,
       fertilizer_target_count: formData.value.fertilizer_target_count,
       fertilizer_buy_daily_limit: formData.value.fertilizer_buy_daily_limit,
-      planting_strategy: formData.value.planting_strategy
+      planting_strategy: formData.value.planting_strategy,
+      prefer_bag_seeds: formData.value.prefer_bag_seeds
     } as Parameters<typeof accountApi.update>[1])
     ElMessage.success('配置已保存')
   } catch (error: unknown) {
@@ -413,6 +416,15 @@ onMounted(() => {
                 <label class="form-label">强制最低级</label>
                 <ElSwitch v-model="formData.force_lowest" />
               </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-item switch-item">
+                <div class="label-with-desc">
+                  <label class="form-label">优先背包种子</label>
+                  <span class="form-desc">优先种植背包中已有的种子，用完再购买</span>
+                </div>
+                <ElSwitch v-model="formData.prefer_bag_seeds" />
             </div>
 
             <div class="form-row">

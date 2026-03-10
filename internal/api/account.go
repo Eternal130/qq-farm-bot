@@ -201,9 +201,11 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			// Anti-detection
 			EnableAntiDetection *bool   `json:"enable_anti_detection"`
 			// Planting preference
-			PreferBagSeeds      *bool   `json:"prefer_bag_seeds"`
+			PreferBagSeeds   *bool   `json:"prefer_bag_seeds"`
+			// Planting strategy (JSON-encoded composable rules)
+			PlantingStrategy *string `json:"planting_strategy"`
 			// External API
-			APIKey              *string `json:"api_key"`
+			APIKey           *string `json:"api_key"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -290,6 +292,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.PreferBagSeeds != nil {
 			account.PreferBagSeeds = *req.PreferBagSeeds
+		}
+		if req.PlantingStrategy != nil {
+			account.PlantingStrategy = *req.PlantingStrategy
 		}
 		if req.APIKey != nil {
 			account.APIKey = *req.APIKey
