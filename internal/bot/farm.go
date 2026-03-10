@@ -406,25 +406,33 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) {
 
 		phaseIdx := int(currentPhase.Phase) - 1
 
-		var targetMaxIdx int
+		var phaseDurations []int
+		var maxDuration int
 		var allEqual bool
-		var totalPhases int
 
 		if season >= 2 && pd.Season2Phases != nil {
-			targetMaxIdx = pd.Season2MaxPhaseIndex
+			// Remap absolute phase index to season 2 relative index.
+			// Season 2 reuses the last N growth phases; offset = how many
+			// season-1-only phases precede the shared ones.
+			s2Offset := len(pd.PhaseDurations) - len(pd.Season2Phases)
+			phaseIdx -= s2Offset
+			phaseDurations = pd.Season2Phases
+			maxDuration = pd.Season2MaxPhase
 			allEqual = pd.Season2AllEqual
-			totalPhases = len(pd.Season2Phases)
 		} else {
-			targetMaxIdx = pd.MaxPhaseIndex
+			phaseDurations = pd.PhaseDurations
+			maxDuration = pd.MaxPhaseDuration
 			allEqual = pd.AllPhasesEqual
-			totalPhases = len(pd.PhaseDurations)
 		}
 
-		if phaseIdx < 0 || phaseIdx >= totalPhases {
+		if phaseIdx < 0 || phaseIdx >= len(phaseDurations) {
 			continue
 		}
 
-		if allEqual || phaseIdx == targetMaxIdx {
+		// Fertilize when in the longest phase (or any phase if all equal).
+		// Compare duration instead of index so we catch ALL phases that
+		// share the maximum duration, not just the first one.
+		if allEqual || phaseDurations[phaseIdx] >= maxDuration {
 			if f.fertilizeSingle(landID) {
 				f.fertilized[landID] = true
 				fertilizeCount++
