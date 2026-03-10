@@ -167,7 +167,7 @@ func (f *FarmWorker) handleBigSeedPlanting(emptyLands []int64, allLands []*plant
 			return candidates[i].level > candidates[j].level
 		})
 
-		reserveCount := seedsLeft * 4
+		reserveCount := seedsLeft
 		if reserveCount > len(candidates) {
 			reserveCount = len(candidates)
 		}
