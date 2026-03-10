@@ -452,11 +452,17 @@ func getCurrentPhase(phases []*plantpb.PlantPhaseInfo, nowSec int64) *plantpb.Pl
 	if len(phases) == 0 {
 		return nil
 	}
-	for i := len(phases) - 1; i >= 0; i-- {
-		bt := toTimeSec(phases[i].BeginTime)
-		if bt > 0 && bt <= nowSec {
-			return phases[i]
+	var best *plantpb.PlantPhaseInfo
+	var bestBT int64
+	for _, p := range phases {
+		bt := toTimeSec(p.BeginTime)
+		if bt > bestBT && bt <= nowSec {
+			bestBT = bt
+			best = p
 		}
+	}
+	if best != nil {
+		return best
 	}
 	return phases[0]
 }
@@ -480,6 +486,9 @@ func getPlantStartTimeSec(phases []*plantpb.PlantPhaseInfo) int64 {
 func toTimeSec(val int64) int64 {
 	if val <= 0 {
 		return 0
+	}
+	if val > 1e15 {
+		return val / 1_000_000
 	}
 	if val > 1e12 {
 		return val / 1000
