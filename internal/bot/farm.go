@@ -92,7 +92,6 @@ func (f *FarmWorker) checkFarm() {
 
 	lands := landsReply.Lands
 
-	// Auto unlock & upgrade lands before analyzing
 	unlockedNew, upgradedNew := 0, 0
 	if f.cfg.EnableUpgradeLand {
 		unlockedNew, upgradedNew = f.autoUnlockAndUpgrade(lands)
@@ -109,7 +108,8 @@ func (f *FarmWorker) checkFarm() {
 	status := f.analyzeLands(lands)
 	landMap := buildLandMap(lands)
 
-	// Optimal fertilization: fertilize growing plants when in their longest phase
+	f.logger.Debugf("巡田", "fertilized缓存: %v", f.fertilized)
+
 	fertilized := f.checkAndFertilize(lands)
 	unlockedCount := 0
 	for _, land := range lands {
@@ -198,8 +198,15 @@ func (f *FarmWorker) checkFarm() {
 		}
 	}
 
-	// Harvest (respect config toggle)
 	if f.cfg.EnableHarvest && len(status.harvestable) > 0 {
+		for _, id := range status.harvestable {
+			if land, ok := landMap[id]; ok && land.Plant != nil {
+				cropName := f.gc.GetPlantName(int(land.Plant.Id))
+				totalSeasons := f.gc.GetPlantSeasons(int(land.Plant.Id))
+				f.logger.Debugf("收获", "地#%d %s 季=%d/%d 准备收获",
+					id, cropName, land.Plant.GetSeason(), totalSeasons)
+			}
+		}
 		f.logger.Infof("收获", "成熟 %d 块: %s", len(status.harvestable), f.descLands(status.harvestable, landMap))
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
@@ -207,10 +214,25 @@ func (f *FarmWorker) checkFarm() {
 			for _, id := range status.harvestable {
 				delete(f.fertilized, id)
 			}
-			// Re-fetch lands after harvest: multi-season crops enter the next
-			// growth cycle and must not be removed; single-season crops become
-			// empty or dead. Re-analyzing gives accurate state for both cases.
 			if freshReply, err := f.net.AllLands(); err == nil {
+				freshLandMap := buildLandMap(freshReply.Lands)
+				for _, id := range status.harvestable {
+					if land, ok := freshLandMap[id]; ok && land.Plant != nil && len(land.Plant.Phases) > 0 {
+						cropName := f.gc.GetPlantName(int(land.Plant.Id))
+						nowSec := time.Now().Unix()
+						cp := getCurrentPhase(land.Plant.Phases, nowSec)
+						phaseName := "?"
+						if cp != nil {
+							phaseName = getPhaseName(cp)
+						}
+						f.logger.Debugf("收获", "地#%d %s 收后状态: 季=%d Phase=%d(%s) phaseId=%d 阶段数=%d",
+							id, cropName, land.Plant.GetSeason(),
+							cp.Phase, phaseName, cp.PhaseId,
+							len(land.Plant.Phases))
+					} else {
+						f.logger.Debugf("收获", "地#%d 收后: 已空/枯萎", id)
+					}
+				}
 				freshStatus := f.analyzeLands(freshReply.Lands)
 				status.dead = freshStatus.dead
 				status.empty = freshStatus.empty
@@ -435,7 +457,6 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 		if !land.Unlocked {
 			continue
 		}
-		// Skip slave lands occupied by multi-tile crops
 		if isOccupiedSlaveLand(land, landMap) {
 			continue
 		}
@@ -451,11 +472,17 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 			continue
 		}
 
+		cropName := f.gc.GetPlantName(int(plant.Id))
+		phaseName := getPhaseName(phase)
+
 		switch plantpb.PlantPhase(phase.Phase) {
 		case plantpb.PlantPhase_DEAD:
 			s.dead = append(s.dead, id)
+			f.logger.Debugf("分析", "地#%d %s Phase=%d(%s) → 枯萎", id, cropName, phase.Phase, phaseName)
 		case plantpb.PlantPhase_MATURE:
 			s.harvestable = append(s.harvestable, id)
+			f.logger.Debugf("分析", "地#%d %s Phase=%d(%s) 季=%d → 成熟",
+				id, cropName, phase.Phase, phaseName, plant.GetSeason())
 		default:
 			if plant.DryNum > 0 || (phase.DryTime > 0 && toTimeSec(phase.DryTime) <= nowSec) {
 				s.needWater = append(s.needWater, id)
@@ -467,6 +494,9 @@ func (f *FarmWorker) analyzeLands(lands []*plantpb.LandInfo) *landStatus {
 				s.needBug = append(s.needBug, id)
 			}
 			s.growing = append(s.growing, id)
+			f.logger.Debugf("分析", "地#%d %s Phase=%d(%s) phaseId=%d 季=%d 阶段数=%d → 生长中",
+				id, cropName, phase.Phase, phaseName, phase.PhaseId,
+				plant.GetSeason(), len(plant.Phases))
 		}
 	}
 	return s
@@ -483,50 +513,67 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) int {
 		if !land.Unlocked || land.Plant == nil || len(land.Plant.Phases) == 0 {
 			continue
 		}
-		// Skip slave lands occupied by multi-tile crops
 		if isOccupiedSlaveLand(land, landMap) {
 			continue
 		}
 
 		plant := land.Plant
 		landID := land.Id
+		cropName := f.gc.GetPlantName(int(plant.Id))
 
 		if f.fertilized[landID] {
+			f.logger.Debugf("施肥", "地#%d %s 本轮已施肥, 跳过", landID, cropName)
 			continue
 		}
 
 		currentPhase := getCurrentPhase(plant.Phases, nowSec)
 		if currentPhase == nil {
+			f.logger.Debugf("施肥", "地#%d %s 无当前阶段, 跳过", landID, cropName)
 			continue
 		}
 
 		phase := plantpb.PlantPhase(currentPhase.Phase)
+		phaseName := getPhaseName(currentPhase)
 		if phase == plantpb.PlantPhase_MATURE || phase == plantpb.PlantPhase_DEAD || phase == plantpb.PlantPhase_PHASE_UNKNOWN {
+			f.logger.Debugf("施肥", "地#%d %s Phase=%d(%s) phaseId=%d → 非生长阶段, 跳过",
+				landID, cropName, currentPhase.Phase, phaseName, currentPhase.PhaseId)
 			continue
 		}
 
 		pd := f.gc.GetPlantPhaseData(int(plant.Id))
 		if pd == nil {
+			f.logger.Debugf("施肥", "地#%d %s 无阶段配置数据, 跳过", landID, cropName)
 			continue
 		}
 
 		season := plant.GetSeason()
+		totalSeasons := f.gc.GetPlantSeasons(int(plant.Id))
 		if season < 1 {
 			season = 1
 		}
 
-		phaseIdx := int(currentPhase.Phase) - 1
+		if plant.LeftInorcFertTimes <= 0 {
+			f.logger.Debugf("施肥", "地#%d %s 剩余施肥次数=%d → 跳过", landID, cropName, plant.LeftInorcFertTimes)
+			continue
+		}
+
+		// Derive phase index from remaining growth phases.
+		// The server removes past phases from plant.Phases, so:
+		//   phaseIdx = totalPhases - remainingGrowthPhases
+		// This avoids relying on the Phase enum value (which is always GERMINATION=2 for growing).
+		remainingGrowth := 0
+		for _, p := range plant.Phases {
+			pp := plantpb.PlantPhase(p.Phase)
+			if pp != plantpb.PlantPhase_MATURE && pp != plantpb.PlantPhase_DEAD && pp != plantpb.PlantPhase_PHASE_UNKNOWN {
+				remainingGrowth++
+			}
+		}
 
 		var phaseDurations []int
 		var maxDuration int
 		var allEqual bool
 
 		if season >= 2 && pd.Season2Phases != nil {
-			// Remap absolute phase index to season 2 relative index.
-			// Season 2 reuses the last N growth phases; offset = how many
-			// season-1-only phases precede the shared ones.
-			s2Offset := len(pd.PhaseDurations) - len(pd.Season2Phases)
-			phaseIdx -= s2Offset
 			phaseDurations = pd.Season2Phases
 			maxDuration = pd.Season2MaxPhase
 			allEqual = pd.Season2AllEqual
@@ -536,19 +583,35 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) int {
 			allEqual = pd.AllPhasesEqual
 		}
 
+		phaseIdx := len(phaseDurations) - remainingGrowth
+
+		f.logger.Debugf("施肥", "地#%d %s 季=%d/%d Phase=%d(%s) phaseId=%d 剩余生长阶段=%d 总阶段=%d phaseIdx=%d fertLeft=%d durations=%v",
+			landID, cropName, season, totalSeasons,
+			currentPhase.Phase, phaseName, currentPhase.PhaseId,
+			remainingGrowth, len(phaseDurations), phaseIdx,
+			plant.LeftInorcFertTimes, phaseDurations)
+
 		if phaseIdx < 0 || phaseIdx >= len(phaseDurations) {
+			f.logger.Debugf("施肥", "地#%d %s phaseIdx=%d 越界(len=%d, 剩余=%d) → 跳过",
+				landID, cropName, phaseIdx, len(phaseDurations), remainingGrowth)
 			continue
 		}
 
-		if allEqual || phaseDurations[phaseIdx] >= maxDuration {
+		currentDuration := phaseDurations[phaseIdx]
+		if allEqual || currentDuration >= maxDuration {
+			f.logger.Debugf("施肥", "地#%d %s 当前时长=%d max=%d allEqual=%v → 执行施肥",
+				landID, cropName, currentDuration, maxDuration, allEqual)
 			if f.fertilizeSingle(landID) {
 				f.fertilized[landID] = true
 				fertilizeCount++
-				cropName := f.gc.GetPlantName(int(plant.Id))
-				phaseName := getPhaseName(currentPhase)
-				timeSaved := formatDuration(phaseDurations[phaseIdx])
+				timeSaved := formatDuration(currentDuration)
 				f.logger.Infof("施肥", "地#%d %s [%s阶段] 跳过%s", landID, cropName, phaseName, timeSaved)
+			} else {
+				f.logger.Debugf("施肥", "地#%d %s 施肥请求失败(服务器拒绝)", landID, cropName)
 			}
+		} else {
+			f.logger.Debugf("施肥", "地#%d %s 当前时长=%d < max=%d → 等待最长阶段",
+				landID, cropName, currentDuration, maxDuration)
 		}
 	}
 
@@ -563,6 +626,7 @@ func (f *FarmWorker) fertilizeSingle(landID int64) bool {
 	req := &plantpb.FertilizeRequest{LandIds: []int64{landID}, FertilizerId: normalFertilizerID}
 	body, _ := proto.Marshal(req)
 	if _, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Fertilize", body); err != nil {
+		f.logger.Debugf("施肥", "地#%d 请求失败: %v", landID, err)
 		return false
 	}
 	time.Sleep(50 * time.Millisecond)
