@@ -2,7 +2,9 @@ package bot
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
+	"sort"
 	"strings"
 	"time"
 
@@ -1038,6 +1040,252 @@ func (f *FarmWorker) findBestSeed(landsCount int) (*shoppb.GoodsInfo, error) {
 	return best.goods, nil
 }
 
+func (f *FarmWorker) findFastestLevelUpSeed(emptyLandIDs []int64, available []shopSeedCandidate) *shoppb.GoodsInfo {
+	if len(emptyLandIDs) == 0 || f.gc == nil || f.lands == nil {
+		return nil
+	}
+
+	_, level, exp, gold, _ := f.net.state.Get()
+
+	nextLevelExp, hasNext := f.gc.GetNextLevelExp(int(level))
+	if !hasNext {
+		return nil
+	}
+	expToNextLevel := nextLevelExp - exp
+	if expToNextLevel <= 0 {
+		return nil
+	}
+
+	harvestInfos := f.lands.GetHarvestInfo()
+	landBuffs := f.lands.GetLandBuffsByID(emptyLandIDs)
+
+	nowSec := time.Now().Unix()
+
+	type harvestEvent struct {
+		timeSec int64
+		exp     int64
+	}
+
+	var existingEvents []harvestEvent
+	var totalExpPerMin float64
+
+	for _, h := range harvestInfos {
+		adjustedExp := float64(h.CropExp) * (10000 + float64(h.ExpBonusPct)) / 10000.0
+		if adjustedExp <= 0 {
+			continue
+		}
+
+		seasons := 1
+		var season2GrowSec int64
+		if h.CropID > 0 {
+			seasons = f.gc.GetPlantSeasons(int(h.CropID))
+			if seasons >= 2 {
+				if pd := f.gc.GetPlantPhaseData(int(h.CropID)); pd != nil && pd.Season2GrowTime > 0 {
+					s2Base := int64(pd.Season2GrowTime)
+					if h.TimeReducePct > 0 {
+						s2Base = s2Base * (10000 - h.TimeReducePct) / 10000
+					}
+					s2Fert := int64(pd.Season2MaxPhase)
+					if h.TimeReducePct > 0 {
+						s2Fert = s2Fert * (10000 - h.TimeReducePct) / 10000
+					}
+					season2GrowSec = s2Base - s2Fert
+					if season2GrowSec < 1 {
+						season2GrowSec = 1
+					}
+				}
+			}
+		}
+
+		if h.CycleTimeSec > 0 {
+			totalCycleExp := adjustedExp * float64(seasons)
+			totalCycleSec := float64(h.CycleTimeSec)
+			if seasons >= 2 && season2GrowSec > 0 {
+				totalCycleSec += float64(season2GrowSec)
+			}
+			totalExpPerMin += totalCycleExp / (totalCycleSec / 60.0)
+		}
+
+		currentSeason := h.Season
+		if currentSeason < 1 {
+			currentSeason = 1
+		}
+
+		if h.IsMature {
+			existingEvents = append(existingEvents, harvestEvent{timeSec: nowSec, exp: int64(adjustedExp)})
+			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
+				existingEvents = append(existingEvents, harvestEvent{timeSec: nowSec + season2GrowSec, exp: int64(adjustedExp)})
+			}
+		} else if h.IsGrowing && h.MatureTimeSec > nowSec {
+			existingEvents = append(existingEvents, harvestEvent{timeSec: h.MatureTimeSec, exp: int64(adjustedExp)})
+			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
+				existingEvents = append(existingEvents, harvestEvent{timeSec: h.MatureTimeSec + season2GrowSec, exp: int64(adjustedExp)})
+			}
+		}
+	}
+
+	yieldRows := f.gc.GetSeedYieldRows()
+	yieldMap := make(map[int]*SeedYieldRow, len(yieldRows))
+	for i := range yieldRows {
+		yieldMap[yieldRows[i].SeedID] = &yieldRows[i]
+	}
+
+	bestSeedGoods := (*shoppb.GoodsInfo)(nil)
+	bestLevelUpSec := int64(math.MaxInt64)
+
+	for _, c := range available {
+		seedID := int(c.goods.ItemId)
+		yr, ok := yieldMap[seedID]
+		if !ok || yr.GrowTimeSec <= 0 {
+			continue
+		}
+
+		plantSize := f.gc.GetPlantSizeBySeedID(seedID)
+		landFootprint := plantSize * plantSize
+		if landFootprint > len(emptyLandIDs) {
+			continue
+		}
+
+		effectiveLandCount := len(emptyLandIDs)
+		if landFootprint > 1 {
+			effectiveLandCount = len(emptyLandIDs) / landFootprint
+		}
+		if effectiveLandCount <= 0 {
+			continue
+		}
+
+		if c.goods.Price <= 0 {
+			continue
+		}
+
+		if c.goods.Price*int64(effectiveLandCount) > gold {
+			canBuy := gold / c.goods.Price
+			if canBuy <= 0 {
+				continue
+			}
+			effectiveLandCount = int(canBuy)
+		}
+
+		var newEvents []harvestEvent
+		var newExpPerMin float64
+
+		for i, landID := range emptyLandIDs {
+			if i >= effectiveLandCount*landFootprint {
+				break
+			}
+			if landFootprint > 1 && i%landFootprint != 0 {
+				continue
+			}
+
+			buff := landBuffs[landID]
+
+			s1Base := int64(yr.GrowTimeSec)
+			if buff.TimeReducePct > 0 {
+				s1Base = s1Base * (10000 - buff.TimeReducePct) / 10000
+			}
+			s1Fert := int64(yr.NormalFertReduceSec)
+			if buff.TimeReducePct > 0 {
+				s1Fert = s1Fert * (10000 - buff.TimeReducePct) / 10000
+			}
+			s1Effective := s1Base - s1Fert
+			if s1Effective < 1 {
+				s1Effective = 1
+			}
+
+			adjustedExp := int64(yr.ExpHarvest) * (10000 + buff.ExpBonusPct) / 10000
+			if adjustedExp <= 0 {
+				adjustedExp = int64(yr.ExpHarvest)
+			}
+
+			harvestTime1 := nowSec + s1Effective
+			newEvents = append(newEvents, harvestEvent{timeSec: harvestTime1, exp: adjustedExp})
+
+			var s2Effective int64
+			if yr.Seasons >= 2 && yr.Season2GrowTimeSec > 0 {
+				s2Base := int64(yr.Season2GrowTimeSec)
+				if buff.TimeReducePct > 0 {
+					s2Base = s2Base * (10000 - buff.TimeReducePct) / 10000
+				}
+				s2Fert := int64(yr.Season2FertReduceSec)
+				if buff.TimeReducePct > 0 {
+					s2Fert = s2Fert * (10000 - buff.TimeReducePct) / 10000
+				}
+				s2Effective = s2Base - s2Fert
+				if s2Effective < 1 {
+					s2Effective = 1
+				}
+				newEvents = append(newEvents, harvestEvent{timeSec: harvestTime1 + s2Effective, exp: adjustedExp})
+			}
+
+			totalCycleSec := float64(s1Effective)
+			totalCycleExp := float64(adjustedExp)
+			if s2Effective > 0 {
+				totalCycleSec += float64(s2Effective)
+				totalCycleExp += float64(adjustedExp)
+			}
+			if totalCycleSec > 0 {
+				newExpPerMin += totalCycleExp / (totalCycleSec / 60.0)
+			}
+		}
+
+		allEvents := make([]harvestEvent, 0, len(existingEvents)+len(newEvents))
+		allEvents = append(allEvents, existingEvents...)
+		allEvents = append(allEvents, newEvents...)
+		sort.Slice(allEvents, func(i, j int) bool {
+			return allEvents[i].timeSec < allEvents[j].timeSec
+		})
+
+		combinedExpPerMin := totalExpPerMin + newExpPerMin
+		remaining := expToNextLevel
+		lastEventTime := nowSec
+		levelUpSec := int64(0)
+		found := false
+
+		for _, e := range allEvents {
+			remaining -= e.exp
+			if remaining <= 0 {
+				secsUntil := e.timeSec - nowSec
+				if secsUntil < 0 {
+					secsUntil = 0
+				}
+				levelUpSec = nowSec + secsUntil
+				found = true
+				break
+			}
+			lastEventTime = e.timeSec
+		}
+
+		if !found {
+			if combinedExpPerMin > 0 {
+				additionalSecs := float64(remaining) / combinedExpPerMin * 60
+				totalSecs := float64(lastEventTime-nowSec) + additionalSecs
+				if totalSecs < 0 {
+					totalSecs = 0
+				}
+				levelUpSec = nowSec + int64(totalSecs)
+			} else {
+				levelUpSec = int64(math.MaxInt64)
+			}
+		}
+
+		if levelUpSec < bestLevelUpSec {
+			bestLevelUpSec = levelUpSec
+			bestSeedGoods = c.goods
+		}
+	}
+
+	if bestSeedGoods != nil {
+		seedName := f.gc.GetPlantNameBySeedID(int(bestSeedGoods.ItemId))
+		hoursToLevelUp := float64(bestLevelUpSec-nowSec) / 3600.0
+		if hoursToLevelUp < 0 {
+			hoursToLevelUp = 0
+		}
+		f.logger.Infof("策略", "最快升级模式 → %s (预计%.1f小时后升级)", seedName, hoursToLevelUp)
+	}
+
+	return bestSeedGoods
+}
+
 // autoUnlockAndUpgrade checks all lands and attempts to unlock/upgrade eligible ones.
 func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, upgraded int) {
 	_, level, _, gold, _ := f.net.state.Get()
@@ -1081,6 +1329,26 @@ func (f *FarmWorker) autoUnlockAndUpgrade(lands []*plantpb.LandInfo) (unlocked, 
 func (f *FarmWorker) selectSeedByStrategy(strategy *PlantingStrategyConfig, available []shopSeedCandidate, landsCount int) *shoppb.GoodsInfo {
 	if f.gc == nil {
 		return nil
+	}
+	if strategy != nil && strategy.Mode == StrategyModeFastestLevelUp {
+		_, _, statuses := f.lands.Get()
+		cropByLandID := make(map[int64]int64, len(statuses))
+		for _, ls := range statuses {
+			cropByLandID[ls.ID] = ls.CropID
+		}
+		emptyLandIDs := make([]int64, 0, len(statuses))
+		for _, ls := range statuses {
+			if !ls.Unlocked || ls.CropID > 0 {
+				continue
+			}
+			if ls.MasterLandID > 0 && ls.MasterLandID != ls.ID {
+				if cropByLandID[ls.MasterLandID] > 0 {
+					continue
+				}
+			}
+			emptyLandIDs = append(emptyLandIDs, ls.ID)
+		}
+		return f.findFastestLevelUpSeed(emptyLandIDs, available)
 	}
 
 	// Build yield lookup from game config
