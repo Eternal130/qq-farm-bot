@@ -96,9 +96,10 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			// Anti-detection
 			EnableAntiDetection bool `json:"enable_anti_detection"`
 			// Planting preference
-			PreferBagSeeds      bool `json:"prefer_bag_seeds"`
+			PreferBagSeeds bool `json:"prefer_bag_seeds"`
+			EnableDebugLog bool `json:"enable_debug_log"`
 			// External API
-			APIKey              string `json:"api_key"`
+			APIKey string `json:"api_key"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -144,6 +145,7 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerBuyDailyLimit: req.FertilizerBuyDailyLimit,
 			EnableAntiDetection:     req.EnableAntiDetection,
 			PreferBagSeeds:          req.PreferBagSeeds,
+			EnableDebugLog:          req.EnableDebugLog,
 			APIKey:                  req.APIKey,
 		}
 		if err := s.CreateAccount(account); err != nil {
@@ -199,13 +201,14 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 			FertilizerTargetCount   *int  `json:"fertilizer_target_count"`
 			FertilizerBuyDailyLimit *int  `json:"fertilizer_buy_daily_limit"`
 			// Anti-detection
-			EnableAntiDetection *bool   `json:"enable_anti_detection"`
+			EnableAntiDetection *bool `json:"enable_anti_detection"`
 			// Planting preference
-			PreferBagSeeds   *bool   `json:"prefer_bag_seeds"`
+			PreferBagSeeds *bool `json:"prefer_bag_seeds"`
+			EnableDebugLog *bool `json:"enable_debug_log"`
 			// Planting strategy (JSON-encoded composable rules)
 			PlantingStrategy *string `json:"planting_strategy"`
 			// External API
-			APIKey           *string `json:"api_key"`
+			APIKey *string `json:"api_key"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -292,6 +295,9 @@ func RegisterAccountRoutes(r *gin.RouterGroup, s *store.Store, mgr *bot.Manager,
 		}
 		if req.PreferBagSeeds != nil {
 			account.PreferBagSeeds = *req.PreferBagSeeds
+		}
+		if req.EnableDebugLog != nil {
+			account.EnableDebugLog = *req.EnableDebugLog
 		}
 		if req.PlantingStrategy != nil {
 			account.PlantingStrategy = *req.PlantingStrategy

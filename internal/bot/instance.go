@@ -48,6 +48,8 @@ type BotConfig struct {
 	EnableAntiDetection bool
 	// Planting strategy
 	PlantingStrategy string
+	// Debug
+	EnableDebugLog bool
 }
 
 const (
@@ -120,6 +122,7 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		PlantingStrategy: account.PlantingStrategy,
 
 		EnableAntiDetection: account.EnableAntiDetection,
+		EnableDebugLog:      account.EnableDebugLog,
 	}
 	if cfg.FarmInterval < 1 {
 		cfg.FarmInterval = 10
@@ -128,10 +131,13 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		cfg.FriendInterval = 10
 	}
 
+	logger := NewLogger(account.ID, s)
+	logger.SetDebug(cfg.EnableDebugLog)
+
 	return &Instance{
 		account: account,
 		config:  cfg,
-		logger:  NewLogger(account.ID, s),
+		logger:  logger,
 		store:   s,
 		stats:   &BotStats{},
 		lands:   NewLandCache(),
@@ -571,4 +577,9 @@ func (inst *Instance) UpdateConfig(account *model.Account) {
 	inst.config.PreferBagSeeds = account.PreferBagSeeds
 
 	inst.config.EnableAntiDetection = account.EnableAntiDetection
+
+	inst.config.EnableDebugLog = account.EnableDebugLog
+	if inst.logger != nil {
+		inst.logger.SetDebug(account.EnableDebugLog)
+	}
 }
