@@ -228,12 +228,12 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 		}
 	}
 
-	// Steal (respect config + crop filter + CheckCanOperate)
 	if fw.cfg.EnableSteal && len(status.stealable) > 0 {
 		canSteal, _ := fw.checkCanSteal(friendGid)
 		if canSteal {
 			stealFilter := ParseCropIDs(fw.cfg.StealCropIDs)
 			hasStealFilter := len(stealFilter) > 0
+			stolenCrops := make(map[string]int)
 
 			for _, sl := range status.stealable {
 				if hasStealFilter && !stealFilter[int(sl.cropID)] {
@@ -249,8 +249,18 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 						continue
 					}
 					actions.steal++
+					cropName := fw.gc.GetPlantName(int(sl.cropID))
+					stolenCrops[cropName]++
 				}
 				fw.antiDetectionDelay(100)
+			}
+
+			if actions.steal > 0 {
+				var cropParts []string
+				for cropName, count := range stolenCrops {
+					cropParts = append(cropParts, fmt.Sprintf("%s×%d", cropName, count))
+				}
+				parts = append(parts, fmt.Sprintf("偷%d(%s)", actions.steal, strings.Join(cropParts, ",")))
 			}
 		}
 	}
@@ -263,9 +273,6 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 	}
 	if actions.water > 0 {
 		parts = append(parts, fmt.Sprintf("水%d", actions.water))
-	}
-	if actions.steal > 0 {
-		parts = append(parts, fmt.Sprintf("偷%d", actions.steal))
 	}
 	if len(parts) > 0 {
 		fw.logger.Infof("好友", "%s: %s", name, strings.Join(parts, "/"))

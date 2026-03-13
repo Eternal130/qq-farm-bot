@@ -107,6 +107,7 @@ func (f *FarmWorker) checkFarm() {
 	}
 
 	status := f.analyzeLands(lands)
+	landMap := buildLandMap(lands)
 
 	// Optimal fertilization: fertilize growing plants when in their longest phase
 	fertilized := f.checkAndFertilize(lands)
@@ -176,18 +177,21 @@ func (f *FarmWorker) checkFarm() {
 
 	// Batch operations: weed, bug, water (respect config toggles)
 	if f.cfg.EnableWeed && len(status.needWeed) > 0 {
+		f.logger.Infof("除草", "需除草 %d 块: %s", len(status.needWeed), f.descLands(status.needWeed, landMap))
 		if err := f.weedOut(status.needWeed); err == nil {
 			actions = append(actions, fmt.Sprintf("除草%d", len(status.needWeed)))
 			f.sc.RecordSimple(model.OpWeed, int64(len(status.needWeed)))
 		}
 	}
 	if f.cfg.EnableBug && len(status.needBug) > 0 {
+		f.logger.Infof("除虫", "需除虫 %d 块: %s", len(status.needBug), f.descLands(status.needBug, landMap))
 		if err := f.insecticide(status.needBug); err == nil {
 			actions = append(actions, fmt.Sprintf("除虫%d", len(status.needBug)))
 			f.sc.RecordSimple(model.OpBug, int64(len(status.needBug)))
 		}
 	}
 	if f.cfg.EnableWater && len(status.needWater) > 0 {
+		f.logger.Infof("浇水", "需浇水 %d 块: %s", len(status.needWater), f.descLands(status.needWater, landMap))
 		if err := f.waterLand(status.needWater); err == nil {
 			actions = append(actions, fmt.Sprintf("浇水%d", len(status.needWater)))
 			f.sc.RecordSimple(model.OpWater, int64(len(status.needWater)))
@@ -196,6 +200,7 @@ func (f *FarmWorker) checkFarm() {
 
 	// Harvest (respect config toggle)
 	if f.cfg.EnableHarvest && len(status.harvestable) > 0 {
+		f.logger.Infof("收获", "成熟 %d 块: %s", len(status.harvestable), f.descLands(status.harvestable, landMap))
 		if err := f.harvest(status.harvestable); err == nil {
 			actions = append(actions, fmt.Sprintf("收获%d", len(status.harvestable)))
 			f.sc.RecordSimple(model.OpHarvest, int64(len(status.harvestable)))
@@ -257,6 +262,50 @@ var phaseNames = map[int32]string{
 	5: "开花",
 	6: "成熟",
 	7: "枯萎",
+}
+
+func formatDuration(seconds int) string {
+	if seconds <= 0 {
+		return "0秒"
+	}
+	hours := seconds / 3600
+	minutes := (seconds % 3600) / 60
+	if hours > 0 && minutes > 0 {
+		return fmt.Sprintf("%d小时%d分", hours, minutes)
+	}
+	if hours > 0 {
+		return fmt.Sprintf("%d小时", hours)
+	}
+	if minutes > 0 {
+		return fmt.Sprintf("%d分钟", minutes)
+	}
+	return fmt.Sprintf("%d秒", seconds%60)
+}
+
+func getPhaseName(phase *plantpb.PlantPhaseInfo) string {
+	if phase.PhaseId != 0 {
+		if name, ok := confPhaseTypeNames[phase.PhaseId]; ok {
+			return name
+		}
+		return fmt.Sprintf("阶段%d", phase.PhaseId)
+	}
+	if name, ok := phaseNames[phase.Phase]; ok {
+		return name
+	}
+	return fmt.Sprintf("阶段%d", phase.Phase)
+}
+
+func (f *FarmWorker) descLands(landIDs []int64, landMap map[int64]*plantpb.LandInfo) string {
+	var parts []string
+	for _, id := range landIDs {
+		if land, ok := landMap[id]; ok && land.Plant != nil {
+			cropName := f.gc.GetPlantName(int(land.Plant.Id))
+			parts = append(parts, fmt.Sprintf("#%d(%s)", id, cropName))
+		} else {
+			parts = append(parts, fmt.Sprintf("#%d", id))
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
@@ -491,19 +540,20 @@ func (f *FarmWorker) checkAndFertilize(lands []*plantpb.LandInfo) int {
 			continue
 		}
 
-		// Fertilize when in the longest phase (or any phase if all equal).
-		// Compare duration instead of index so we catch ALL phases that
-		// share the maximum duration, not just the first one.
 		if allEqual || phaseDurations[phaseIdx] >= maxDuration {
 			if f.fertilizeSingle(landID) {
 				f.fertilized[landID] = true
 				fertilizeCount++
+				cropName := f.gc.GetPlantName(int(plant.Id))
+				phaseName := getPhaseName(currentPhase)
+				timeSaved := formatDuration(phaseDurations[phaseIdx])
+				f.logger.Infof("施肥", "地#%d %s [%s阶段] 跳过%s", landID, cropName, phaseName, timeSaved)
 			}
 		}
 	}
 
 	if fertilizeCount > 0 {
-		f.logger.Infof("施肥", "最优阶段施肥 %d 块地", fertilizeCount)
+		f.logger.Infof("施肥", "本轮共施肥 %d 块地", fertilizeCount)
 		f.sc.RecordSimple(model.OpFertilize, int64(fertilizeCount))
 	}
 	return fertilizeCount
@@ -691,15 +741,23 @@ func (f *FarmWorker) autoPlant(deadLands, emptyLands []int64, unlockedCount int,
 		delete(f.fertilized, id)
 	}
 
-	// Remove dead plants and collect all freed land IDs (including slaves of size-2 crops)
 	if len(deadLands) > 0 {
+		deadLandMap := buildLandMap(allLands)
+		var deadDesc []string
+		for _, id := range deadLands {
+			if land, ok := deadLandMap[id]; ok && land.Plant != nil {
+				cropName := f.gc.GetPlantName(int(land.Plant.Id))
+				deadDesc = append(deadDesc, fmt.Sprintf("#%d(%s)", id, cropName))
+			} else {
+				deadDesc = append(deadDesc, fmt.Sprintf("#%d", id))
+			}
+		}
+		f.logger.Infof("铲除", "铲除枯萎作物 %d 块: %s", len(deadLands), strings.Join(deadDesc, " "))
 		freedIDs, err := f.removePlantAndCollectFreed(deadLands)
 		if err == nil {
 			slaveCount := len(freedIDs) - len(deadLands)
 			if slaveCount > 0 {
-				f.logger.Infof("铲除", "已铲除 %d 块 (含大作物附属地 %d 块)", len(deadLands), slaveCount)
-			} else {
-				f.logger.Infof("铲除", "已铲除 %d 块", len(deadLands))
+				f.logger.Infof("铲除", "释放附属地 %d 块，共腾出 %d 块", slaveCount, len(freedIDs))
 			}
 			for _, id := range freedIDs {
 				delete(f.fertilized, id)
@@ -790,6 +848,7 @@ func (f *FarmWorker) plantFromBag(lands []int64) int {
 			count = availableForSeed
 		}
 		seedPlanted := 0
+		var plantedOnLands []string
 		for _, landID := range lands {
 			if !pendingLands[landID] {
 				continue
@@ -807,9 +866,9 @@ func (f *FarmWorker) plantFromBag(lands []int64) int {
 			}
 			seedPlanted++
 			planted++
+			plantedOnLands = append(plantedOnLands, fmt.Sprintf("#%d", landID))
 			delete(pendingLands, landID)
 			delete(f.fertilized, landID)
-			// For multi-tile crops, parse reply to find occupied slave lands
 			if landFootprint > 1 {
 				plantReply := &plantpb.PlantReply{}
 				proto.Unmarshal(replyBody, plantReply)
@@ -824,7 +883,7 @@ func (f *FarmWorker) plantFromBag(lands []int64) int {
 			time.Sleep(50 * time.Millisecond)
 		}
 		if seedPlanted > 0 {
-			f.logger.Infof("背包", "使用背包种子 %s x%d", seedName, seedPlanted)
+			f.logger.Infof("种植", "背包种子 %s x%d → 地%s", seedName, seedPlanted, strings.Join(plantedOnLands, " "))
 		}
 	}
 
@@ -887,12 +946,13 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 	seedCost := bestSeed.Price * needCount
 	f.sc.Record(model.OpBuySeed, needCount, -seedCost, 0)
 
-	// Plant seeds one by one, tracking occupied lands for multi-tile crops
 	planted := 0
+	var plantedOnLands []string
 	pendingLands := make(map[int64]bool, len(toLant))
 	for _, id := range toLant {
 		pendingLands[id] = true
 	}
+	actualSeedName := f.gc.GetPlantNameBySeedID(int(actualSeedID))
 	for _, landID := range toLant {
 		if !pendingLands[landID] {
 			continue
@@ -909,9 +969,9 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 			break
 		}
 		planted++
+		plantedOnLands = append(plantedOnLands, fmt.Sprintf("#%d", landID))
 		delete(pendingLands, landID)
 		delete(f.fertilized, landID)
-		// For multi-tile crops, parse reply to find occupied slave lands
 		if landFootprint > 1 {
 			plantReply := &plantpb.PlantReply{}
 			proto.Unmarshal(replyBody, plantReply)
@@ -925,8 +985,8 @@ func (f *FarmWorker) buyAndPlant(toLant []int64, unlockedCount int) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
-	f.logger.Infof("种植", "已种植 %d 块", planted)
 	if planted > 0 {
+		f.logger.Infof("种植", "商店种子 %s x%d → 地%s", actualSeedName, planted, strings.Join(plantedOnLands, " "))
 		f.sc.RecordSimple(model.OpPlant, int64(planted))
 	}
 }

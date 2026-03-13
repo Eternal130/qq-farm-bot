@@ -390,13 +390,14 @@ func (fw *FertilizerWorker) useSurplusFertilizer(items []*corepb.Item) {
 	targetCount := int64(fw.cfg.FertilizerTargetCount)
 	totalItems := totalFertilizerItemCount(items)
 
-	// Only use surplus when we have more than the target
 	if targetCount > 0 && totalItems <= targetCount {
 		return
 	}
 
-	normalHours := containerHours(items, normalContainerID)
-	organicHours := containerHours(items, organicContainerID)
+	normalHoursBefore := containerHours(items, normalContainerID)
+	organicHoursBefore := containerHours(items, organicContainerID)
+	normalHours := normalHoursBefore
+	organicHours := organicHoursBefore
 
 	var toUse []*itempb.BatchUseItem
 	var usedDesc []string
@@ -499,7 +500,8 @@ func (fw *FertilizerWorker) useSurplusFertilizer(items []*corepb.Item) {
 		return
 	}
 
-	fw.logger.Infof("化肥", "使用化肥: 普通容器%d小时 有机容器%d小时", normalHours, organicHours)
+	fw.logger.Infof("化肥", "使用化肥: 普通容器 %d→%d小时, 有机容器 %d→%d小时",
+		normalHoursBefore, normalHours, organicHoursBefore, organicHours)
 	fw.sc.RecordSimple(model.OpFertUse, int64(len(toUse)))
 }
 
