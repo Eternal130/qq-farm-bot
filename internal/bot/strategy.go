@@ -17,6 +17,8 @@ const (
 	RulePrice          StrategyRuleType = "price"           // seed price (gold)
 	RuleSeasons        StrategyRuleType = "seasons"         // number of seasons (1 or 2)
 	RuleLevel          StrategyRuleType = "level"           // required player level
+
+	StrategyModeFastestLevelUp = "fastest_levelup" // mode for fastest level-up strategy
 )
 
 // StrategyOperator defines filter comparison operations.
@@ -49,6 +51,7 @@ type StrategyRule struct {
 
 // PlantingStrategyConfig is the top-level JSON structure stored in account.planting_strategy.
 type PlantingStrategyConfig struct {
+	Mode  string         `json:"mode,omitempty"`
 	Rules []StrategyRule `json:"rules"`
 }
 
@@ -78,7 +81,7 @@ func ParsePlantingStrategy(raw string) *PlantingStrategyConfig {
 	if err := json.Unmarshal([]byte(raw), &cfg); err != nil {
 		return nil
 	}
-	if len(cfg.Rules) == 0 {
+	if cfg.Mode == "" && len(cfg.Rules) == 0 {
 		return nil
 	}
 	return &cfg
@@ -203,7 +206,15 @@ func sortCandidates(candidates []SeedCandidate, rules []StrategyRule) {
 
 // FormatStrategyDescription returns a human-readable Chinese description of a strategy.
 func FormatStrategyDescription(strategy *PlantingStrategyConfig) string {
-	if strategy == nil || len(strategy.Rules) == 0 {
+	if strategy == nil {
+		return "默认策略"
+	}
+
+	if strategy.Mode == StrategyModeFastestLevelUp {
+		return "最快升级模式"
+	}
+
+	if len(strategy.Rules) == 0 {
 		return "默认策略"
 	}
 
