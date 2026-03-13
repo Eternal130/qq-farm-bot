@@ -16,6 +16,7 @@ type Logger struct {
 	store       *store.Store
 	subscribers map[chan *model.LogEntry]struct{}
 	mu          sync.RWMutex
+	enableDebug bool
 }
 
 func NewLogger(accountID int64, s *store.Store) *Logger {
@@ -44,6 +45,23 @@ func (l *Logger) Warnf(tag, format string, args ...interface{}) {
 
 func (l *Logger) Errorf(tag, format string, args ...interface{}) {
 	l.emit("error", tag, fmt.Sprintf(format, args...))
+}
+
+func (l *Logger) Debugf(tag, format string, args ...interface{}) {
+	l.mu.RLock()
+	enabled := l.enableDebug
+	l.mu.RUnlock()
+	if !enabled {
+		return
+	}
+	l.emit("debug", tag, fmt.Sprintf(format, args...))
+}
+
+// SetDebug enables or disables debug-level logging.
+func (l *Logger) SetDebug(enabled bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.enableDebug = enabled
 }
 
 func (l *Logger) emit(level, tag, msg string) {
