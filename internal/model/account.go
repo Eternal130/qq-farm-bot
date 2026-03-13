@@ -48,8 +48,11 @@ type Account struct {
 	// Planting strategy (JSON-encoded composable rules)
 	PlantingStrategy string `json:"planting_strategy"`
 
+	// Debug
+	EnableDebugLog bool `json:"enable_debug_log"`
+
 	// External API
-	APIKey string `json:"api_key"`
+	APIKey    string    `json:"api_key"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -168,9 +171,9 @@ const (
 
 // AggregatedStats represents aggregated operation statistics for a time bucket.
 type AggregatedStats struct {
-	Period    string         `json:"period"`    // time bucket label, e.g. "2026-03-09 10:00"
-	OpCounts  map[string]int64 `json:"op_counts"` // op_type -> total count
-	GoldIn    int64          `json:"gold_in"`    // total gold earned
-	GoldOut   int64          `json:"gold_out"`   // total gold spent (absolute)
-	ExpGained int64          `json:"exp_gained"` // total exp earned
+	Period    string           `json:"period"`     // time bucket label, e.g. "2026-03-09 10:00"
+	OpCounts  map[string]int64 `json:"op_counts"`  // op_type -> total count
+	GoldIn    int64            `json:"gold_in"`    // total gold earned
+	GoldOut   int64            `json:"gold_out"`   // total gold spent (absolute)
+	ExpGained int64            `json:"exp_gained"` // total exp earned
 }

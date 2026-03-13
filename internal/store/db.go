@@ -41,6 +41,7 @@ const accountColumns = `id, user_id, name, platform, code, auto_start,
 	enable_anti_detection,
 	prefer_bag_seeds,
 	planting_strategy,
+	enable_debug_log,
 	api_key,
 	created_at, updated_at`
 
@@ -110,7 +111,7 @@ func (s *Store) migrate() error {
 	// Migration: add anti-detection column
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN enable_anti_detection INTEGER NOT NULL DEFAULT 0`)
 	// Migration: add per-account API key column
-_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN api_key TEXT NOT NULL DEFAULT ''
+	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN api_key TEXT NOT NULL DEFAULT ''
 `)
 	// Migration: op_stats table for operation statistics tracking
 	_, _ = s.db.Exec(`CREATE TABLE IF NOT EXISTS op_stats (
@@ -130,6 +131,7 @@ _, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN api_key TEXT NOT NULL DEFAULT 
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN prefer_bag_seeds INTEGER NOT NULL DEFAULT 0`)
 	// Migration: add planting_strategy column (JSON-encoded composable rules)
 	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN planting_strategy TEXT NOT NULL DEFAULT ''`)
+	_, _ = s.db.Exec(`ALTER TABLE accounts ADD COLUMN enable_debug_log INTEGER NOT NULL DEFAULT 0`)
 
 	return err
 }
@@ -142,7 +144,7 @@ func scanAccount(scanner interface {
 	var autoStart, enableSteal, forceLowest int
 	var enableHarvest, enablePlant, enableSell, enableWeed, enableBug, enableWater int
 	var enableRemoveDead, enableUpgradeLand, enableHelpFriend, enableClaimTask int
-	var autoUseFert, autoBuyFert, enableAntiDetection, preferBagSeeds int
+	var autoUseFert, autoBuyFert, enableAntiDetection, preferBagSeeds, enableDebugLog int
 
 	if err := scanner.Scan(
 		&a.ID, &a.UserID, &a.Name, &a.Platform, &a.Code, &autoStart,
@@ -154,6 +156,7 @@ func scanAccount(scanner interface {
 		&enableAntiDetection,
 		&preferBagSeeds,
 		&a.PlantingStrategy,
+		&enableDebugLog,
 		&a.APIKey,
 		&a.CreatedAt, &a.UpdatedAt,
 	); err != nil {
@@ -177,6 +180,7 @@ func scanAccount(scanner interface {
 	a.AutoBuyFertilizer = autoBuyFert == 1
 	a.EnableAntiDetection = enableAntiDetection == 1
 	a.PreferBagSeeds = preferBagSeeds == 1
+	a.EnableDebugLog = enableDebugLog == 1
 
 	return &a, nil
 }
@@ -248,9 +252,10 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		enable_anti_detection,
 		prefer_bag_seeds,
 		planting_strategy,
+		enable_debug_log,
 		api_key,
 		created_at, updated_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		a.UserID, a.Name, a.Platform, a.Code, boolToInt(a.AutoStart),
 		a.FarmInterval, a.FriendInterval, boolToInt(a.EnableSteal), boolToInt(a.ForceLowest),
 		boolToInt(a.EnableHarvest), boolToInt(a.EnablePlant), boolToInt(a.EnableSell),
@@ -263,6 +268,7 @@ func (s *Store) CreateAccount(a *model.Account) error {
 		boolToInt(a.EnableAntiDetection),
 		boolToInt(a.PreferBagSeeds),
 		a.PlantingStrategy,
+		boolToInt(a.EnableDebugLog),
 		a.APIKey,
 		now, now)
 	if err != nil {
@@ -284,6 +290,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		enable_anti_detection=?,
 		prefer_bag_seeds=?,
 		planting_strategy=?,
+		enable_debug_log=?,
 		api_key=?,
 		updated_at=?
 	WHERE id=?`,
@@ -299,6 +306,7 @@ func (s *Store) UpdateAccount(a *model.Account) error {
 		boolToInt(a.EnableAntiDetection),
 		boolToInt(a.PreferBagSeeds),
 		a.PlantingStrategy,
+		boolToInt(a.EnableDebugLog),
 		a.APIKey,
 		a.UpdatedAt, a.ID)
 	return err
