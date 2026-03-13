@@ -76,15 +76,21 @@ interface StrategyRule {
 }
 
 interface PlantingStrategy {
-  rules: StrategyRule[]
+  mode?: string
+  rules?: StrategyRule[]
 }
 
 // Strategy rules state
 const strategyRules = ref<StrategyRule[]>([])
 const activePreset = ref<string | null>(null)
+const activeMode = ref<string | null>(null)
 
 // Preset strategies
 const presetStrategies: Record<string, { label: string; strategy: PlantingStrategy }> = {
+  fastestLevelUp: {
+    label: '最快升级',
+    strategy: { mode: 'fastest_levelup' }
+  },
   maxExp: {
     label: '最高经验效率',
     strategy: { rules: [{ type: 'exp_efficiency', order: 'desc' }] }
@@ -149,17 +155,29 @@ const growthTimeHelpers = [
 
 // Parse strategy JSON to rules
 const parseStrategy = (strategyJson: string): StrategyRule[] => {
-  if (!strategyJson || strategyJson.trim() === '') return []
+  if (!strategyJson || strategyJson.trim() === '') {
+    activeMode.value = null
+    return []
+  }
   try {
     const parsed: PlantingStrategy = JSON.parse(strategyJson)
+    if (parsed.mode) {
+      activeMode.value = parsed.mode
+      return []
+    }
+    activeMode.value = null
     return Array.isArray(parsed.rules) ? parsed.rules : []
   } catch {
+    activeMode.value = null
     return []
   }
 }
 
 // Serialize rules to strategy JSON
 const serializeStrategy = (rules: StrategyRule[]): string => {
+  if (activeMode.value) {
+    return JSON.stringify({ mode: activeMode.value })
+  }
   if (rules.length === 0) return ''
   return JSON.stringify({ rules })
 }
@@ -168,7 +186,13 @@ const serializeStrategy = (rules: StrategyRule[]): string => {
 const applyPreset = (presetKey: string) => {
   const preset = presetStrategies[presetKey]
   if (preset) {
-    strategyRules.value = JSON.parse(JSON.stringify(preset.strategy.rules))
+    if (preset.strategy.mode) {
+      activeMode.value = preset.strategy.mode
+      strategyRules.value = []
+    } else {
+      activeMode.value = null
+      strategyRules.value = JSON.parse(JSON.stringify(preset.strategy.rules || []))
+    }
     activePreset.value = presetKey
     formData.value.planting_strategy = serializeStrategy(strategyRules.value)
   }
@@ -180,6 +204,7 @@ const addRule = () => {
     type: 'exp_efficiency'
   })
   activePreset.value = null
+  activeMode.value = null
   formData.value.planting_strategy = serializeStrategy(strategyRules.value)
 }
 
@@ -187,6 +212,7 @@ const addRule = () => {
 const deleteRule = (index: number) => {
   strategyRules.value.splice(index, 1)
   activePreset.value = null
+  activeMode.value = null
   formData.value.planting_strategy = serializeStrategy(strategyRules.value)
 }
 
@@ -197,6 +223,7 @@ const moveRuleUp = (index: number) => {
     strategyRules.value[index] = strategyRules.value[index - 1]
     strategyRules.value[index - 1] = temp
     activePreset.value = null
+    activeMode.value = null
     formData.value.planting_strategy = serializeStrategy(strategyRules.value)
   }
 }
@@ -208,12 +235,16 @@ const moveRuleDown = (index: number) => {
     strategyRules.value[index] = strategyRules.value[index + 1]
     strategyRules.value[index + 1] = temp
     activePreset.value = null
+    activeMode.value = null
     formData.value.planting_strategy = serializeStrategy(strategyRules.value)
   }
 }
 
 // Generate strategy description
 const strategyDescription = computed(() => {
+  if (activeMode.value === 'fastest_levelup') {
+    return '最快升级模式 — 自动选择最快升级的作物'
+  }
   if (strategyRules.value.length === 0) {
     return '未配置策略，将使用默认种植逻辑'
   }
