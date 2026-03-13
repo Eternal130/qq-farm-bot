@@ -392,116 +392,325 @@ func (inst *Instance) Status() *model.BotStatus {
 	return s
 }
 
-// estimateLevelUp calculates expected exp rate and hours to next level based on
-// current crop data: harvest times, crop exp, and growth cycle times.
-// Multi-season crops produce multiple harvests per planting cycle, which is factored
-// into both the exp rate and the discrete harvest event timeline.
+// effectiveGrowSec computes growth time after applying land time-reduction buff
+// and subtracting fertilizer skip time (longest-phase optimization).
+func effectiveGrowSec(baseSec, fertReduceSec int, timeReducePct int64) int64 {
+	base := int64(baseSec)
+	if timeReducePct > 0 {
+		base = base * (10000 - timeReducePct) / 10000
+	}
+	fert := int64(fertReduceSec)
+	if timeReducePct > 0 {
+		fert = fert * (10000 - timeReducePct) / 10000
+	}
+	eff := base - fert
+	if eff < 1 {
+		eff = 1
+	}
+	return eff
+}
+
+// resolveStrategySeed determines which seed the bot would plant based on the
+// current planting configuration (explicit crop ID, strategy rules, or defaults).
+// Uses only static GameConfig data — no network calls required.
+// Returns nil if no suitable seed can be determined.
+func (inst *Instance) resolveStrategySeed(gc *GameConfig) *SeedYieldRow {
+	if gc == nil {
+		return nil
+	}
+
+	_, level, _, _, _ := inst.net.state.Get()
+	yieldRows := gc.GetSeedYieldRows()
+	if len(yieldRows) == 0 {
+		return nil
+	}
+
+	var available []SeedYieldRow
+	for _, yr := range yieldRows {
+		if yr.RequiredLevel <= int(level) && yr.GrowTimeSec > 0 {
+			available = append(available, yr)
+		}
+	}
+	if len(available) == 0 {
+		return nil
+	}
+
+	// 1. Explicit crop ID override
+	if inst.config.PlantCropID > 0 {
+		targetSeedID := gc.GetSeedIDForCrop(inst.config.PlantCropID)
+		if targetSeedID > 0 {
+			for i, yr := range available {
+				if yr.SeedID == targetSeedID {
+					return &available[i]
+				}
+			}
+		}
+	}
+
+	// 2. Strategy-based selection
+	strategy := ParsePlantingStrategy(inst.config.PlantingStrategy)
+	if strategy != nil {
+		if strategy.Mode == StrategyModeFastestLevelUp {
+			// fastest_levelup does per-round optimization; approximate with best exp efficiency
+			best := &available[0]
+			for i := 1; i < len(available); i++ {
+				if available[i].FarmExpPerHourNormal > best.FarmExpPerHourNormal {
+					best = &available[i]
+				}
+			}
+			return best
+		}
+
+		var candidates []SeedCandidate
+		for _, yr := range available {
+			sc := SeedCandidate{
+				SeedID:             yr.SeedID,
+				Name:               yr.Name,
+				RequiredLevel:      yr.RequiredLevel,
+				Price:              yr.Price,
+				ExpPerHarvest:      yr.ExpHarvest,
+				Seasons:            yr.Seasons,
+				GrowTimeSec:        yr.GrowTimeSec,
+				ExpEfficiency:      yr.FarmExpPerHourNormal,
+				GrowTimeNormalFert: yr.GrowTimeNormalFert,
+			}
+			if yr.Price > 0 {
+				sc.GoldEfficiency = float64(yr.ExpHarvest*yr.Seasons) / float64(yr.Price)
+			}
+			candidates = append(candidates, sc)
+		}
+
+		result := ApplyStrategy(strategy, candidates)
+		if len(result) > 0 {
+			for i, yr := range available {
+				if yr.SeedID == result[0].SeedID {
+					return &available[i]
+				}
+			}
+		}
+	}
+
+	// 3. ForceLowest: pick lowest required level seed
+	if inst.config.ForceLowest {
+		best := &available[0]
+		for i := 1; i < len(available); i++ {
+			if available[i].RequiredLevel < best.RequiredLevel ||
+				(available[i].RequiredLevel == best.RequiredLevel && available[i].Price < best.Price) {
+				best = &available[i]
+			}
+		}
+		return best
+	}
+
+	// 4. Default: best exp efficiency (matches findBestSeed fallback)
+	best := &available[0]
+	for i := 1; i < len(available); i++ {
+		if available[i].FarmExpPerHourNormal > best.FarmExpPerHourNormal {
+			best = &available[i]
+		}
+	}
+	return best
+}
+
+// estimateLevelUp calculates expected exp rate and hours to next level using a
+// time-series simulation. It builds discrete harvest events from currently
+// growing crops, then simulates future planting cycles using the configured
+// planting strategy to produce an accurate level-up timeline.
 func (inst *Instance) estimateLevelUp(expToNextLevel int64) (expRatePerHour float64, hoursToNextLevel float64) {
 	if inst.lands == nil || expToNextLevel <= 0 {
 		return 0, 0
 	}
 
 	harvestInfos := inst.lands.GetHarvestInfo()
-	if len(harvestInfos) == 0 {
-		return 0, 0
-	}
-
 	gc := GetGameConfig()
 	nowSec := time.Now().Unix()
 
-	// Calculate total exp per minute rate from all planted lands
-	var totalExpPerMin float64
+	// --- Phase 1: Build events from current crops + track per-land free times ---
 
-	// Build discrete harvest events
 	type harvestEvent struct {
 		timeSec int64
 		exp     int64
 	}
+	type landState struct {
+		landID        int64
+		freeTimeSec   int64 // when this land becomes available for replanting
+		expBonusPct   int64
+		timeReducePct int64
+	}
+
 	var events []harvestEvent
+	var landStates []landState
+	var totalExpPerMin float64
 
 	for _, h := range harvestInfos {
-		// Apply land exp bonus: server value is pct*100, e.g. 1000 = 10%
 		adjustedExp := float64(h.CropExp) * (10000 + float64(h.ExpBonusPct)) / 10000.0
 		if adjustedExp <= 0 {
 			continue
 		}
 
-		// Determine season count and season 2 grow time for this crop
 		seasons := 1
 		var season2GrowSec int64
 		if gc != nil && h.CropID > 0 {
 			seasons = gc.GetPlantSeasons(int(h.CropID))
 			if seasons >= 2 {
 				if pd := gc.GetPlantPhaseData(int(h.CropID)); pd != nil && pd.Season2GrowTime > 0 {
-					// Apply time reduction buff to season 2 grow time
-					s2Base := int64(pd.Season2GrowTime)
-					if h.TimeReducePct > 0 {
-						s2Base = s2Base * (10000 - h.TimeReducePct) / 10000
-					}
-					// Subtract fert reduction for season 2 (max phase skipped)
-					s2Fert := int64(pd.Season2MaxPhase)
-					if h.TimeReducePct > 0 {
-						s2Fert = s2Fert * (10000 - h.TimeReducePct) / 10000
-					}
-					season2GrowSec = s2Base - s2Fert
-					if season2GrowSec < 1 {
-						season2GrowSec = 1
-					}
+					season2GrowSec = effectiveGrowSec(pd.Season2GrowTime, pd.Season2MaxPhase, h.TimeReducePct)
 				}
 			}
 		}
 
-		// Steady-state rate: total exp across all seasons / full cycle time
 		if h.CycleTimeSec > 0 {
 			totalCycleExp := adjustedExp * float64(seasons)
 			totalCycleSec := float64(h.CycleTimeSec)
 			if seasons >= 2 && season2GrowSec > 0 {
 				totalCycleSec += float64(season2GrowSec)
 			}
-			expPerMin := totalCycleExp / (totalCycleSec / 60.0)
-			totalExpPerMin += expPerMin
+			totalExpPerMin += totalCycleExp / (totalCycleSec / 60.0)
 		}
 
-		// Discrete harvest events for this land
 		currentSeason := h.Season
 		if currentSeason < 1 {
 			currentSeason = 1
 		}
 
+		var lastHarvestTime int64
+
 		if h.IsMature {
-			// Already mature — will be harvested very soon
 			events = append(events, harvestEvent{timeSec: nowSec, exp: int64(adjustedExp)})
-			// If season 1 mature on a multi-season crop, season 2 harvest follows
+			lastHarvestTime = nowSec
 			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
-				events = append(events, harvestEvent{timeSec: nowSec + season2GrowSec, exp: int64(adjustedExp)})
+				s2Time := nowSec + season2GrowSec
+				events = append(events, harvestEvent{timeSec: s2Time, exp: int64(adjustedExp)})
+				lastHarvestTime = s2Time
 			}
 		} else if h.IsGrowing && h.MatureTimeSec > nowSec {
 			events = append(events, harvestEvent{timeSec: h.MatureTimeSec, exp: int64(adjustedExp)})
-			// If growing in season 1 on a multi-season crop, season 2 harvest follows
+			lastHarvestTime = h.MatureTimeSec
 			if currentSeason <= 1 && seasons >= 2 && season2GrowSec > 0 {
-				events = append(events, harvestEvent{timeSec: h.MatureTimeSec + season2GrowSec, exp: int64(adjustedExp)})
+				s2Time := h.MatureTimeSec + season2GrowSec
+				events = append(events, harvestEvent{timeSec: s2Time, exp: int64(adjustedExp)})
+				lastHarvestTime = s2Time
 			}
+		}
+
+		if lastHarvestTime > 0 {
+			landStates = append(landStates, landState{
+				landID:        h.LandID,
+				freeTimeSec:   lastHarvestTime,
+				expBonusPct:   h.ExpBonusPct,
+				timeReducePct: h.TimeReducePct,
+			})
 		}
 	}
 
-	if totalExpPerMin <= 0 {
+	// --- Phase 2: Include empty/idle lands in the simulation ---
+	_, _, landStatuses := inst.lands.Get()
+	trackedLands := make(map[int64]bool, len(landStates))
+	for _, ls := range landStates {
+		trackedLands[ls.landID] = true
+	}
+	for _, ls := range landStatuses {
+		if !ls.Unlocked || trackedLands[ls.ID] || ls.CropID > 0 {
+			continue
+		}
+		// Skip slave lands occupied by a master's crop
+		if ls.MasterLandID > 0 && ls.MasterLandID != ls.ID && trackedLands[ls.MasterLandID] {
+			continue
+		}
+		landStates = append(landStates, landState{
+			landID:        ls.ID,
+			freeTimeSec:   nowSec,
+			expBonusPct:   ls.ExpBonusPct,
+			timeReducePct: ls.TimeReducePct,
+		})
+	}
+
+	if len(landStates) == 0 {
 		return 0, 0
 	}
 
 	expRatePerHour = totalExpPerMin * 60
 
-	// Sort harvest events chronologically
+	// --- Phase 3: Resolve strategy seed for future planting cycles ---
+	strategySeed := inst.resolveStrategySeed(gc)
+
+	// --- Phase 4: Simulate future planting cycles using the strategy seed ---
+	if strategySeed != nil {
+		s1GrowTimeSec := strategySeed.GrowTimeSec
+		s1FertReduceSec := strategySeed.NormalFertReduceSec
+		s2GrowTimeSec := strategySeed.Season2GrowTimeSec
+		s2FertReduceSec := strategySeed.Season2FertReduceSec
+		seedSeasons := strategySeed.Seasons
+		seedExp := strategySeed.ExpHarvest
+
+		maxSimTime := nowSec + 30*24*3600 // cap simulation at 30 days
+		maxCycles := 50
+
+		// Track cumulative exp for early termination
+		var totalSimExp int64
+		for _, e := range events {
+			totalSimExp += e.exp
+		}
+
+		for cycle := 0; cycle < maxCycles && totalSimExp < expToNextLevel; cycle++ {
+			for i := range landStates {
+				ls := &landStates[i]
+				if ls.freeTimeSec >= maxSimTime {
+					continue
+				}
+
+				s1Eff := effectiveGrowSec(s1GrowTimeSec, s1FertReduceSec, ls.timeReducePct)
+				adjExp := int64(seedExp) * (10000 + ls.expBonusPct) / 10000
+				if adjExp <= 0 {
+					adjExp = int64(seedExp)
+				}
+
+				harvest1Time := ls.freeTimeSec + s1Eff
+				events = append(events, harvestEvent{timeSec: harvest1Time, exp: adjExp})
+				totalSimExp += adjExp
+
+				lastHarvest := harvest1Time
+				if seedSeasons >= 2 && s2GrowTimeSec > 0 {
+					s2Eff := effectiveGrowSec(s2GrowTimeSec, s2FertReduceSec, ls.timeReducePct)
+					harvest2Time := harvest1Time + s2Eff
+					events = append(events, harvestEvent{timeSec: harvest2Time, exp: adjExp})
+					totalSimExp += adjExp
+					lastHarvest = harvest2Time
+				}
+
+				ls.freeTimeSec = lastHarvest
+			}
+		}
+
+		var stratExpPerMin float64
+		for _, ls := range landStates {
+			adjExp := float64(seedExp) * (10000 + float64(ls.expBonusPct)) / 10000.0
+			s1Eff := effectiveGrowSec(s1GrowTimeSec, s1FertReduceSec, ls.timeReducePct)
+			totalExp := adjExp * float64(seedSeasons)
+			totalTime := float64(s1Eff)
+			if seedSeasons >= 2 && s2GrowTimeSec > 0 {
+				s2Eff := effectiveGrowSec(s2GrowTimeSec, s2FertReduceSec, ls.timeReducePct)
+				totalTime += float64(s2Eff)
+			}
+			if totalTime > 0 {
+				stratExpPerMin += totalExp / (totalTime / 60.0)
+			}
+		}
+		if stratExpPerMin > 0 {
+			expRatePerHour = stratExpPerMin * 60
+		}
+	}
+
+	// --- Phase 5: Walk sorted events to find the level-up moment ---
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].timeSec < events[j].timeSec
 	})
 
-	// Walk through harvest events — check if any batch triggers level-up
 	remaining := expToNextLevel
 	lastEventTime := nowSec
 	for _, e := range events {
 		remaining -= e.exp
 		if remaining <= 0 {
-			// Level up happens at this harvest
 			secsUntil := e.timeSec - nowSec
 			if secsUntil < 0 {
 				secsUntil = 0
@@ -512,13 +721,15 @@ func (inst *Instance) estimateLevelUp(expToNextLevel int64) (expRatePerHour floa
 		lastEventTime = e.timeSec
 	}
 
-	// Current harvests not enough — use steady-state rate for the remainder
-	additionalSecs := float64(remaining) / totalExpPerMin * 60
-	totalSecs := float64(lastEventTime-nowSec) + additionalSecs
-	if totalSecs < 0 {
-		totalSecs = 0
+	// --- Phase 6: Fallback — use steady-state rate for any remaining exp ---
+	if expRatePerHour > 0 {
+		additionalSecs := float64(remaining) / (expRatePerHour / 3600.0)
+		totalSecs := float64(lastEventTime-nowSec) + additionalSecs
+		if totalSecs < 0 {
+			totalSecs = 0
+		}
+		hoursToNextLevel = totalSecs / 3600.0
 	}
-	hoursToNextLevel = totalSecs / 3600.0
 	return
 }
 
