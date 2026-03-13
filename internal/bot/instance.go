@@ -113,10 +113,10 @@ func NewInstance(account *model.Account, serverURL, clientVersion string, s *sto
 		EnableClaimTask:   account.EnableClaimTask,
 
 		// Crop selection & filtering
-		PlantCropID:  account.PlantCropID,
-		SellCropIDs:  account.SellCropIDs,
-		StealCropIDs: account.StealCropIDs,
-		PreferBagSeeds: account.PreferBagSeeds,
+		PlantCropID:      account.PlantCropID,
+		SellCropIDs:      account.SellCropIDs,
+		StealCropIDs:     account.StealCropIDs,
+		PreferBagSeeds:   account.PreferBagSeeds,
 		PlantingStrategy: account.PlantingStrategy,
 
 		EnableAntiDetection: account.EnableAntiDetection,
@@ -565,6 +565,7 @@ func (inst *Instance) UpdateConfig(account *model.Account) {
 	inst.config.EnableClaimTask = account.EnableClaimTask
 
 	inst.config.PlantCropID = account.PlantCropID
+	inst.config.PlantingStrategy = account.PlantingStrategy
 	inst.config.SellCropIDs = account.SellCropIDs
 	inst.config.StealCropIDs = account.StealCropIDs
 	inst.config.PreferBagSeeds = account.PreferBagSeeds
