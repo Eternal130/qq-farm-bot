@@ -9,6 +9,7 @@ package friendpb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	avatarframepb "qq-farm-bot/proto/avatarframepb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -193,8 +194,11 @@ type GameFriend struct {
 	Tags             *Tags                  `protobuf:"bytes,8,opt,name=tags,proto3" json:"tags,omitempty"`
 	Plant            *Plant                 `protobuf:"bytes,9,opt,name=plant,proto3" json:"plant,omitempty"`
 	AuthorizedStatus int32                  `protobuf:"varint,10,opt,name=authorized_status,json=authorizedStatus,proto3" json:"authorized_status,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// field 11 reserved
+	Illustrated       *Illustrated                 `protobuf:"bytes,12,opt,name=illustrated,proto3" json:"illustrated,omitempty"`
+	EquipAvatarFrames []*avatarframepb.AvatarFrame `protobuf:"bytes,13,rep,name=equip_avatar_frames,json=equipAvatarFrames,proto3" json:"equip_avatar_frames,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *GameFriend) Reset() {
@@ -297,6 +301,20 @@ func (x *GameFriend) GetAuthorizedStatus() int32 {
 	return 0
 }
 
+func (x *GameFriend) GetIllustrated() *Illustrated {
+	if x != nil {
+		return x.Illustrated
+	}
+	return nil
+}
+
+func (x *GameFriend) GetEquipAvatarFrames() []*avatarframepb.AvatarFrame {
+	if x != nil {
+		return x.EquipAvatarFrames
+	}
+	return nil
+}
+
 type Illustrated struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	NormalProgress  int32                  `protobuf:"varint,1,opt,name=normal_progress,json=normalProgress,proto3" json:"normal_progress,omitempty"`
@@ -388,6 +406,7 @@ func (*GetAllRequest) Descriptor() ([]byte, []int) {
 type GetAllReply struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	GameFriends      []*GameFriend          `protobuf:"bytes,1,rep,name=game_friends,json=gameFriends,proto3" json:"game_friends,omitempty"`
+	Invitations      []*Invitation          `protobuf:"bytes,2,rep,name=invitations,proto3" json:"invitations,omitempty"`
 	ApplicationCount int64                  `protobuf:"varint,3,opt,name=application_count,json=applicationCount,proto3" json:"application_count,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -426,6 +445,13 @@ func (*GetAllReply) Descriptor() ([]byte, []int) {
 func (x *GetAllReply) GetGameFriends() []*GameFriend {
 	if x != nil {
 		return x.GameFriends
+	}
+	return nil
+}
+
+func (x *GetAllReply) GetInvitations() []*Invitation {
+	if x != nil {
+		return x.Invitations
 	}
 	return nil
 }
@@ -484,6 +510,7 @@ func (x *SyncAllRequest) GetOpenIds() []string {
 type SyncAllReply struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	GameFriends      []*GameFriend          `protobuf:"bytes,1,rep,name=game_friends,json=gameFriends,proto3" json:"game_friends,omitempty"`
+	Invitations      []*Invitation          `protobuf:"bytes,2,rep,name=invitations,proto3" json:"invitations,omitempty"`
 	ApplicationCount int64                  `protobuf:"varint,3,opt,name=application_count,json=applicationCount,proto3" json:"application_count,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -522,6 +549,13 @@ func (*SyncAllReply) Descriptor() ([]byte, []int) {
 func (x *SyncAllReply) GetGameFriends() []*GameFriend {
 	if x != nil {
 		return x.GameFriends
+	}
+	return nil
+}
+
+func (x *SyncAllReply) GetInvitations() []*Invitation {
+	if x != nil {
+		return x.Invitations
 	}
 	return nil
 }
@@ -1015,6 +1049,7 @@ func (x *SetBlockApplicationsReply) GetBlock() bool {
 
 type GetGameFriendsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	FriendGids    []int64                `protobuf:"varint,1,rep,packed,name=friend_gids,json=friendGids,proto3" json:"friend_gids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1049,9 +1084,16 @@ func (*GetGameFriendsRequest) Descriptor() ([]byte, []int) {
 	return file_friendpb_friend_proto_rawDescGZIP(), []int{18}
 }
 
+func (x *GetGameFriendsRequest) GetFriendGids() []int64 {
+	if x != nil {
+		return x.FriendGids
+	}
+	return nil
+}
+
 type GetGameFriendsReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	GameFriends   []*GameFriend          `protobuf:"bytes,1,rep,name=game_friends,json=gameFriends,proto3" json:"game_friends,omitempty"`
+	Friends       []*GameFriend          `protobuf:"bytes,1,rep,name=friends,proto3" json:"friends,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1086,9 +1128,9 @@ func (*GetGameFriendsReply) Descriptor() ([]byte, []int) {
 	return file_friendpb_friend_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *GetGameFriendsReply) GetGameFriends() []*GameFriend {
+func (x *GetGameFriendsReply) GetFriends() []*GameFriend {
 	if x != nil {
-		return x.GameFriends
+		return x.Friends
 	}
 	return nil
 }
@@ -1477,7 +1519,7 @@ var File_friendpb_friend_proto protoreflect.FileDescriptor
 
 const file_friendpb_friend_proto_rawDesc = "" +
 	"\n" +
-	"\x15friendpb/friend.proto\x12\x0fgamepb.friendpb\"\xb8\x02\n" +
+	"\x15friendpb/friend.proto\x12\x0fgamepb.friendpb\x1a\x1favatarframepb/avatarframe.proto\"\xb8\x02\n" +
 	"\x05Plant\x12 \n" +
 	"\fdry_time_sec\x18\x01 \x01(\x03R\n" +
 	"dryTimeSec\x12\"\n" +
@@ -1492,7 +1534,7 @@ const file_friendpb_friend_proto_rawDesc = "" +
 	"insect_num\x18\t \x01(\x03R\tinsectNum\":\n" +
 	"\x04Tags\x12\x15\n" +
 	"\x06is_new\x18\x01 \x01(\bR\x05isNew\x12\x1b\n" +
-	"\tis_follow\x18\x02 \x01(\bR\bisFollow\"\xb2\x02\n" +
+	"\tis_follow\x18\x02 \x01(\bR\bisFollow\"\xc5\x03\n" +
 	"\n" +
 	"GameFriend\x12\x10\n" +
 	"\x03gid\x18\x01 \x01(\x03R\x03gid\x12\x17\n" +
@@ -1506,18 +1548,22 @@ const file_friendpb_friend_proto_rawDesc = "" +
 	"\x04tags\x18\b \x01(\v2\x15.gamepb.friendpb.TagsR\x04tags\x12,\n" +
 	"\x05plant\x18\t \x01(\v2\x16.gamepb.friendpb.PlantR\x05plant\x12+\n" +
 	"\x11authorized_status\x18\n" +
-	" \x01(\x05R\x10authorizedStatus\"a\n" +
+	" \x01(\x05R\x10authorizedStatus\x12>\n" +
+	"\villustrated\x18\f \x01(\v2\x1c.gamepb.friendpb.IllustratedR\villustrated\x12Q\n" +
+	"\x13equip_avatar_frames\x18\r \x03(\v2!.gamepb.avatarframepb.AvatarFrameR\x11equipAvatarFrames\"a\n" +
 	"\vIllustrated\x12'\n" +
 	"\x0fnormal_progress\x18\x01 \x01(\x05R\x0enormalProgress\x12)\n" +
 	"\x10premium_progress\x18\x02 \x01(\x05R\x0fpremiumProgress\"\x0f\n" +
-	"\rGetAllRequest\"z\n" +
+	"\rGetAllRequest\"\xb9\x01\n" +
 	"\vGetAllReply\x12>\n" +
-	"\fgame_friends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\vgameFriends\x12+\n" +
+	"\fgame_friends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\vgameFriends\x12=\n" +
+	"\vinvitations\x18\x02 \x03(\v2\x1b.gamepb.friendpb.InvitationR\vinvitations\x12+\n" +
 	"\x11application_count\x18\x03 \x01(\x03R\x10applicationCount\"+\n" +
 	"\x0eSyncAllRequest\x12\x19\n" +
-	"\bopen_ids\x18\x02 \x03(\tR\aopenIds\"{\n" +
+	"\bopen_ids\x18\x02 \x03(\tR\aopenIds\"\xba\x01\n" +
 	"\fSyncAllReply\x12>\n" +
-	"\fgame_friends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\vgameFriends\x12+\n" +
+	"\fgame_friends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\vgameFriends\x12=\n" +
+	"\vinvitations\x18\x02 \x03(\v2\x1b.gamepb.friendpb.InvitationR\vinvitations\x12+\n" +
 	"\x11application_count\x18\x03 \x01(\x03R\x10applicationCount\"\x9a\x01\n" +
 	"\vApplication\x12\x10\n" +
 	"\x03gid\x18\x01 \x01(\x03R\x03gid\x12\x17\n" +
@@ -1547,10 +1593,12 @@ const file_friendpb_friend_proto_rawDesc = "" +
 	"\x1bSetBlockApplicationsRequest\x12\x14\n" +
 	"\x05block\x18\x01 \x01(\bR\x05block\"1\n" +
 	"\x19SetBlockApplicationsReply\x12\x14\n" +
-	"\x05block\x18\x01 \x01(\bR\x05block\"\x17\n" +
-	"\x15GetGameFriendsRequest\"U\n" +
-	"\x13GetGameFriendsReply\x12>\n" +
-	"\fgame_friends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\vgameFriends\"Z\n" +
+	"\x05block\x18\x01 \x01(\bR\x05block\"8\n" +
+	"\x15GetGameFriendsRequest\x12\x1f\n" +
+	"\vfriend_gids\x18\x01 \x03(\x03R\n" +
+	"friendGids\"L\n" +
+	"\x13GetGameFriendsReply\x125\n" +
+	"\afriends\x18\x01 \x03(\v2\x1b.gamepb.friendpb.GameFriendR\afriends\"Z\n" +
 	"\x0eSetTagsRequest\x12\x1d\n" +
 	"\n" +
 	"friend_gid\x18\x01 \x01(\x03R\tfriendGid\x12)\n" +
@@ -1612,23 +1660,28 @@ var file_friendpb_friend_proto_goTypes = []any{
 	(*FriendApplicationReceivedNotify)(nil), // 26: gamepb.friendpb.FriendApplicationReceivedNotify
 	(*FriendAddedNotify)(nil),               // 27: gamepb.friendpb.FriendAddedNotify
 	(*DelFriendNotify)(nil),                 // 28: gamepb.friendpb.DelFriendNotify
+	(*avatarframepb.AvatarFrame)(nil),       // 29: gamepb.avatarframepb.AvatarFrame
 }
 var file_friendpb_friend_proto_depIdxs = []int32{
 	1,  // 0: gamepb.friendpb.GameFriend.tags:type_name -> gamepb.friendpb.Tags
 	0,  // 1: gamepb.friendpb.GameFriend.plant:type_name -> gamepb.friendpb.Plant
-	2,  // 2: gamepb.friendpb.GetAllReply.game_friends:type_name -> gamepb.friendpb.GameFriend
-	2,  // 3: gamepb.friendpb.SyncAllReply.game_friends:type_name -> gamepb.friendpb.GameFriend
-	8,  // 4: gamepb.friendpb.GetApplicationsReply.applications:type_name -> gamepb.friendpb.Application
-	2,  // 5: gamepb.friendpb.AcceptFriendsReply.friends:type_name -> gamepb.friendpb.GameFriend
-	2,  // 6: gamepb.friendpb.GetGameFriendsReply.game_friends:type_name -> gamepb.friendpb.GameFriend
-	1,  // 7: gamepb.friendpb.SetTagsRequest.tags:type_name -> gamepb.friendpb.Tags
-	8,  // 8: gamepb.friendpb.FriendApplicationReceivedNotify.applications:type_name -> gamepb.friendpb.Application
-	2,  // 9: gamepb.friendpb.FriendAddedNotify.friends:type_name -> gamepb.friendpb.GameFriend
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	3,  // 2: gamepb.friendpb.GameFriend.illustrated:type_name -> gamepb.friendpb.Illustrated
+	29, // 3: gamepb.friendpb.GameFriend.equip_avatar_frames:type_name -> gamepb.avatarframepb.AvatarFrame
+	2,  // 4: gamepb.friendpb.GetAllReply.game_friends:type_name -> gamepb.friendpb.GameFriend
+	9,  // 5: gamepb.friendpb.GetAllReply.invitations:type_name -> gamepb.friendpb.Invitation
+	2,  // 6: gamepb.friendpb.SyncAllReply.game_friends:type_name -> gamepb.friendpb.GameFriend
+	9,  // 7: gamepb.friendpb.SyncAllReply.invitations:type_name -> gamepb.friendpb.Invitation
+	8,  // 8: gamepb.friendpb.GetApplicationsReply.applications:type_name -> gamepb.friendpb.Application
+	2,  // 9: gamepb.friendpb.AcceptFriendsReply.friends:type_name -> gamepb.friendpb.GameFriend
+	2,  // 10: gamepb.friendpb.GetGameFriendsReply.friends:type_name -> gamepb.friendpb.GameFriend
+	1,  // 11: gamepb.friendpb.SetTagsRequest.tags:type_name -> gamepb.friendpb.Tags
+	8,  // 12: gamepb.friendpb.FriendApplicationReceivedNotify.applications:type_name -> gamepb.friendpb.Application
+	2,  // 13: gamepb.friendpb.FriendAddedNotify.friends:type_name -> gamepb.friendpb.GameFriend
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_friendpb_friend_proto_init() }

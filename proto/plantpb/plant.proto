@@ -2,6 +2,8 @@ syntax = "proto3";
 package gamepb.plantpb;
 option go_package = "qq-farm-bot/proto/plantpb";
 
+import "corepb/core.proto";
+
 enum PlantPhase {
     PHASE_UNKNOWN = 0;
     SEED = 1;
@@ -115,6 +117,8 @@ message HarvestRequest {
 }
 message HarvestReply {
     repeated LandInfo land = 1;
+    repeated corepb.Item items = 2;
+    repeated corepb.Item lost_items = 3;
     repeated OperationLimit operation_limits = 4;
     map<int64, string> warnings = 5;
 }

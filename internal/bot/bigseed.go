@@ -12,7 +12,6 @@ import (
 	"qq-farm-bot/proto/plantpb"
 )
 
-
 type bigSeed struct {
 	itemID int64
 	count  int64
@@ -94,11 +93,11 @@ func (f *FarmWorker) handleBigSeedPlanting(emptyLands []int64, allLands []*plant
 			}
 
 			block := emptyBlocks[picked]
-			masterID := block.ids[0]
+			blockLandIDs := block.ids[:]
 			seedName := f.gc.GetPlantNameBySeedID(int(seed.itemID))
 
-			if f.plantBigSeedOnLand(seed.itemID, masterID, consumed) {
-				f.logger.Infof("大种子", "种植 %s 于土地#%d (等级合计%d)", seedName, masterID, block.totalLevel)
+			if f.plantBigSeedOnLands(seed.itemID, blockLandIDs, consumed) {
+				f.logger.Infof("大种子", "种植 %s 于土地#%d (等级合计%d)", seedName, blockLandIDs[0], block.totalLevel)
 				seed.count--
 				totalPlanted++
 			}
@@ -121,7 +120,7 @@ func (f *FarmWorker) handleBigSeedPlanting(emptyLands []int64, allLands []*plant
 						continue
 					}
 					seedName := f.gc.GetPlantNameBySeedID(int(seed.itemID))
-					if f.plantBigSeedOnLand(seed.itemID, landID, consumed) {
+					if f.plantBigSeedOnLands(seed.itemID, []int64{landID}, consumed) {
 						f.logger.Infof("大种子", "种植 %s 于土地#%d", seedName, landID)
 						seed.count--
 						totalPlanted++
@@ -192,11 +191,9 @@ func (f *FarmWorker) handleBigSeedPlanting(emptyLands []int64, allLands []*plant
 	return remaining
 }
 
-// plantBigSeedOnLand attempts to plant a big seed on the given land as master.
-// On success it marks all occupied lands in consumed and returns true.
-func (f *FarmWorker) plantBigSeedOnLand(seedID, landID int64, consumed map[int64]bool) bool {
+func (f *FarmWorker) plantBigSeedOnLands(seedID int64, landIDs []int64, consumed map[int64]bool) bool {
 	plantReq := &plantpb.PlantRequest{
-		Items: []*plantpb.PlantItem{{SeedId: seedID, LandIds: []int64{landID}}},
+		Items: []*plantpb.PlantItem{{SeedId: seedID, LandIds: landIDs}},
 	}
 	plantBody, _ := proto.Marshal(plantReq)
 	replyBody, err := f.net.SendRequest("gamepb.plantpb.PlantService", "Plant", plantBody)
@@ -204,8 +201,10 @@ func (f *FarmWorker) plantBigSeedOnLand(seedID, landID int64, consumed map[int64
 		return false
 	}
 
-	consumed[landID] = true
-	delete(f.fertilized, landID)
+	for _, id := range landIDs {
+		consumed[id] = true
+		delete(f.fertilized, id)
+	}
 
 	plantReply := &plantpb.PlantReply{}
 	proto.Unmarshal(replyBody, plantReply)
@@ -244,9 +243,36 @@ func (f *FarmWorker) getBigSeedsFromBag() []bigSeed {
 	return seeds
 }
 
-// all2x2BlockPositions returns all possible 2×2 block positions on the farm grid.
-// Each block is [4]int64{topLeft, topRight, bottomLeft, bottomRight}.
-// The farm grid is fixed at 4 columns (row-major sequential IDs).
+func detectGridCols(allLands []*plantpb.LandInfo) int {
+	if len(allLands) == 0 {
+		return 0
+	}
+	var ids []int64
+	for _, land := range allLands {
+		ids = append(ids, land.Id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+
+	n := len(ids)
+	minID := ids[0]
+	maxID := ids[n-1]
+	totalSlots := int(maxID - minID + 1)
+
+	if totalSlots == n {
+		for _, cols := range []int{6, 5, 4} {
+			if totalSlots%cols == 0 {
+				return cols
+			}
+		}
+	}
+	for _, cols := range []int{6, 5, 4} {
+		if n%cols == 0 && totalSlots >= cols {
+			return cols
+		}
+	}
+	return 4
+}
+
 func all2x2BlockPositions(allLands []*plantpb.LandInfo) [][4]int64 {
 	if len(allLands) < 4 {
 		return nil
@@ -264,8 +290,8 @@ func all2x2BlockPositions(allLands []*plantpb.LandInfo) [][4]int64 {
 	maxID := ids[len(ids)-1]
 	totalSlots := int(maxID - minID + 1)
 
-	const cols = 4 // farm grid is always 4 columns wide
-	if totalSlots < cols {
+	cols := detectGridCols(allLands)
+	if cols == 0 || totalSlots < cols {
 		return nil
 	}
 

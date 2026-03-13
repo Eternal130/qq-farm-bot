@@ -2,6 +2,8 @@ syntax = "proto3";
 package gamepb.friendpb;
 option go_package = "qq-farm-bot/proto/friendpb";
 
+import "avatarframepb/avatarframe.proto";
+
 message Plant {
     int64 dry_time_sec = 1;
     int64 weed_time_sec = 2;
@@ -30,6 +32,9 @@ message GameFriend {
     Tags tags = 8;
     Plant plant = 9;
     int32 authorized_status = 10;
+    // field 11 reserved
+    Illustrated illustrated = 12;
+    repeated gamepb.avatarframepb.AvatarFrame equip_avatar_frames = 13;
 }
 
 message Illustrated {
@@ -40,12 +45,14 @@ message Illustrated {
 message GetAllRequest {}
 message GetAllReply {
     repeated GameFriend game_friends = 1;
+    repeated Invitation invitations = 2;
     int64 application_count = 3;
 }
 
 message SyncAllRequest { repeated string open_ids = 2; }
 message SyncAllReply {
     repeated GameFriend game_friends = 1;
+    repeated Invitation invitations = 2;
     int64 application_count = 3;
 }
 
@@ -78,9 +85,11 @@ message RejectFriendsReply {}
 message SetBlockApplicationsRequest { bool block = 1; }
 message SetBlockApplicationsReply { bool block = 1; }
 
-message GetGameFriendsRequest {}
+message GetGameFriendsRequest {
+    repeated int64 friend_gids = 1;
+}
 message GetGameFriendsReply {
-    repeated GameFriend game_friends = 1;
+    repeated GameFriend friends = 1;
 }
 
 message SetTagsRequest {

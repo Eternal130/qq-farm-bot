@@ -9,6 +9,7 @@ package plantpb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	corepb "qq-farm-bot/proto/corepb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -999,6 +1000,8 @@ func (x *HarvestRequest) GetIsAll() bool {
 type HarvestReply struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Land            []*LandInfo            `protobuf:"bytes,1,rep,name=land,proto3" json:"land,omitempty"`
+	Items           []*corepb.Item         `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	LostItems       []*corepb.Item         `protobuf:"bytes,3,rep,name=lost_items,json=lostItems,proto3" json:"lost_items,omitempty"`
 	OperationLimits []*OperationLimit      `protobuf:"bytes,4,rep,name=operation_limits,json=operationLimits,proto3" json:"operation_limits,omitempty"`
 	Warnings        map[int64]string       `protobuf:"bytes,5,rep,name=warnings,proto3" json:"warnings,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
@@ -1038,6 +1041,20 @@ func (*HarvestReply) Descriptor() ([]byte, []int) {
 func (x *HarvestReply) GetLand() []*LandInfo {
 	if x != nil {
 		return x.Land
+	}
+	return nil
+}
+
+func (x *HarvestReply) GetItems() []*corepb.Item {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *HarvestReply) GetLostItems() []*corepb.Item {
+	if x != nil {
+		return x.LostItems
 	}
 	return nil
 }
@@ -2352,7 +2369,7 @@ var File_plantpb_plant_proto protoreflect.FileDescriptor
 
 const file_plantpb_plant_proto_rawDesc = "" +
 	"\n" +
-	"\x13plantpb/plant.proto\x12\x0egamepb.plantpb\"\x91\x06\n" +
+	"\x13plantpb/plant.proto\x12\x0egamepb.plantpb\x1a\x11corepb/core.proto\"\x91\x06\n" +
 	"\bLandInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
 	"\bunlocked\x18\x02 \x01(\bR\bunlocked\x12\x14\n" +
@@ -2450,9 +2467,12 @@ const file_plantpb_plant_proto_rawDesc = "" +
 	"\x0eHarvestRequest\x12\x19\n" +
 	"\bland_ids\x18\x01 \x03(\x03R\alandIds\x12\x19\n" +
 	"\bhost_gid\x18\x02 \x01(\x03R\ahostGid\x12\x15\n" +
-	"\x06is_all\x18\x03 \x01(\bR\x05isAll\"\x8c\x02\n" +
+	"\x06is_all\x18\x03 \x01(\bR\x05isAll\"\xdd\x02\n" +
 	"\fHarvestReply\x12,\n" +
-	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land\x12I\n" +
+	"\x04land\x18\x01 \x03(\v2\x18.gamepb.plantpb.LandInfoR\x04land\x12\"\n" +
+	"\x05items\x18\x02 \x03(\v2\f.corepb.ItemR\x05items\x12+\n" +
+	"\n" +
+	"lost_items\x18\x03 \x03(\v2\f.corepb.ItemR\tlostItems\x12I\n" +
 	"\x10operation_limits\x18\x04 \x03(\v2\x1e.gamepb.plantpb.OperationLimitR\x0foperationLimits\x12F\n" +
 	"\bwarnings\x18\x05 \x03(\v2*.gamepb.plantpb.HarvestReply.WarningsEntryR\bwarnings\x1a;\n" +
 	"\rWarningsEntry\x12\x10\n" +
@@ -2606,6 +2626,7 @@ var file_plantpb_plant_proto_goTypes = []any{
 	nil,                            // 38: gamepb.plantpb.PlantPhaseInfo.FertsUsedEntry
 	nil,                            // 39: gamepb.plantpb.HarvestReply.WarningsEntry
 	nil,                            // 40: gamepb.plantpb.PlantRequest.LandAndSeedEntry
+	(*corepb.Item)(nil),            // 41: corepb.Item
 }
 var file_plantpb_plant_proto_depIdxs = []int32{
 	2,  // 0: gamepb.plantpb.LandInfo.unlock_condition:type_name -> gamepb.plantpb.LandUnlockCondition
@@ -2618,34 +2639,36 @@ var file_plantpb_plant_proto_depIdxs = []int32{
 	1,  // 7: gamepb.plantpb.AllLandsReply.lands:type_name -> gamepb.plantpb.LandInfo
 	8,  // 8: gamepb.plantpb.AllLandsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
 	1,  // 9: gamepb.plantpb.HarvestReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 10: gamepb.plantpb.HarvestReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	39, // 11: gamepb.plantpb.HarvestReply.warnings:type_name -> gamepb.plantpb.HarvestReply.WarningsEntry
-	1,  // 12: gamepb.plantpb.WaterLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 13: gamepb.plantpb.WaterLandReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 14: gamepb.plantpb.WeedOutReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 15: gamepb.plantpb.WeedOutReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 16: gamepb.plantpb.InsecticideReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 17: gamepb.plantpb.InsecticideReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	40, // 18: gamepb.plantpb.PlantRequest.land_and_seed:type_name -> gamepb.plantpb.PlantRequest.LandAndSeedEntry
-	19, // 19: gamepb.plantpb.PlantRequest.items:type_name -> gamepb.plantpb.PlantItem
-	1,  // 20: gamepb.plantpb.PlantReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 21: gamepb.plantpb.PlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 22: gamepb.plantpb.RemovePlantReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 23: gamepb.plantpb.RemovePlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 24: gamepb.plantpb.FertilizeReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 25: gamepb.plantpb.FertilizeReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 26: gamepb.plantpb.PutInsectsReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 27: gamepb.plantpb.PutInsectsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 28: gamepb.plantpb.PutWeedsReply.land:type_name -> gamepb.plantpb.LandInfo
-	8,  // 29: gamepb.plantpb.PutWeedsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
-	1,  // 30: gamepb.plantpb.LandsNotify.lands:type_name -> gamepb.plantpb.LandInfo
-	1,  // 31: gamepb.plantpb.UnlockLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	1,  // 32: gamepb.plantpb.UpgradeLandReply.land:type_name -> gamepb.plantpb.LandInfo
-	33, // [33:33] is the sub-list for method output_type
-	33, // [33:33] is the sub-list for method input_type
-	33, // [33:33] is the sub-list for extension type_name
-	33, // [33:33] is the sub-list for extension extendee
-	0,  // [0:33] is the sub-list for field type_name
+	41, // 10: gamepb.plantpb.HarvestReply.items:type_name -> corepb.Item
+	41, // 11: gamepb.plantpb.HarvestReply.lost_items:type_name -> corepb.Item
+	8,  // 12: gamepb.plantpb.HarvestReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	39, // 13: gamepb.plantpb.HarvestReply.warnings:type_name -> gamepb.plantpb.HarvestReply.WarningsEntry
+	1,  // 14: gamepb.plantpb.WaterLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 15: gamepb.plantpb.WaterLandReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 16: gamepb.plantpb.WeedOutReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 17: gamepb.plantpb.WeedOutReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 18: gamepb.plantpb.InsecticideReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 19: gamepb.plantpb.InsecticideReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	40, // 20: gamepb.plantpb.PlantRequest.land_and_seed:type_name -> gamepb.plantpb.PlantRequest.LandAndSeedEntry
+	19, // 21: gamepb.plantpb.PlantRequest.items:type_name -> gamepb.plantpb.PlantItem
+	1,  // 22: gamepb.plantpb.PlantReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 23: gamepb.plantpb.PlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 24: gamepb.plantpb.RemovePlantReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 25: gamepb.plantpb.RemovePlantReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 26: gamepb.plantpb.FertilizeReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 27: gamepb.plantpb.FertilizeReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 28: gamepb.plantpb.PutInsectsReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 29: gamepb.plantpb.PutInsectsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 30: gamepb.plantpb.PutWeedsReply.land:type_name -> gamepb.plantpb.LandInfo
+	8,  // 31: gamepb.plantpb.PutWeedsReply.operation_limits:type_name -> gamepb.plantpb.OperationLimit
+	1,  // 32: gamepb.plantpb.LandsNotify.lands:type_name -> gamepb.plantpb.LandInfo
+	1,  // 33: gamepb.plantpb.UnlockLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	1,  // 34: gamepb.plantpb.UpgradeLandReply.land:type_name -> gamepb.plantpb.LandInfo
+	35, // [35:35] is the sub-list for method output_type
+	35, // [35:35] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_plantpb_plant_proto_init() }

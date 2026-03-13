@@ -71,31 +71,7 @@ func (fw *FriendWorker) checkFriends() {
 		return
 	}
 
-	// QQ 平台使用 SyncAll 接口获取好友列表，微信平台使用 GetAll
-	var friends []*friendpb.GameFriend
-	if fw.cfg.Platform == "qq" {
-		req := &friendpb.SyncAllRequest{OpenIds: []string{}}
-		body, _ := proto.Marshal(req)
-		replyBody, err := fw.net.SendRequestWithRetry("gamepb.friendpb.FriendService", "SyncAll", body)
-		if err != nil {
-			fw.logger.Warnf("好友", "获取好友失败: %v", err)
-			return
-		}
-		reply := &friendpb.SyncAllReply{}
-		proto.Unmarshal(replyBody, reply)
-		friends = reply.GameFriends
-	} else {
-		req := &friendpb.GetAllRequest{}
-		body, _ := proto.Marshal(req)
-		replyBody, err := fw.net.SendRequestWithRetry("gamepb.friendpb.FriendService", "GetAll", body)
-		if err != nil {
-			fw.logger.Warnf("好友", "获取好友失败: %v", err)
-			return
-		}
-		reply := &friendpb.GetAllReply{}
-		proto.Unmarshal(replyBody, reply)
-		friends = reply.GameFriends
-	}
+	friends := fw.fetchFriendList()
 	if len(friends) == 0 {
 		return
 	}
@@ -252,21 +228,30 @@ func (fw *FriendWorker) visitFriend(friendGid int64, name string, myGid int64) f
 		}
 	}
 
-	// Steal (respect config + crop filter)
+	// Steal (respect config + crop filter + CheckCanOperate)
 	if fw.cfg.EnableSteal && len(status.stealable) > 0 {
-		stealFilter := ParseCropIDs(fw.cfg.StealCropIDs)
-		hasStealFilter := len(stealFilter) > 0
+		canSteal, _ := fw.checkCanSteal(friendGid)
+		if canSteal {
+			stealFilter := ParseCropIDs(fw.cfg.StealCropIDs)
+			hasStealFilter := len(stealFilter) > 0
 
-		for _, sl := range status.stealable {
-			if hasStealFilter && !stealFilter[int(sl.cropID)] {
-				continue
+			for _, sl := range status.stealable {
+				if hasStealFilter && !stealFilter[int(sl.cropID)] {
+					continue
+				}
+				req := &plantpb.HarvestRequest{LandIds: []int64{sl.landID}, HostGid: friendGid, IsAll: true}
+				body, _ := proto.Marshal(req)
+				replyBody, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Harvest", body)
+				if err == nil {
+					reply := &plantpb.HarvestReply{}
+					proto.Unmarshal(replyBody, reply)
+					if len(reply.LostItems) > 0 && len(reply.Land) == 0 {
+						continue
+					}
+					actions.steal++
+				}
+				fw.antiDetectionDelay(100)
 			}
-			req := &plantpb.HarvestRequest{LandIds: []int64{sl.landID}, HostGid: friendGid, IsAll: true}
-			body, _ := proto.Marshal(req)
-			if _, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "Harvest", body); err == nil {
-				actions.steal++
-			}
-			fw.antiDetectionDelay(100)
 		}
 	}
 
@@ -370,8 +355,31 @@ func (fw *FriendWorker) checkAndAcceptApplications() {
 	}
 }
 
-// antiDetectionDelay sleeps for baseMs when anti-detection is off,
-// or a randomized duration (2x ~ 4x baseMs) when anti-detection is on.
+func (fw *FriendWorker) fetchFriendList() []*friendpb.GameFriend {
+	req := &friendpb.GetAllRequest{}
+	body, _ := proto.Marshal(req)
+	replyBody, err := fw.net.SendRequestWithRetry("gamepb.friendpb.FriendService", "GetAll", body)
+	if err != nil {
+		fw.logger.Warnf("好友", "获取好友失败: %v", err)
+		return nil
+	}
+	reply := &friendpb.GetAllReply{}
+	proto.Unmarshal(replyBody, reply)
+	return reply.GameFriends
+}
+
+func (fw *FriendWorker) checkCanSteal(friendGid int64) (bool, int64) {
+	req := &plantpb.CheckCanOperateRequest{HostGid: friendGid, OperationId: 10008}
+	body, _ := proto.Marshal(req)
+	replyBody, err := fw.net.SendRequest("gamepb.plantpb.PlantService", "CheckCanOperate", body)
+	if err != nil {
+		return false, 0
+	}
+	reply := &plantpb.CheckCanOperateReply{}
+	proto.Unmarshal(replyBody, reply)
+	return reply.CanOperate, reply.CanStealNum
+}
+
 func (fw *FriendWorker) antiDetectionDelay(baseMs int) {
 	if fw.cfg.EnableAntiDetection {
 		time.Sleep(time.Duration(baseMs*2+rand.Intn(baseMs*2)) * time.Millisecond)
