@@ -19,13 +19,13 @@ const normalFertilizerID = 1011
 
 // FarmWorker handles all farm automation logic.
 type FarmWorker struct {
-	net        *Network
-	logger     *Logger
-	cfg        *BotConfig
-	gc         *GameConfig
-	lands      *LandCache
-	sc         *StatsCollector
-	fertilized map[int64]bool // tracks lands we've already fertilized this grow cycle
+	net                *Network
+	logger             *Logger
+	cfg                *BotConfig
+	gc                 *GameConfig
+	lands              *LandCache
+	sc                 *StatsCollector
+	fertilized         map[int64]bool // tracks lands we've already fertilized this grow cycle
 	reservedForBigSeed map[int64]bool // lands reserved for 2×2 seed planting
 }
 
@@ -35,16 +35,15 @@ type shopSeedCandidate struct {
 	requiredLevel int64
 }
 
-
 func NewFarmWorker(net *Network, logger *Logger, cfg *BotConfig, lands *LandCache, sc *StatsCollector) *FarmWorker {
 	return &FarmWorker{
-		net:        net,
-		logger:     logger,
-		cfg:        cfg,
-		gc:         GetGameConfig(),
-		lands:      lands,
-		sc:         sc,
-		fertilized: make(map[int64]bool),
+		net:                net,
+		logger:             logger,
+		cfg:                cfg,
+		gc:                 GetGameConfig(),
+		lands:              lands,
+		sc:                 sc,
+		fertilized:         make(map[int64]bool),
 		reservedForBigSeed: make(map[int64]bool),
 	}
 }
@@ -232,6 +231,21 @@ func (f *FarmWorker) checkFarm() {
 	}
 }
 
+// confPhaseTypeNames maps the game's confPhaseType values (phase_id field)
+// to Chinese display names, matching the client's confPhaseTypeStr mapping.
+var confPhaseTypeNames = map[int64]string{
+	0: "无", 1: "种子", 2: "幼株", 3: "幼枝", 4: "幼芽", 5: "幼苗",
+	6: "发芽", 7: "长枝", 8: "小叶子", 9: "秧苗", 10: "开花",
+	11: "小叶", 12: "大叶子", 13: "成株", 14: "伸长", 15: "幼穗",
+	16: "卷心", 17: "分叶", 18: "大叶", 19: "成熟", 20: "初熟",
+	21: "花蕾", 22: "结果", 23: "成树", 24: "盛开", 25: "枯萎",
+	26: "发菌", 27: "出菇", 28: "幼菇", 29: "幼蕾", 30: "芝蕾",
+	31: "含苞", 32: "幼芝", 33: "初放", 34: "莲座期", 35: "成株期",
+	36: "已成熟", 37: "成苗",
+}
+
+// phaseNames maps PlantPhase enum values to fallback display names,
+// used only when phase_id is not available (zero value).
 var phaseNames = map[int32]string{
 	0: "未知",
 	1: "种子",
@@ -290,7 +304,13 @@ func (f *FarmWorker) updateLandCache(lands []*plantpb.LandInfo) {
 
 			currentPhase := getCurrentPhase(land.Plant.Phases, nowSec)
 			if currentPhase != nil {
-				if name, ok := phaseNames[currentPhase.Phase]; ok {
+				if currentPhase.PhaseId != 0 {
+					if name, ok := confPhaseTypeNames[currentPhase.PhaseId]; ok {
+						ls.Phase = name
+					} else {
+						ls.Phase = fmt.Sprintf("阶段%d", currentPhase.PhaseId)
+					}
+				} else if name, ok := phaseNames[currentPhase.Phase]; ok {
 					ls.Phase = name
 				} else {
 					ls.Phase = fmt.Sprintf("阶段%d", currentPhase.Phase)
