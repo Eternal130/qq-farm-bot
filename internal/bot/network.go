@@ -689,7 +689,7 @@ func (n *Network) clearPendingCalls(reason string) {
 	count := len(n.pending)
 	for seq, p := range n.pending {
 		p.timer.Stop()
-		p.ch <- &callResult{err: fmt.Errorf(reason)}
+		p.ch <- &callResult{err: fmt.Errorf("%s", reason)}
 		delete(n.pending, seq)
 	}
 	n.pendingMu.Unlock()
