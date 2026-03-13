@@ -21,6 +21,12 @@ type LandHarvestInfo struct {
 	YieldBonusPct int64 // land buff: plant_yield_bonus percentage
 }
 
+// LandBuffInfo holds per-land buff data for the fastest-levelup simulation.
+type LandBuffInfo struct {
+	ExpBonusPct   int64
+	TimeReducePct int64
+}
+
 // LandCache stores the latest farm land status for dashboard display.
 type LandCache struct {
 	mu            sync.RWMutex
@@ -54,5 +60,29 @@ func (lc *LandCache) GetHarvestInfo() []LandHarvestInfo {
 	defer lc.mu.RUnlock()
 	result := make([]LandHarvestInfo, len(lc.harvestInfos))
 	copy(result, lc.harvestInfos)
+	return result
+}
+
+// GetLandBuffsByID returns buff data for the specified land IDs.
+// Missing IDs return zero-value LandBuffInfo (no bonus).
+func (lc *LandCache) GetLandBuffsByID(landIDs []int64) map[int64]LandBuffInfo {
+	lc.mu.RLock()
+	defer lc.mu.RUnlock()
+	result := make(map[int64]LandBuffInfo, len(landIDs))
+	// build index from lc.lands
+	index := make(map[int64]model.LandStatus, len(lc.lands))
+	for _, land := range lc.lands {
+		index[land.ID] = land
+	}
+	for _, id := range landIDs {
+		if land, ok := index[id]; ok {
+			result[id] = LandBuffInfo{
+				ExpBonusPct:   land.ExpBonusPct,
+				TimeReducePct: land.TimeReducePct,
+			}
+		} else {
+			result[id] = LandBuffInfo{}
+		}
+	}
 	return result
 }
